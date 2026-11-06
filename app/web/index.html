@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Night Guard Wallet</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>🌙 Night Guard Wallet <small data-t="sub"></small></h1>
+  <button id="phone" title="phone"></button>
+  <button id="bigger">A+</button>
+  <button id="lang">EN</button>
+  <a class="pill" href="family.html" target="_blank" data-t="familyPage"></a>
+</header>
+<main>
+  <div class="balances" id="balances"></div>
+  <section class="card">
+    <h2 data-t="incoming"></h2>
+    <div id="scenarios"></div>
+  </section>
+  <section class="card" id="resultCard">
+    <h2 data-t="check"></h2>
+    <div id="result"><p class="empty" data-t="pick"></p></div>
+    <h2 style="margin-top:22px" data-t="onchain"></h2>
+    <div id="requests"></div>
+  </section>
+</main>
+<script>
+const T = {
+  pt: { sub: "Carteira da Dona Lúcia, 74 anos · Solana devnet", familyPage: "Tela da Ana (guardiã) ↗", incoming: "Pedidos que chegaram",
+    check: "Antes de assinar", pick: "Escolha um pedido e toque em “Verificar antes de assinar”.", onchain: "Pedidos no cofre (na Solana)",
+    verify: "Verificar antes de assinar", checking: "Simulando na Solana e lendo a mensagem…", listen: "🔊 Ouvir", sign: "Assinar e enviar",
+    askAna: "Pedir para a Ana decidir", alertAna: "Avisar a Ana", dont: "Não enviar", what: "O que muda na sua carteira", why: "Por quê",
+    tricks: "Truques de golpe na mensagem", vault: "Seu cofre (protegido na Solana)", wallet: "Carteira do dia a dia", today: "Gasto hoje",
+    of: "de", tokens: "Seus tokens", fake: "FALSO", phoneOff: "📞 Estou no telefone com alguém", phoneOn: "📞 Modo golpe de telefone LIGADO",
+    none: "Nenhum pedido no cofre.", pending: "aguardando a Ana", approved: "Ana aprovou", rejected: "Ana recusou", waiting: "Espera de segurança:",
+    sendNow: "Enviar agora", cancel: "Cancelar", needsAna: "precisa da Ana", sent: "Enviado! Veja na Solana:", asked: "Pedido criado no cofre. A Ana foi avisada.",
+    alerted: "A Ana foi avisada.", speed: "Simulado na Solana devnet e analisado em", ai: "IA", gone: "Pronto, nada foi enviado. Seu dinheiro está seguro.",
+    trusted: "Contatos de confiança", thinking: "está lendo a mensagem…", seconds: "s", wrote: "explicação escrita por", tpl: "texto fixo", from: "De", via: "Por" },
+  en: { sub: "Lucy's wallet, 74 · Solana devnet", familyPage: "Ana's page (guardian) ↗", incoming: "Requests that arrived",
+    check: "Before you sign", pick: "Pick a request and tap “Check before signing”.", onchain: "Requests in the vault (on Solana)",
+    verify: "Check before signing", checking: "Simulating on Solana and reading the message…", listen: "🔊 Listen", sign: "Sign and send",
+    askAna: "Ask Ana to decide", alertAna: "Tell Ana", dont: "Don't send", what: "What changes in your wallet", why: "Why",
+    tricks: "Scam tricks in the message", vault: "Your vault (protected on Solana)", wallet: "Everyday wallet", today: "Spent today",
+    of: "of", tokens: "Your tokens", fake: "FAKE", phoneOff: "📞 I'm on the phone with someone", phoneOn: "📞 Phone-scam mode ON",
+    none: "No requests in the vault.", pending: "waiting for Ana", approved: "Ana approved", rejected: "Ana said no", waiting: "Safety wait:",
+    sendNow: "Send now", cancel: "Cancel", needsAna: "needs Ana", sent: "Sent! See it on Solana:", asked: "Request created in the vault. Ana was told.",
+    alerted: "Ana was told.", speed: "Simulated on Solana devnet and checked in", ai: "AI", gone: "Done, nothing was sent. Your money is safe.",
+    trusted: "Trusted contacts", thinking: "is reading the message…", seconds: "s", wrote: "explanation written by", tpl: "fixed text", from: "From", via: "Via" },
+};
+let lang = localStorage.lang || "pt", phone = false, fs = 22, scen = [], current = null, report = null, st = null;
+const $ = (s) => document.querySelector(s);
+const t = (k) => T[lang][k];
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+async function api(path, body) {
+  const r = await fetch(path, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : {});
+  return r.json();
+}
+function labels() {
+  document.documentElement.lang = lang === "pt" ? "pt-BR" : "en";
+  document.querySelectorAll("[data-t]").forEach((e) => (e.textContent = t(e.dataset.t)));
+  $("#lang").textContent = lang === "pt" ? "EN" : "PT";
+  $("#phone").textContent = phone ? t("phoneOn") : t("phoneOff");
+  $("#phone").classList.toggle("on", phone);
+}
+async function loadState() {
+  st = await api("/api/state?lang=" + lang);
+  const v = st.vault;
+  $("#balances").innerHTML = `
+    <div class="bal vault"><span>🔒 ${t("vault")}</span><b>${esc(v?.availableTxt)}</b><span><a href="${v?.link}" target="_blank">Solana Explorer ↗</a></span></div>
+    <div class="bal"><span>👛 ${t("wallet")}</span><b>${esc(st.walletTxt)}</b></div>
+    <div class="bal"><span>📅 ${t("today")}</span><b>${esc(v?.spentTodayTxt)}</b><span>${t("of")} ${esc(v?.dailyLimitTxt)}</span></div>
+    <div class="bal"><span>🪙 ${t("tokens")}</span><div>${st.tokens.map((x) => `<span class="tok ${x.verified ? "" : "fake"}">${esc(x.amount)} ${esc(x.symbol)}${x.verified ? "" : " · " + t("fake")}</span>`).join("")}</div>
+      <span>👪 ${t("trusted")}: ${st.trusted.map((c) => esc(c.name)).join(", ")}</span></div>`;
+  renderRequests();
+}
+function renderRequests() {
+  const rs = st?.requests ?? [];
+  if (!rs.length) { $("#requests").innerHTML = `<p class="empty">${t("none")}</p>`; return; }
+  const now = Date.now() / 1000;
+  $("#requests").innerHTML = rs.map((r) => {
+    const left = Math.max(0, Math.ceil(r.unlockAt - now));
+    const status = r.needsGuardian ? t(r.status) : "";
+    const canSend = r.status !== "rejected" && (!r.needsGuardian || r.status === "approved") && left === 0;
+    return `<div class="req"><b>${esc(r.amountTxt)} → ${esc(r.toName)}</b>
+      <div class="meta">#${r.id} · ${r.needsGuardian ? "👩 " + t("needsAna") + ": <b>" + esc(status) + "</b>" : ""} ${left ? ` · ⏳ ${t("waiting")} <span class="timer" data-unlock="${r.unlockAt}">${left}${t("seconds")}</span>` : ""}
+      · <a href="${r.link}" target="_blank">Explorer ↗</a></div>
+      <div class="actions">${canSend ? `<button class="big b-sign" onclick="execReq('${r.address}')">${t("sendNow")}</button>` : ""}
+      <button class="big b-no" onclick="cancelReq('${r.address}')">${t("cancel")}</button></div></div>`;
+  }).join("");
+}
+setInterval(() => {
+  document.querySelectorAll("[data-unlock]").forEach((e) => {
+    const left = Math.max(0, Math.ceil(+e.dataset.unlock - Date.now() / 1000));
+    e.textContent = left + t("seconds");
+    if (left === 0 && !e.dataset.done) { e.dataset.done = 1; loadState(); }
+  });
+}, 1000);
+async function loadScenarios() {
+  scen = await api("/api/scenarios");
+  $("#scenarios").innerHTML = scen.map((s) => `<div class="req" id="s-${s.id}">
+    <b>${esc(s.title[lang])}</b>
+    <div class="meta">${t("from")}: ${esc(s.from[lang])} · ${t("via")}: ${esc(s.channel[lang])}</div>
+    <div class="bubble">${esc(s.message[lang])}</div>
+    ${s.link ? `<div class="bubble link">🔗 ${esc(s.link)}</div>` : ""}${s.qr ? `<div class="bubble link">▦ ${esc(s.qr)}</div>` : ""}
+    <button class="big b-check" onclick="checkIt('${s.id}')">${t("verify")}</button></div>`).join("");
+}
+function hl(text, quotes) {
+  let h = esc(text);
+  for (const q of quotes) { const e = esc(q); if (e) h = h.split(e).join(`<span class="quote">${e}</span>`); }
+  return h;
+}
+async function checkIt(id) {
+  current = scen.find((s) => s.id === id);
+  $("#result").innerHTML = `<p>${t("checking")}</p>`;
+  document.getElementById("resultCard").scrollIntoView({ behavior: "smooth" });
+  report = await api("/api/check", { id, lang, phoneMode: phone });
+  render(id, false);
+  say();
+  if (st?.ai !== "templates") {
+    const full = await api("/api/check", { id, lang, phoneMode: phone, ai: true });
+    if (current?.id !== id) return;
+    if (report.verdict === "STOP") full.verdict = "STOP", full.headline = report.headline; // the model can only add warnings
+    full.timings.simulateMs = report.timings.simulateMs; full.fastMs = report.timings.totalMs;
+    report = full; render(id, true);
+  }
+}
+function render(id, done) {
+  const r = report;
+  const tm = r.timings;
+  const flags = r.flags.map((f) => `<li class="${f.level}">${esc(f[lang])}</li>`).join("");
+  const tactics = r.tactics.length ? `<h2>${t("tricks")}</h2><div class="bubble">${hl(current.message[lang], r.tactics.map((x) => x.quote))}</div>
+    <div class="small">${r.tactics.map((x) => `${x.id} (${x.by === "model" ? "Gemma" : "rule"})`).join(" · ")}</div>` : "";
+  const act = r.verdict === "OK"
+    ? `<button class="big b-sign" onclick="signIt()">${t("sign")}</button>`
+    : `<button class="big b-family" onclick="askFamily()">${current.vaultPath ? t("askAna") : t("alertAna")}</button><button class="big b-no" onclick="dont()">${t("dont")}</button>`;
+  $("#result").innerHTML = `
+    <div class="verdict v-${r.verdict}"><h3>${r.verdict === "STOP" ? "⛔" : r.verdict === "CAUTION" ? "⚠️" : "✅"} ${esc(r.headline[lang])}</h3><p>${esc(r.explanation.text)}</p></div>
+    <div class="actions"><button class="big b-listen" onclick="say()">${t("listen")}</button>${act}</div>
+    <h2 style="margin-top:16px">${t("what")}</h2><ul class="changes">${r.changes.map((c) => `<li>${esc(c[lang])}</li>`).join("")}</ul>
+    ${flags ? `<h2>${t("why")}</h2><ul class="flags">${flags}</ul>` : ""}
+    ${tactics}
+    <p class="small">${t("speed")} ${((r.fastMs ?? tm.totalMs) / 1000).toFixed(2)} s (simulation ${Math.round(tm.simulateMs)} ms) · ${done ? `${t("ai")} ${esc(st?.ai)}: ${(Math.round(tm.aiTacticsMs + tm.aiExplainMs) / 1000).toFixed(1)} s · ${t("wrote")} ${r.explanation.by === "model" ? esc(st?.ai) : t("tpl")}` : (st?.ai !== "templates" ? `⏳ ${esc(st?.ai)} ${t("thinking")}` : "")} · ${r.simulation.unitsConsumed} CU</p>
+    <div id="after"></div>`;
+}
+function say() {
+  if (!report || !window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(report.headline[lang] + " " + report.explanation.text);
+  u.lang = lang === "pt" ? "pt-BR" : "en-US"; u.rate = 0.9;
+  const v = speechSynthesis.getVoices().find((x) => x.lang.startsWith(u.lang.slice(0, 2)));
+  if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+async function signIt() {
+  $("#after").innerHTML = "…";
+  const r = await api("/api/sign", { id: current.id });
+  $("#after").innerHTML = r.sig ? `<p>✅ ${t("sent")} <a href="${r.link}" target="_blank">${r.sig.slice(0, 16)}…</a> (${(r.ms / 1000).toFixed(1)} s)</p>` : `<p>${esc(r.error)}</p>`;
+  loadState();
+}
+async function askFamily() {
+  $("#after").innerHTML = "…";
+  const r = await api("/api/ask-family", { id: current.id });
+  $("#after").innerHTML = r.request ? `<p>👩 ${t("asked")} <a href="${r.link}" target="_blank">Explorer ↗</a></p>` : `<p>👩 ${t("alerted")} ${t("gone")}</p>`;
+  loadState();
+}
+function dont() { $("#after").innerHTML = `<p>✅ ${t("gone")}</p>`; }
+async function execReq(a) { const r = await api("/api/execute", { request: a }); if (r.error) alert(r.error); loadState(); }
+async function cancelReq(a) { await api("/api/cancel", { request: a }); loadState(); }
+$("#lang").onclick = () => { lang = lang === "pt" ? "en" : "pt"; localStorage.lang = lang; labels(); loadScenarios(); loadState(); $("#result").innerHTML = `<p class="empty">${t("pick")}</p>`; };
+$("#phone").onclick = () => { phone = !phone; labels(); };
+$("#bigger").onclick = () => { fs = fs >= 30 ? 20 : fs + 4; document.documentElement.style.setProperty("--fs", fs + "px"); };
+const es = new EventSource("/api/events");
+es.onmessage = (m) => { const ev = JSON.parse(m.data); if (ev.type === "chain") loadState(); };
+labels(); loadScenarios(); loadState();
+</script>
+</body>
+</html>

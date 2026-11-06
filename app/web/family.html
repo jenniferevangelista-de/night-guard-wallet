@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Night Guard Wallet · Ana</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>👩 Ana · <span data-t="title"></span> <small data-t="sub"></small></h1>
+  <button id="lang">EN</button>
+</header>
+<main>
+  <section class="card">
+    <h2 data-t="decide"></h2>
+    <div id="requests"></div>
+  </section>
+  <section class="card feed">
+    <h2 data-t="live"></h2>
+    <div id="feed"><p class="empty" data-t="quiet"></p></div>
+  </section>
+</main>
+<script>
+const T = {
+  pt: { title: "guardiã da Dona Lúcia", sub: "Alertas ao vivo, lidos direto da Solana", decide: "Pedidos esperando você", live: "Ao vivo",
+    quiet: "Nada por enquanto.", approve: "✅ Aprovar", reject: "⛔ Recusar", none: "Nenhum pedido esperando você.",
+    blocked: "Night Guard BLOQUEOU", help: "Sua mãe pediu ajuda com", wait: "espera de segurança até", signed: "assinado na Solana",
+    RequestOpened: "Novo pedido no cofre", GuardianDecided: "Decisão registrada na Solana", Executed: "Dinheiro enviado pelo cofre", Sent: "Pagamento do dia a dia",
+    Cancelled: "Pedido cancelado", TrustedChanged: "Lista de confiança mudou", needs: "precisa de você", untrusted: "carteira FORA da lista de confiança", over: "acima do limite do dia", large: "valor alto" },
+  en: { title: "Lucy's guardian", sub: "Live alerts, read straight from Solana", decide: "Requests waiting for you", live: "Live",
+    quiet: "Nothing yet.", approve: "✅ Approve", reject: "⛔ Say no", none: "No requests waiting for you.",
+    blocked: "Night Guard BLOCKED", help: "Your mom asked for help with", wait: "safety wait until", signed: "signed on Solana",
+    RequestOpened: "New request in the vault", GuardianDecided: "Decision recorded on Solana", Executed: "Money sent by the vault", Sent: "Everyday payment",
+    Cancelled: "Request cancelled", TrustedChanged: "Trusted list changed", needs: "needs you", untrusted: "wallet NOT on the trusted list", over: "over today's limit", large: "big amount" },
+};
+let lang = localStorage.lang || "pt";
+const $ = (s) => document.querySelector(s);
+const t = (k) => T[lang][k] ?? k;
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+async function api(p, b) { const r = await fetch(p, b ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) } : {}); return r.json(); }
+function labels() { document.querySelectorAll("[data-t]").forEach((e) => (e.textContent = t(e.dataset.t))); $("#lang").textContent = lang === "pt" ? "EN" : "PT"; }
+async function load() {
+  const st = await api("/api/state?lang=" + lang);
+  const rs = st.requests.filter((r) => r.needsGuardian && r.status === "pending");
+  $("#requests").innerHTML = rs.length ? rs.map((r) => `<div class="req"><b>${esc(r.amountTxt)} → ${esc(r.toName)}</b>
+    <div class="meta">#${r.id} · ${esc(r.note)} · <a href="${r.link}" target="_blank">Explorer ↗</a></div>
+    <div class="actions"><button class="big b-sign" onclick="decide('${r.address}', true)">${t("approve")}</button>
+    <button class="big b-family" onclick="decide('${r.address}', false)">${t("reject")}</button></div></div>`).join("") : `<p class="empty">${t("none")}</p>`;
+}
+async function decide(req, approve) { await api("/api/guardian/decide", { request: req, approve }); load(); }
+const feed = [];
+function render() {
+  $("#feed").innerHTML = feed.slice().reverse().map((ev) => {
+    const time = new Date(ev.at).toLocaleTimeString(lang === "pt" ? "pt-BR" : "en-US");
+    if (ev.type === "blocked") return `<div class="ev blocked"><b>⛔ ${t("blocked")}: ${esc(ev.title[lang])}</b> ${esc(ev.amountTxt)}
+      <ul class="flags">${ev.flags.map((f) => `<li class="${f.level}">${esc(f[lang])}</li>`).join("")}</ul><span class="small">${time}</span></div>`;
+    if (ev.type === "help") return `<div class="ev blocked"><b>🆘 ${t("help")}: ${esc(ev.title[lang])}</b><br><span class="small">${time}</span></div>`;
+    const d = ev.data || {};
+    let extra = "";
+    if (ev.name === "RequestOpened") extra = [d.needs_guardian === "true" || d.needs_guardian === true ? t("needs") : "", d.trusted === false || d.trusted === "false" ? t("untrusted") : "", d.over_limit === true || d.over_limit === "true" ? t("over") : "", d.large === true || d.large === "true" ? t("large") : ""].filter(Boolean).join(" · ");
+    if (ev.name === "GuardianDecided") extra = (d.approve === true || d.approve === "true") ? t("approve") : t("reject");
+    return `<div class="ev chain"><b>⛓️ ${t(ev.name)}</b> ${extra ? "· " + esc(extra) : ""}<br><span class="small">${time} · ${t("signed")} · <a href="${ev.link}" target="_blank">${ev.sig.slice(0, 12)}… ↗</a></span></div>`;
+  }).join("") || `<p class="empty">${t("quiet")}</p>`;
+}
+const es = new EventSource("/api/events");
+es.onmessage = (m) => { const ev = JSON.parse(m.data); feed.push(ev); render(); load();
+  if (ev.type === "blocked" && window.speechSynthesis) { const u = new SpeechSynthesisUtterance(t("blocked") + ": " + ev.title[lang]); u.lang = lang === "pt" ? "pt-BR" : "en-US"; speechSynthesis.speak(u); } };
+$("#lang").onclick = () => { lang = lang === "pt" ? "en" : "pt"; localStorage.lang = lang; labels(); render(); load(); };
+labels(); load(); setInterval(load, 15000);
+</script>
+</body>
+</html>

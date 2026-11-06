@@ -1,0 +1,27 @@
+{
+  "name": "night-guard-wallet",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A Solana wallet guardian for older people: simulate, explain in plain words, flag scams, and lock risky payments behind a family guardian on-chain.",
+  "scripts": {
+    "setup": "tsx src/setup.ts",
+    "start": "tsx src/server.ts",
+    "demo": "tsx src/demo_run.ts",
+    "eval": "tsx src/eval_messages.ts",
+    "test": "tsx --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "0.31.1",
+    "@solana/spl-token": "0.4.13",
+    "@solana/spl-token-metadata": "0.1.6",
+    "@solana/web3.js": "1.98.2",
+    "bs58": "6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
