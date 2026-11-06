@@ -15,6 +15,10 @@ import { qrFor, SCENARIOS } from "./scenarios.js";
 import { explorer, explorerAddr, fetchVault, ix, listRequests, requestPda, sendTx } from "./vault.js";
 import { kp, loadWorld, World } from "./world.js";
 
+// The public devnet RPC sometimes answers 429; one failed call must never take the whole wallet down.
+process.on("unhandledRejection", (e) => console.error("[unhandled]", String((e as any)?.message ?? e).slice(0, 200)));
+process.on("uncaughtException", (e) => console.error("[uncaught]", String(e?.message ?? e).slice(0, 200)));
+
 const WEB = join(dirname(fileURLToPath(import.meta.url)), "..", "web");
 export const w: World = loadWorld();
 const last = new Map<string, Report>();
@@ -62,7 +66,16 @@ function json(res: ServerResponse, code: number, data: unknown) {
   res.end(JSON.stringify(data, (_, v) => (typeof v === "bigint" ? v.toString() : v)));
 }
 
+const stateCache = new Map<string, { at: number; v: any }>();
 async function state(lang: Lang) {
+  const c = stateCache.get(lang);
+  if (c && Date.now() - c.at < 2500) return c.v;
+  const v = await stateUncached(lang);
+  stateCache.set(lang, { at: Date.now(), v });
+  return v;
+}
+const dropState = () => stateCache.clear();
+async function stateUncached(lang: Lang) {
   const [v, reqs, bal, fake] = await Promise.all([
     fetchVault(w.conn, w.vault), listRequests(w.conn, w.vault), w.conn.getBalance(w.elder, "confirmed"),
     w.fakeUsdcMint ? w.conn.getTokenAccountBalance(getAssociatedTokenAddressSync(w.fakeUsdcMint, w.elder, false, TOKEN_2022_PROGRAM_ID)).catch(() => null) : null,
@@ -103,6 +116,7 @@ const routes: Record<string, (req: IncomingMessage, res: ServerResponse, q: URLS
   },
   // Sign only what the guardian let through (OK). Everything else goes to the family.
   "POST /api/sign": async (req, res) => {
+    dropState();
     const b = await body(req);
     const s = SCENARIOS.find((x) => x.id === b.id);
     const r = s && last.get(s.id);
@@ -118,6 +132,7 @@ const routes: Record<string, (req: IncomingMessage, res: ServerResponse, q: URLS
   },
   // Open an on-chain request: the chain decides if Ana must approve and how long to wait.
   "POST /api/ask-family": async (req, res) => {
+    dropState();
     const b = await body(req);
     const s = SCENARIOS.find((x) => x.id === b.id);
     if (!s) return json(res, 404, { error: "unknown scenario" });
@@ -131,11 +146,13 @@ const routes: Record<string, (req: IncomingMessage, res: ServerResponse, q: URLS
     json(res, 200, { request: requestPda(w.vault, v!.nextRequest).toBase58(), sig: r.sig, link: explorer(r.sig), ms: r.ms });
   },
   "POST /api/guardian/decide": async (req, res) => {
+    dropState();
     const b = await body(req);
     const r = await sendTx(w.conn, [await ix(w.conn).decide(kp("ana").publicKey, w.elder, new PublicKey(b.request), !!b.approve)], [kp("ana")]);
     json(res, 200, { sig: r.sig, link: explorer(r.sig), ms: r.ms });
   },
   "POST /api/execute": async (req, res) => {
+    dropState();
     const b = await body(req);
     const reqs = await listRequests(w.conn, w.vault);
     const rq = reqs.find((x) => x.address === b.request);
@@ -148,6 +165,7 @@ const routes: Record<string, (req: IncomingMessage, res: ServerResponse, q: URLS
     }
   },
   "POST /api/cancel": async (req, res) => {
+    dropState();
     const b = await body(req);
     const r = await sendTx(w.conn, [await ix(w.conn).cancel(w.elder, w.elder, new PublicKey(b.request))], [kp("elder")]);
     json(res, 200, { sig: r.sig, link: explorer(r.sig) });

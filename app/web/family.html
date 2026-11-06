@@ -48,7 +48,12 @@ async function load() {
     <div class="actions"><button class="big b-sign" onclick="decide('${r.address}', true)">${t("approve")}</button>
     <button class="big b-family" onclick="decide('${r.address}', false)">${t("reject")}</button></div></div>`).join("") : `<p class="empty">${t("none")}</p>`;
 }
-async function decide(req, approve) { await api("/api/guardian/decide", { request: req, approve }); load(); }
+async function decide(req, approve) {
+  document.querySelectorAll(".req button").forEach((b) => (b.disabled = true));
+  const r = await api("/api/guardian/decide", { request: req, approve });
+  if (r.error) { alert(r.error); }
+  load();
+}
 const feed = [];
 function render() {
   $("#feed").innerHTML = feed.slice().reverse().map((ev) => {
@@ -67,7 +72,7 @@ const es = new EventSource("/api/events");
 es.onmessage = (m) => { const ev = JSON.parse(m.data); feed.push(ev); render(); load();
   if (ev.type === "blocked" && window.speechSynthesis) { const u = new SpeechSynthesisUtterance(t("blocked") + ": " + ev.title[lang]); u.lang = lang === "pt" ? "pt-BR" : "en-US"; speechSynthesis.speak(u); } };
 $("#lang").onclick = () => { lang = lang === "pt" ? "en" : "pt"; localStorage.lang = lang; labels(); render(); load(); };
-labels(); load(); setInterval(load, 15000);
+labels(); load(); setInterval(load, 30000);
 </script>
 </body>
 </html>

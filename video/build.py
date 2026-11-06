@@ -369,8 +369,10 @@ if __name__ == "__main__":
                            "-i", str(WORK / "_mix.wav"), "-map", "0:v", "-map", "1:a", "-t", str(DUR),
                            "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-pix_fmt", "yuv420p",
                            "-af", "loudnorm=I=-14:TP=-1.5:LRA=11", "-c:a", "aac", "-ar", "48000", "-b:a", "192k", str(dst)], stdin=subprocess.PIPE)
-    with Pool(4) as pool:
-        for b in pool.imap(job, range(int(DUR * FPS)), chunksize=8):
-            ff.stdin.write(b)
+    total = int(DUR * FPS)
+    with Pool(4) as pool:                  # in batches, so finished frames never pile up in memory
+        for start in range(0, total, 48):
+            for b in pool.map(job, range(start, min(total, start + 48)), chunksize=6):
+                ff.stdin.write(b)
     ff.stdin.close(); ff.wait()
     print("done", dst, DUR, "s")

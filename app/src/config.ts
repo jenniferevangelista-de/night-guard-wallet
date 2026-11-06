@@ -20,6 +20,6 @@ export const PORT = Number(process.env.PORT ?? 8787);
 
 // Demo vault settings (lamports / seconds). Real life: cooling-off of 24 h.
 export const LAMPORTS = 1_000_000_000;
-export const DAILY_LIMIT = 0.3 * LAMPORTS;
+export const DAILY_LIMIT = 0.5 * LAMPORTS;
 export const LARGE_AMOUNT = 1.0 * LAMPORTS;
 export const COOLING_OFF_SECS = Number(process.env.NGW_COOLING_OFF ?? 60);

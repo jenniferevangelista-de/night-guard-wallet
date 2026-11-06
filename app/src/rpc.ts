@@ -10,10 +10,10 @@ async function patientFetch(input: any, init?: any): Promise<Response> {
   for (let i = 0; ; i++) {
     try {
       const r = await fetch(input, init);
-      if ((r.status === 429 || r.status >= 500) && i < 8) { rpcRetries++; await sleep(wait); wait = Math.min(wait * 2, 6000); continue; }
+      if ((r.status === 429 || r.status >= 500) && i < 14) { rpcRetries++; await sleep(wait); wait = Math.min(wait * 2, 6000); continue; }
       return r;
     } catch (e) {
-      if (i >= 8) throw e;
+      if (i >= 14) throw e;
       rpcRetries++; await sleep(wait); wait = Math.min(wait * 2, 6000);
     }
   }

@@ -44,6 +44,8 @@ The verdict comes from the simulation and the rules, so it is on screen before t
 - **car-repair (pt)**: Atenção, você precisa esperar um pouco antes de enviar esse 1 SOL. Espere um tempo para não ter problemas. _(model)_
 - **car-repair (en)**: Wait a little while because that amount is too big for your wallet right now. Give it some time before you try sending it again. _(model)_
 
+Note: in this run the Portuguese groceries text says "você recebeu" (you received), the wrong direction. Since then, an explanation that reverses the direction of the money is rejected and replaced by the fixed text ([app/src/ai.ts](../app/src/ai.ts)), and the model is given "what happens" as its first fact.
+
 ## On-chain proofs (devnet)
 
 Transactions sent on purpose without preflight, so the refusal is recorded on Solana.

@@ -87,6 +87,8 @@ export function ix(conn: Connection) {
       p.methods.deposit(new BN(amount)).accountsPartial({ payer, vault: vaultPda(owner), systemProgram: SystemProgram.programId }).instruction(),
     addTrusted: (owner: PublicKey, guardian: PublicKey, contact: PublicKey) =>
       p.methods.addTrusted(contact).accountsPartial({ owner, guardian, vault: vaultPda(owner) }).instruction(),
+    setLimits: (owner: PublicKey, guardian: PublicKey, daily: number, large: number, cooling: number) =>
+      p.methods.setLimits(new BN(daily), new BN(large), new BN(cooling)).accountsPartial({ owner, guardian, vault: vaultPda(owner) }).instruction(),
     send: (owner: PublicKey, to: PublicKey, amount: number) =>
       p.methods.send(new BN(amount)).accountsPartial({ owner, vault: vaultPda(owner), to }).instruction(),
     request: (owner: PublicKey, to: PublicKey, amount: number, nextId: number, note: string) =>

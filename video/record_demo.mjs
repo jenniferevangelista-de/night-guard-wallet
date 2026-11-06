@@ -59,8 +59,9 @@ s = scene("ana");
 await page.goto(URL + "/family.html");
 await page.waitForSelector(".req .b-family", { timeout: 60000 }); shown(s);
 await pause(4500);
+const before_b_family = await page.locator("#requests .req").count();
 await page.locator(".req .b-family").first().click();
-await waitText("Decision recorded on Solana", 90000);
+await page.waitForFunction((n) => document.querySelectorAll("#requests .req").length < n, before_b_family, { timeout: 120000 });   // gone from Ana's list: decided on-chain
 await pause(4500); end(s);
 
 await page.goto(URL);
@@ -99,8 +100,9 @@ await waitText("Request created in the vault", 90000);
 await page.goto(URL + "/family.html");
 await page.waitForSelector(".req .b-sign", { timeout: 60000 });
 await pause(2000);
+const before_b_sign = await page.locator("#requests .req").count();
 await page.locator(".req .b-sign").first().click();
-await waitText("Decision recorded on Solana", 90000);
+await page.waitForFunction((n) => document.querySelectorAll("#requests .req").length < n, before_b_sign, { timeout: 120000 });
 await pause(2000);
 await page.goto(URL);
 await page.waitForSelector(".bal b");

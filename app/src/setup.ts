@@ -58,6 +58,11 @@ async function main() {
     log("vault opened + 2 SOL deposited", vault.toBase58(), r.sig);
     v = await fetchVault(conn, vault);
   }
+  if (v && (v.dailyLimit !== DAILY_LIMIT || v.largeAmount !== LARGE_AMOUNT || v.coolingOffSecs !== COOLING_OFF_SECS)) {
+    const r = await sendTx(conn, [await I.setLimits(k.elder.publicKey, k.ana.publicKey, DAILY_LIMIT, LARGE_AMOUNT, COOLING_OFF_SECS)], [k.elder, k.ana]);
+    log("limits updated (owner + guardian signed)", r.sig);
+    v = await fetchVault(conn, vault);
+  }
   for (const c of [k.ana, k.pedro]) {
     if (!v!.trusted.includes(c.publicKey.toBase58())) {
       const r = await sendTx(conn, [await I.addTrusted(k.elder.publicKey, k.ana.publicKey, c.publicKey)], [k.elder, k.ana]);
