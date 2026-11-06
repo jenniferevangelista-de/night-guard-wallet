@@ -5,10 +5,10 @@ import { chromium } from "playwright";
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 
 const URL = process.env.NGW_URL ?? "http://localhost:8787";
-const W = 1536, H = 864;
+const W = 1152, H = 648;   // filmed at 1152x648 and scaled to 1536x864, so the letters read well in the video
 mkdirSync("video/work/raw", { recursive: true });
 const browser = await chromium.launch();
-const ctx = await browser.newContext({ viewport: { width: W, height: H }, recordVideo: { dir: "video/work/raw", size: { width: W, height: H } }, deviceScaleFactor: 1 });
+const ctx = await browser.newContext({ viewport: { width: W, height: H }, recordVideo: { dir: "video/work/raw", size: { width: 1536, height: 864 } }, deviceScaleFactor: 1 });
 await ctx.addInitScript(() => { localStorage.lang = "en"; window.speechSynthesis && (window.speechSynthesis.speak = () => {}); });
 const page = await ctx.newPage();
 const T0 = Date.now();
@@ -85,6 +85,11 @@ await waitText("Sent! See it on Solana", 90000);
 await pause(3500); end(s);
 }
 
+await page.evaluate(async () => {   // the rejected request was shown already; clear it before the next part
+  const st = await (await fetch("/api/state")).json();
+  for (const r of st.requests) await fetch("/api/cancel", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ request: r.address }) });
+});
+await page.reload(); await page.waitForSelector(".bal b");
 s = scene("car");
 await check("car-repair"); shown(s);
 await page.evaluate(() => document.getElementById("resultCard").scrollIntoView({ behavior: "smooth" }));
@@ -106,19 +111,6 @@ await page.locator("#requests .b-sign").first().click();
 await pause(6000);
 end(s);
 
-// The on-chain proof: a forced transfer to the scammer, refused by the program (from the measured demo run)
-const res = existsSync("app/out/results.json") ? JSON.parse(readFileSync("app/out/results.json", "utf8")) : null;
-const proof = res?.proofs.find((p) => p.failed && p.name.includes("new number"));
-if (proof) {
-  s = scene("proof");
-  await page.goto(proof.link, { waitUntil: "domcontentloaded" });
-  await waitCut(page.waitForTimeout(9000), 0.5); shown(s);
-  await page.mouse.wheel(0, 900); await page.waitForTimeout(5000);
-  await page.screenshot({ path: "video/work/proof.png" });
-  await page.mouse.wheel(0, 1400); await page.waitForTimeout(4000);
-  await page.screenshot({ path: "video/work/proof_logs.png" });
-  end(s);
-}
 await ctx.close();
 await browser.close();
 writeFileSync("video/work/scenes.json", JSON.stringify(scenes, null, 2));

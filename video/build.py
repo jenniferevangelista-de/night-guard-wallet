@@ -46,6 +46,7 @@ def _dur(p):
 
 # ---------------------------------------------------------------- the recording, with the long waits cut out
 scenes = {s["key"]: s for s in json.loads((WORK / "scenes.json").read_text())}
+narr = [n for n in narr if n["kind"] != "rec" or n["id"] in scenes]      # a scene missing from a test recording
 cuts = json.loads((WORK / "cuts.json").read_text())
 raw = sorted((WORK / "raw").glob("*.webm"))[0]
 rec_keys = [n["id"] for n in narr if n["kind"] == "rec"]
@@ -83,7 +84,7 @@ for n in narr:
         s = scenes[n["id"]]
         v0, v1 = new_time(s["start"]), new_time(s["end"])
         rec_len = max(0.5, v1 - v0)
-        speed = min(1.8, max(1.0, rec_len / (d + 0.8)))
+        speed = min(2.2, max(1.0, rec_len / (d + 0.8)))
         item.update(v0=v0, v1=v1, speed=speed)
         seg_len = max(d + 0.8, rec_len / speed)
     else:
@@ -194,9 +195,12 @@ def card(d, x, y, w, h, k, big, small, col, seed, tt):
     yy = y + (1 - eout(k)) * 60
     d.rounded_rectangle((x, yy, x + w, yy + h), 24, fill=(255, 255, 255))
     wrect(d, x, yy, x + w, yy + h, tt, seed, 6, col)
-    text(d, big, x + w / 2, yy + h * 0.40, int(h * 0.36), col, "mm", "impact.ttf")
-    for i, ln in enumerate(textwrap.wrap(small, 30)):
-        text(d, ln, x + w / 2, yy + h * 0.72 + i * 40, 32, INK)
+    size = int(h * 0.36)
+    while size > 30 and d.textlength(big, font=font("impact.ttf", size)) > w - 50:
+        size -= 4
+    text(d, big, x + w / 2, yy + h * 0.40, size, col, "mm", "impact.ttf")
+    for i, ln in enumerate(textwrap.wrap(small, 24)):
+        text(d, ln, x + w / 2, yy + h * 0.70 + i * 36, 29, INK)
 
 
 def stamp(im, s, cx, cy, ang, col=RED, size=70):
@@ -234,8 +238,8 @@ def paper_frame(tt, it):
         card(d, 710, 210, 500, 320, seg(rel, dur * 0.35, dur * 0.35 + 0.6), "$4.3 billion", "of it involved crypto", RED, 12, tt)
         card(d, 1280, 210, 500, 320, seg(rel, dur * 0.35 + 0.8, dur * 0.35 + 1.4), "$38,500", "average loss per victim", RED, 13, tt)
         if rel > dur * 0.75:
-            stamp(im, "ONE SIGNATURE CAN'T BE UNDONE", 960, 700, 3, RED, 64)
-        text(d, "Source: FBI IC3, 2025 Internet Crime Report, Elder Fraud section", 960, 1030, 28, SOFT)
+            stamp(im, "ONE SIGNATURE CAN'T BE UNDONE", 960, 760, 3, RED, 64)
+        text(d, "Source: FBI IC3, 2025 Internet Crime Report, Elder Fraud section", 960, 580, 30, SOFT)
     elif key == "olive":
         owl(im, tt, 960, 900, 560, m or 0.0, "talk", wave=1.0 if rel < 2.5 else 0.0)
         text(d, "Olive", 960, 120, 90, PURPLE, "mm", "impact.ttf")
@@ -255,22 +259,31 @@ def paper_frame(tt, it):
         text(d, "Before Lucy signs", 960, 130, 64, NIGHT, "mm", "impact.ttf")
         owl(im, tt, 1700, 1000, 330, m or 0.0, "talk")
     elif key == "proof":
-        p = WORK / "proof_logs.png" if (WORK / "proof_logs.png").exists() else WORK / "proof.png"
-        if p.exists():
-            sh = taped(str(p), 1180)
-            lay = Image.new("RGBA", (sh.width + 40, sh.height + 40), (0, 0, 0, 0))
-            lay.paste(sh, (20, 20)); lay = lay.rotate(-1.5, expand=True, resample=Image.BICUBIC)
-            im.alpha_composite(lay, (60, 160))
-            d = ImageDraw.Draw(im)
-            for (x, y) in ((120, 170), (1150, 170)):
-                d.rectangle((x, y - 16, x + 120, y + 16), fill=(240, 226, 170, 210))
-        text(d, "Forced through on purpose · Solana devnet", 700, 110, 46, NIGHT, "mm", "impact.ttf")
-        if rel > 1.2:
-            stamp(im, "REFUSED ON-CHAIN: NotTrusted", 720, 900, -4, RED, 70)
-        owl(im, tt, 1640, 1000, 360, m or 0.0, "talk", emo="proud" if rel > dur * 0.7 else "happy")
+        P = json.loads((WORK / "proof.json").read_text())
+        pr = next(x for x in P if "new number" in x["name"])
+        k = eout(seg(rel, 0.1, 0.8))
+        x0, y0 = 90, 190 + (1 - k) * 60
+        d.rounded_rectangle((x0, y0, x0 + 1300, y0 + 700), 20, fill=(255, 255, 255)); wrect(d, x0, y0, x0 + 1300, y0 + 700, tt, 77, 6, NIGHT)
+        for (x, y) in ((x0 + 60, y0), (x0 + 1140, y0)):
+            d.rectangle((x, y - 18, x + 120, y + 18), fill=(240, 226, 170))
+        text(d, "Transaction on Solana devnet, read back from the chain", x0 + 40, y0 + 60, 40, NIGHT, "lm", "impact.ttf")
+        rows_ = [("Signature", pr["sig"][:44] + "…"), ("Slot", f'{pr["slot"]:,}'), ("What", "vault send · 1.8 SOL → the \"new number\" wallet · forced, no preflight"),
+                 ("Status", "FAILED"), ("Program", "guardian_vault  8vE76ymUvgkQ…YymSpSkf3hwtn")]
+        for i, (a_, b_) in enumerate(rows_):
+            text(d, a_, x0 + 40, y0 + 140 + i * 58, 32, SOFT, "lm", "segoeuib.ttf")
+            text(d, b_, x0 + 260, y0 + 140 + i * 58, 32, RED if a_ == "Status" else INK, "lm", "segoeuib.ttf" if a_ == "Status" else "segoeui.ttf")
+        logs = [l for l in pr["logs"] if "AnchorError" in l][:1]
+        if logs:
+            for i, ln in enumerate(textwrap.wrap(logs[0].replace("Program log: ", ""), 78)[:4]):
+                text(d, ln, x0 + 40, y0 + 460 + i * 44, 28, INK, "lm", "segoeui.ttf")
+        text(d, "explorer.solana.com/tx/" + pr["sig"][:20] + "…?cluster=devnet", x0 + 40, y0 + 660, 26, PURPLE, "lm", "segoeui.ttf")
+        text(d, "Forced through on purpose: the program says no", 760, 110, 50, NIGHT, "mm", "impact.ttf")
+        if rel > 1.4:
+            stamp(im, "REFUSED ON-CHAIN: NotTrusted", 1000, 860, -4, RED, 64)
+        owl(im, tt, 1700, 1000, 340, m or 0.0, "talk", emo="proud" if rel > dur * 0.7 else "happy")
     elif key == "numbers":
         s = RES["summary"]
-        cells = [(s["scamsStopped"], "scams stopped", RED), (s["legitLetThrough"], "real payments through", GREEN),
+        cells = [(s["scamsStopped"], "scam scenarios stopped", RED), (s["legitLetThrough"], "real payments through", GREEN),
                  (f'{s["medianVerdictMs"] / 1000:.1f} s', "verdict on screen (median)", NIGHT),
                  (f'{EVAL["gemma"]["caught"]}/{EVAL["gemma"]["scams"]}', "scam messages Gemma caught", PURPLE),
                  (f'{EVAL["gemma"]["falseAlarms"]}/{EVAL["gemma"]["ordinary"]}', "false alarms", PURPLE),
