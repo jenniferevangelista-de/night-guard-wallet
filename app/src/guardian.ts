@@ -154,7 +154,7 @@ export async function check(conn: Connection, book: Book, input: CheckInput): Pr
   }
   const balance = (sim.changes.find((c) => c.address === book.owner)?.solBefore ?? 0) + (book.vaultBalance ?? 0);
   if (out > 0 && balance > 0 && out / balance >= 0.5) {
-    const pct = Math.round((out / balance) * 100);
+    const pct = Math.min(100, Math.round((out / balance) * 100));
     add("drains_balance", out / balance >= 0.8 ? "critical" : "high",
       `Isso leva ${pct}% de todo o seu dinheiro.`, `This takes ${pct}% of all your money.`);
   }

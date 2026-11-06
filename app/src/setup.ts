@@ -13,7 +13,7 @@ import {
 import { createInitializeInstruction, pack } from "@solana/spl-token-metadata";
 import { Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram } from "@solana/web3.js";
 import { COOLING_OFF_SECS, DAILY_LIMIT, DEMO_DIR, LARGE_AMOUNT } from "./config.js";
-import { fetchVault, ix, sendTx, vaultPda } from "./vault.js";
+import { fetchVault, ix, listRequests, sendTx, vaultPda } from "./vault.js";
 import { deployer, ensureKey, readWorld, ROLES, writeWorld } from "./world.js";
 import { makeConnection } from "./rpc.js";
 
@@ -38,7 +38,8 @@ async function main() {
   const lookalike = ensureKey("lookalike");
 
   // Fund the family (small amounts; the vault holds most of it)
-  const fund: [Keypair, number][] = [[k.elder, 2.7], [k.ana, 0.03], [k.pedro, 0.005], [lookalike, 0.004]];
+  const hasVault = !!(await conn.getAccountInfo(vaultPda(k.elder.publicKey)));
+  const fund: [Keypair, number][] = [[k.elder, hasVault ? 0.7 : 2.7], [k.ana, 0.03], [k.pedro, 0.005], [lookalike, 0.004]];
   for (const [who, sol] of fund) {
     const bal = await conn.getBalance(who.publicKey);
     if (bal < sol * LAMPORTS_PER_SOL * 0.5) {
@@ -107,6 +108,20 @@ async function main() {
     log("usual payment to Ana", r.sig);
   }
   v = await fetchVault(conn, vault);
+  if (v && v.available < 1.6 * LAMPORTS_PER_SOL) {   // keep the demo vault at 2 SOL
+    const r = await sendTx(conn, [await I.deposit(payer.publicKey, k.elder.publicKey, Math.round(2.0 * LAMPORTS_PER_SOL - v.available))], [payer]);
+    log("vault topped up to 2 SOL", r.sig);
+    v = await fetchVault(conn, vault);
+  }
+  for (const r of await listRequests(conn, vault)) {        // start the demo with no old requests
+    await sendTx(conn, [await I.cancel(k.elder.publicKey, k.elder.publicKey, new PublicKey(r.address))], [k.elder]);
+    log("old request cancelled", r.id);
+  }
+  const loose = await conn.getBalance(k.elder.publicKey);
+  if (loose < 0.6 * LAMPORTS_PER_SOL) {
+    const r = await sendTx(conn, [SystemProgram.transfer({ fromPubkey: payer.publicKey, toPubkey: k.elder.publicKey, lamports: Math.round(0.7 * LAMPORTS_PER_SOL) - loose })], [payer]);
+    log("everyday wallet topped up to 0.7 SOL", r.sig);
+  }
   log("vault", JSON.stringify(v, null, 1));
   log("elder wallet", (await conn.getBalance(k.elder.publicKey)) / LAMPORTS_PER_SOL, "SOL");
   log("look-alike", lookalike.publicKey.toBase58(), "vs Ana", k.ana.publicKey.toBase58());

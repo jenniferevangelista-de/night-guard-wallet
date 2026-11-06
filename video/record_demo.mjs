@@ -74,6 +74,8 @@ for (const id of ["fake-support", "airdrop-drainer", "address-poisoning", "fake-
 }
 end(s);
 
+const SKIP = (process.env.NGW_SKIP ?? "").split(",");
+if (!SKIP.includes("groceries")) {
 s = scene("groceries");
 await check("groceries"); shown(s);
 await page.evaluate(() => document.getElementById("resultCard").scrollIntoView({ behavior: "smooth" }));
@@ -81,6 +83,7 @@ await pause(1500);
 await page.locator("button.b-sign").first().click();
 await waitText("Sent! See it on Solana", 90000);
 await pause(3500); end(s);
+}
 
 s = scene("car");
 await check("car-repair"); shown(s);
