@@ -139,10 +139,15 @@ export async function explain(facts: { verdict: string; amount: string; lines: s
   const raw = await ollama(EXPLAIN_SYSTEM[facts.lang], user, EXPLAIN_SCHEMA, 45_000);
   const ms = performance.now() - t0;
   const text: string = raw?.text?.trim() ?? "";
-  const okAmount = !facts.amount || norm(text).includes(norm(facts.amount));
+  // Any amount the model writes must be the real one (no invented numbers). Leaving it out is fine.
+  const val = (x: string) => Number(x.replace(",", "."));
+  const real = facts.amount ? val(facts.amount.replace(/\s*SOL$/, "")) : null;
+  const said = [...text.matchAll(/(\d+(?:[.,]\d+)?)\s*SOL/gi)].map((m) => val(m[1]));
+  const okAmount = said.every((x) => real !== null && Math.abs(x - real) < 1e-9);
   const words = text.split(/\s+/).length;
   const saysSafe = /\b(seguro|safe|tranquil|pode seguir|go ahead)\b/i.test(text);
   if (!text || !okAmount || words > 60 || (facts.verdict.startsWith("STOP") || facts.verdict.startsWith("PARE")) && saysSafe) {
+    if (text) console.warn("[explain] model text rejected:", JSON.stringify(text).slice(0, 300));
     return { text: facts.fallback, ms, by: "template" as const };
   }
   return { text, ms, by: "model" as const };

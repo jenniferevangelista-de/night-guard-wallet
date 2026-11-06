@@ -151,15 +151,16 @@ pub mod guardian_vault {
     /// Sends the money of a request, once its rules are met. Closes the request.
     pub fn execute(ctx: Context<Execute>) -> Result<()> {
         let now = Clock::get()?.unix_timestamp;
-        let (amount, to) = {
+        let (amount, to, supervised) = {
             let r = &ctx.accounts.req;
             require!(r.status != Status::Rejected as u8, VaultError::Rejected);
             require!(!r.needs_guardian || r.status == Status::Approved as u8, VaultError::NeedsGuardian);
             require!(now >= r.unlock_at, VaultError::StillCoolingOff);
             require_keys_eq!(r.to, ctx.accounts.to.key(), VaultError::WrongDestination);
-            (r.amount, r.to)
+            (r.amount, r.to, r.needs_guardian)
         };
-        {
+        // The daily limit counts what the owner spends alone; a payment the guardian approved does not use it up.
+        if !supervised {
             let v = &mut ctx.accounts.vault;
             roll_day(v, now);
             v.spent_today = v.spent_today.saturating_add(amount);

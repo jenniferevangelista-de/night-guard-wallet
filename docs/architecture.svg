@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0f1b3d"/></marker>
+    <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b42318"/></marker>
+    <marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6941c6"/></marker>
+  </defs>
+  <rect width="1600" height="900" fill="#f6f3ee"/>
+  <text x="40" y="58" font-size="38" font-weight="800" fill="#0f1b3d">🌙 Night Guard Wallet · architecture</text>
+  <text x="40" y="94" font-size="20" fill="#4a5568">Simulate on Solana → flag the scam → explain in plain words → the vault program enforces what nobody can switch off</text>
+
+  <!-- Inputs -->
+  <rect x="40" y="140" width="300" height="300" rx="22" fill="#fff" stroke="#e2ddd3" stroke-width="2"/>
+  <text x="62" y="180" font-size="24" font-weight="700" fill="#0f1b3d">👵 Lucy, 74</text>
+  <text x="62" y="210" font-size="17" fill="#4a5568">What reaches her wallet:</text>
+  <g font-size="17" fill="#14213d">
+    <text x="62" y="246">💬 WhatsApp / SMS message</text>
+    <text x="62" y="278">🔗 link or Blink</text>
+    <text x="62" y="310">▦ Solana Pay QR</text>
+    <text x="62" y="342">✍️ a transaction to sign</text>
+    <text x="62" y="374">📞 "I'm on the phone" mode</text>
+  </g>
+  <text x="62" y="416" font-size="15" fill="#4a5568">PT + EN · big letters · read aloud</text>
+
+  <!-- Guardian -->
+  <rect x="400" y="130" width="560" height="470" rx="24" fill="#fff" stroke="#0f1b3d" stroke-width="3"/>
+  <text x="424" y="172" font-size="25" font-weight="800" fill="#0f1b3d">Night Guard guardian (before signing)</text>
+  <g>
+    <rect x="424" y="196" width="512" height="70" rx="14" fill="#eef1f7"/>
+    <text x="444" y="226" font-size="19" font-weight="700" fill="#0f1b3d">① Decode every instruction</text>
+    <text x="444" y="252" font-size="15" fill="#4a5568">System · SPL Token / Token-2022 · vault IDL · Memo · unknown programs</text>
+    <rect x="424" y="278" width="512" height="70" rx="14" fill="#e8eefc"/>
+    <text x="444" y="308" font-size="19" font-weight="700" fill="#0f1b3d">② Simulate on Solana devnet</text>
+    <text x="444" y="334" font-size="15" fill="#4a5568">simulateTransaction: SOL, tokens, delegates, owners before → after</text>
+    <rect x="424" y="360" width="512" height="86" rx="14" fill="#fde8e7"/>
+    <text x="444" y="390" font-size="19" font-weight="700" fill="#b42318">③ Risk rules on the simulated result</text>
+    <text x="444" y="414" font-size="15" fill="#4a5568">new wallet · look-alike address · drains balance · unlimited approve</text>
+    <text x="444" y="434" font-size="15" fill="#4a5568">SetAuthority · CloseAccount · fake token · phishing link · vault refused</text>
+    <rect x="424" y="458" width="512" height="86" rx="14" fill="#efe9fd"/>
+    <text x="444" y="488" font-size="19" font-weight="700" fill="#6941c6">④ Gemma 4 (local, Ollama, free)</text>
+    <text x="444" y="512" font-size="15" fill="#4a5568">reads the message: 10 scam tricks, each with a verbatim quote</text>
+    <text x="444" y="532" font-size="15" fill="#4a5568">writes the plain-language explanation · can only ADD warnings</text>
+    <text x="424" y="580" font-size="17" font-weight="700" fill="#0f1b3d">Verdict: ✅ go ahead · ⚠️ careful · ⛔ STOP (locked)</text>
+  </g>
+
+  <!-- Vault program -->
+  <rect x="1020" y="130" width="540" height="470" rx="24" fill="#0f1b3d"/>
+  <text x="1044" y="172" font-size="25" font-weight="800" fill="#f4c95d">guardian_vault · Anchor program</text>
+  <text x="1044" y="200" font-size="16" fill="#c9d3ee">Solana devnet · the rules live on-chain</text>
+  <g font-size="17" fill="#fff">
+    <text x="1044" y="244">🔒 Vault PDA holds the savings</text>
+    <text x="1044" y="278">👪 Trusted contacts: owner AND guardian sign</text>
+    <text x="1044" y="312">📅 Daily limit for everyday payments</text>
+    <text x="1044" y="346">🆕 Anything else → on-chain request</text>
+    <text x="1044" y="380">👩 Guardian approves or refuses (signature)</text>
+    <text x="1044" y="414">⏳ Cooling-off for big amounts</text>
+    <text x="1044" y="448">📣 Events for every step</text>
+  </g>
+  <rect x="1044" y="474" width="492" height="102" rx="14" fill="#1d2b55"/>
+  <text x="1064" y="504" font-size="16" fill="#f4c95d" font-weight="700">send · request · guardian_decide · execute</text>
+  <text x="1064" y="530" font-size="16" fill="#c9d3ee">add_trusted · remove_trusted · set_limits · cancel</text>
+  <text x="1064" y="556" font-size="15" fill="#c9d3ee">Even if the app is bypassed, the chain refuses.</text>
+
+  <!-- Family -->
+  <rect x="1020" y="650" width="540" height="200" rx="24" fill="#fff" stroke="#6941c6" stroke-width="3"/>
+  <text x="1044" y="694" font-size="24" font-weight="800" fill="#6941c6">👩 Ana, the family guardian</text>
+  <text x="1044" y="728" font-size="17" fill="#14213d">Live alerts read from the program's events (onLogs)</text>
+  <text x="1044" y="760" font-size="17" fill="#14213d">⛔ "Night Guard blocked…" with the reasons</text>
+  <text x="1044" y="792" font-size="17" fill="#14213d">✅ Approve / ⛔ Refuse = her own on-chain signature</text>
+  <text x="1044" y="824" font-size="15" fill="#4a5568">Human in the loop, like Night Guard for kids</text>
+
+  <!-- Bottom left: outcome -->
+  <rect x="40" y="650" width="920" height="200" rx="24" fill="#fff" stroke="#e2ddd3" stroke-width="2"/>
+  <text x="64" y="694" font-size="24" font-weight="800" fill="#0f1b3d">What Lucy sees</text>
+  <rect x="64" y="714" width="270" height="110" rx="16" fill="#e3f6ea" stroke="#1d7a46" stroke-width="3"/>
+  <text x="84" y="756" font-size="24" font-weight="800" fill="#1d7a46">✅ Go ahead</text>
+  <text x="84" y="788" font-size="15" fill="#1d7a46">trusted, within the limit:</text>
+  <text x="84" y="808" font-size="15" fill="#1d7a46">signed and sent at once</text>
+  <rect x="352" y="714" width="270" height="110" rx="16" fill="#fff3d6" stroke="#9a5b00" stroke-width="3"/>
+  <text x="372" y="756" font-size="24" font-weight="800" fill="#9a5b00">⚠️ Careful</text>
+  <text x="372" y="788" font-size="15" fill="#9a5b00">big amount: request, Ana</text>
+  <text x="372" y="808" font-size="15" fill="#9a5b00">approves, cooling-off</text>
+  <rect x="640" y="714" width="296" height="110" rx="16" fill="#fde8e7" stroke="#b42318" stroke-width="3"/>
+  <text x="660" y="756" font-size="24" font-weight="800" fill="#b42318">⛔ STOP</text>
+  <text x="660" y="788" font-size="15" fill="#b42318">nothing is signed; Ana is told;</text>
+  <text x="660" y="808" font-size="15" fill="#b42318">the vault refuses it anyway</text>
+
+  <!-- Arrows -->
+  <path d="M340 290 L398 290" stroke="#0f1b3d" stroke-width="4" marker-end="url(#a)" fill="none"/>
+  <path d="M960 300 L1018 300" stroke="#0f1b3d" stroke-width="4" marker-end="url(#a)" fill="none"/>
+  <text x="962" y="288" font-size="14" fill="#0f1b3d">sign</text>
+  <path d="M1018 330 C 990 330, 990 312, 962 312" stroke="#0f1b3d" stroke-width="3" stroke-dasharray="6 5" marker-end="url(#a)" fill="none"/>
+  <text x="966" y="350" font-size="14" fill="#0f1b3d">simulate</text>
+  <path d="M1296 600 L1296 648" stroke="#6941c6" stroke-width="4" marker-end="url(#p)" fill="none"/>
+  <path d="M1250 648 L1250 602" stroke="#6941c6" stroke-width="4" marker-end="url(#p)" fill="none"/>
+  <text x="1312" y="630" font-size="14" fill="#6941c6">events ↓   decision ↑</text>
+  <path d="M680 600 L680 648" stroke="#b42318" stroke-width="4" marker-end="url(#r)" fill="none"/>
+</svg>

@@ -1,0 +1,881 @@
+{
+  "summary": {
+    "model": "gemma4:e2b",
+    "when": "2026-11-06T19:41:21.281Z",
+    "rules": {
+      "caught": 22,
+      "scams": 32,
+      "falseAlarms": 3,
+      "ordinary": 28
+    },
+    "gemma": {
+      "caught": 32,
+      "scams": 32,
+      "falseAlarms": 0,
+      "ordinary": 28
+    },
+    "both": {
+      "caught": 32,
+      "scams": 32,
+      "falseAlarms": 3,
+      "ordinary": 28
+    },
+    "bothTwoTricks": {
+      "caught": 25,
+      "scams": 32,
+      "falseAlarms": 0,
+      "ordinary": 28
+    },
+    "medianGemmaMs": 5517,
+    "gemmaAnswered": 60
+  },
+  "rows": [
+    {
+      "id": "scam-pt-01",
+      "lang": "pt",
+      "scam": true,
+      "rules": [
+        "fake_support"
+      ],
+      "model": [
+        "new_number:Meu celular caiu na privada, tô usando o do meu amigo.",
+        "urgency:Preciso de 0,8 SOL pra pagar a matrícula antes do banco fechar"
+      ],
+      "modelUsed": true,
+      "ms": 8490,
+      "both": [
+        "fake_support",
+        "new_number",
+        "urgency"
+      ]
+    },
+    {
+      "id": "scam-pt-02",
+      "lang": "pt",
+      "scam": true,
+      "rules": [],
+      "model": [
+        "new_number:salva esse número novo",
+        "urgency:preciso que você me transfira 1 SOL agora"
+      ],
+      "modelUsed": true,
+      "ms": 6913,
+      "both": [
+        "new_number",
+        "urgency"
+      ]
+    },
+    {
+      "id": "scam-pt-03",
+      "lang": "pt",
+      "scam": true,
+      "rules": [],
+      "model": [
+        "fake_support:Aqui é do setor de segurança do seu banco.",
+        "urgency:Para cancelar, transfira o saldo para a conta de proteção que vou te passar."
+      ],
+      "modelUsed": true,
+      "ms": 7979,
+      "both": [
+        "fake_support",
+        "urgency"
+      ]
+    },
+    {
+      "id": "scam-pt-04",
+      "lang": "pt",
+      "scam": true,
+      "rules": [
+        "secret_words"
+      ],
+      "model": [
+        "urgency:Sua carteira Phantom será desativada em 24 horas por falta de verificação.",
+        "secrecy:Confirme suas 12 palavras no link para manter o acesso."
+      ],
+      "modelUsed": true,
+      "ms": 8588,
+      "both": [
+        "secret_words",
+        "urgency",
+        "secrecy"
+      ]
+    },
+    {
+      "id": "scam-pt-05",
+      "lang": "pt",
+      "scam": true,
+      "rules": [],
+      "model": [
+        "prize:seu número foi sorteado na promoção de fim de ano e você tem 2.000 USDC esperando",
+        "fee_to_unlock:Só precisa pagar o frete de 0,3 SOL"
+      ],
+      "modelUsed": true,
+      "ms": 8569,
+      "both": [
+        "prize",
+        "fee_to_unlock"
+      ]
+    },
+    {
+      "id": "scam-pt-06",
+      "lang": "pt",
+      "scam": true,
+      "rules": [
+        "secrecy",
+        "emotional"
+      ],
+      "model": [
+        "emotional:Ele se envolveu num acidente e precisa pagar a fiança hoje.",
+        "secrecy:Ele pediu pra não contar pros pais."
+      ],
+      "modelUsed": true,
+      "ms": 8652,
+      "both": [
+        "secrecy",
+        "emotional"
+      ]
+    },
+    {
+      "id": "scam-pt-07",
+      "lang": "pt",
+      "scam": true,
+      "rules": [],
+      "model": [
+        "urgency:é rapidinho"
+      ],
+      "modelUsed": true,
+      "ms": 5223,
+      "both": [
+        "urgency"
+      ]
+    },
+    {
+      "id": "scam-pt-08",
+      "lang": "pt",
+      "scam": true,
+      "rules": [
+        "prize"
+      ],
+      "model": [
+        "prize:receber o airdrop oficial",
+        "safe_wallet:Conecte a carteira"
+      ],
+      "modelUsed": true,
+      "ms": 7167,
+      "both": [
+        "prize",
+        "safe_wallet"
+      ]
+    },
+    {
+      "id": "scam-pt-09",
+      "lang": "pt",
+      "scam": true,
+      "rules": [
+        "fee_to_unlock"
+      ],
+      "model": [
+        "urgency:em até 30 minutos",
+        "fee_to_unlock:é necessário recolher o imposto de 0,6 SOL"
+      ],
+      "modelUsed": true,
+      "ms": 8097,
+      "both": [
+        "fee_to_unlock",
+        "urgency"
+      ]
+    },
+    {
+      "id": "scam-pt-10",
+      "lang": "pt",
+      "scam": true,
+      "rules": [
+        "secrecy"
+      ],
+      "model": [
+        "secrecy:não comenta com ninguém"
+      ],
+      "modelUsed": true,
+      "ms": 5136,
+      "both": [
+        "secrecy"
+      ]
+    },
+    {
+      "id": "scam-pt-11",
+      "lang": "pt",
+      "scam": true,
+      "rules": [
+        "fake_support",
+        "safe_wallet"
+      ],
+      "model": [
+        "fake_support:Atendimento Solflare: detectamos que sua conta foi invadida. Mova seus fundos para a carteira segura abaixo enquanto resolvemos.",
+        "urgency:detectamos que sua conta foi invadida. Mova seus fundos para a carteira segura abaixo enquanto resolvemos"
+      ],
+      "modelUsed": true,
+      "ms": 9276,
+      "both": [
+        "fake_support",
+        "safe_wallet",
+        "urgency"
+      ]
+    },
+    {
+      "id": "scam-pt-12",
+      "lang": "pt",
+      "scam": true,
+      "rules": [
+        "urgency"
+      ],
+      "model": [
+        "new_number:tô com número novo",
+        "urgency:preciso resolver isso ainda hoje"
+      ],
+      "modelUsed": true,
+      "ms": 6607,
+      "both": [
+        "urgency",
+        "new_number"
+      ]
+    },
+    {
+      "id": "scam-pt-13",
+      "lang": "pt",
+      "scam": true,
+      "rules": [
+        "too_good"
+      ],
+      "model": [
+        "too_good:Investimento garantido: coloque 1 SOL hoje e receba 3 SOL amanhã.",
+        "urgency:Vagas limitadas, só para os primeiros 20!"
+      ],
+      "modelUsed": true,
+      "ms": 7794,
+      "both": [
+        "too_good",
+        "urgency"
+      ]
+    },
+    {
+      "id": "scam-pt-14",
+      "lang": "pt",
+      "scam": true,
+      "rules": [
+        "secret_words"
+      ],
+      "model": [
+        "fake_support:Sua conta será bloqueada por suspeita de fraude. Fale comigo no WhatsApp e informe sua frase de recuperação para validarmos.",
+        "secrecy:informe sua frase de recuperação"
+      ],
+      "modelUsed": true,
+      "ms": 17872,
+      "both": [
+        "secret_words",
+        "fake_support",
+        "secrecy"
+      ]
+    },
+    {
+      "id": "scam-pt-15",
+      "lang": "pt",
+      "scam": true,
+      "rules": [
+        "emotional"
+      ],
+      "model": [
+        "emotional:Mãe, tô no hospital, perdi a carteira e o celular."
+      ],
+      "modelUsed": true,
+      "ms": 12933,
+      "both": [
+        "emotional"
+      ]
+    },
+    {
+      "id": "scam-pt-16",
+      "lang": "pt",
+      "scam": true,
+      "rules": [
+        "prize",
+        "too_good"
+      ],
+      "model": [
+        "prize:Ganhe 10x seus tokens! Envie qualquer valor para o endereço do evento e receba o dobro de volta automaticamente.",
+        "too_good:receba o dobro de volta automaticamente"
+      ],
+      "modelUsed": true,
+      "ms": 14320,
+      "both": [
+        "prize",
+        "too_good"
+      ]
+    },
+    {
+      "id": "scam-en-01",
+      "lang": "en",
+      "scam": true,
+      "rules": [
+        "secrecy"
+      ],
+      "model": [
+        "new_number:I'm texting from a friend's",
+        "urgency:I need 0.8 SOL before the bank closes",
+        "secrecy:please keep this between us"
+      ],
+      "modelUsed": true,
+      "ms": 18307,
+      "both": [
+        "secrecy",
+        "new_number",
+        "urgency"
+      ]
+    },
+    {
+      "id": "scam-en-02",
+      "lang": "en",
+      "scam": true,
+      "rules": [
+        "new_number",
+        "urgency"
+      ],
+      "model": [
+        "new_number:save this new number",
+        "emotional:Something bad happened, I'll explain later",
+        "urgency:I need you to send me 1 SOL right now"
+      ],
+      "modelUsed": true,
+      "ms": 9118,
+      "both": [
+        "new_number",
+        "urgency",
+        "emotional"
+      ]
+    },
+    {
+      "id": "scam-en-03",
+      "lang": "en",
+      "scam": true,
+      "rules": [],
+      "model": [
+        "fake_support:This is your bank's fraud department.",
+        "safe_wallet:move your balance to the protection account I'll give you"
+      ],
+      "modelUsed": true,
+      "ms": 7561,
+      "both": [
+        "fake_support",
+        "safe_wallet"
+      ]
+    },
+    {
+      "id": "scam-en-04",
+      "lang": "en",
+      "scam": true,
+      "rules": [],
+      "model": [
+        "urgency:Your Phantom wallet will be deactivated in 24 hours unless verified.",
+        "fake_support:Confirm your 12 words at the link to keep access."
+      ],
+      "modelUsed": true,
+      "ms": 7624,
+      "both": [
+        "urgency",
+        "fake_support"
+      ]
+    },
+    {
+      "id": "scam-en-05",
+      "lang": "en",
+      "scam": true,
+      "rules": [],
+      "model": [
+        "prize:Congratulations!! You were picked in our holiday giveaway and 2,000 USDC are waiting for you.",
+        "fee_to_unlock:Just cover the 0.3 SOL shipping."
+      ],
+      "modelUsed": true,
+      "ms": 7486,
+      "both": [
+        "prize",
+        "fee_to_unlock"
+      ]
+    },
+    {
+      "id": "scam-en-06",
+      "lang": "en",
+      "scam": true,
+      "rules": [
+        "emotional"
+      ],
+      "model": [
+        "emotional:He was in a car crash and needs bail paid today. He asked that his parents not find out.",
+        "secrecy:He asked that his parents not find out."
+      ],
+      "modelUsed": true,
+      "ms": 7808,
+      "both": [
+        "emotional",
+        "secrecy"
+      ]
+    },
+    {
+      "id": "scam-en-07",
+      "lang": "en",
+      "scam": true,
+      "rules": [],
+      "model": [
+        "urgency:it's quick"
+      ],
+      "modelUsed": true,
+      "ms": 5371,
+      "both": [
+        "urgency"
+      ]
+    },
+    {
+      "id": "scam-en-08",
+      "lang": "en",
+      "scam": true,
+      "rules": [
+        "prize"
+      ],
+      "model": [
+        "prize:You've been selected for the official airdrop."
+      ],
+      "modelUsed": true,
+      "ms": 5283,
+      "both": [
+        "prize"
+      ]
+    },
+    {
+      "id": "scam-en-09",
+      "lang": "en",
+      "scam": true,
+      "rules": [
+        "urgency"
+      ],
+      "model": [
+        "urgency:pay the 0.6 SOL tax to this wallet within 30 minutes",
+        "fee_to_unlock:pay the 0.6 SOL tax"
+      ],
+      "modelUsed": true,
+      "ms": 7760,
+      "both": [
+        "urgency",
+        "fee_to_unlock"
+      ]
+    },
+    {
+      "id": "scam-en-10",
+      "lang": "en",
+      "scam": true,
+      "rules": [
+        "urgency"
+      ],
+      "model": [
+        "secrecy:don't mention it to anyone"
+      ],
+      "modelUsed": true,
+      "ms": 5099,
+      "both": [
+        "urgency",
+        "secrecy"
+      ]
+    },
+    {
+      "id": "scam-en-11",
+      "lang": "en",
+      "scam": true,
+      "rules": [
+        "fake_support",
+        "safe_wallet"
+      ],
+      "model": [
+        "fake_support:Solflare Support: we detected your account was compromised. Move your funds to the secure wallet below while we fix it.",
+        "urgency:Move your funds to the secure wallet below while we fix it"
+      ],
+      "modelUsed": true,
+      "ms": 8653,
+      "both": [
+        "fake_support",
+        "safe_wallet",
+        "urgency"
+      ]
+    },
+    {
+      "id": "scam-en-12",
+      "lang": "en",
+      "scam": true,
+      "rules": [],
+      "model": [
+        "new_number:Mark here, got a new phone",
+        "urgency:I'm short and need to sort this out today"
+      ],
+      "modelUsed": true,
+      "ms": 8139,
+      "both": [
+        "new_number",
+        "urgency"
+      ]
+    },
+    {
+      "id": "scam-en-13",
+      "lang": "en",
+      "scam": true,
+      "rules": [
+        "too_good"
+      ],
+      "model": [
+        "too_good:Guaranteed investment: put in 1 SOL today and get 3 SOL tomorrow. Limited spots, only the first 20!"
+      ],
+      "modelUsed": true,
+      "ms": 6886,
+      "both": [
+        "too_good"
+      ]
+    },
+    {
+      "id": "scam-en-14",
+      "lang": "en",
+      "scam": true,
+      "rules": [
+        "secret_words"
+      ],
+      "model": [
+        "fake_support:Your account will be frozen for suspected fraud.",
+        "secret_words:Message me on WhatsApp with your recovery phrase so we can verify you."
+      ],
+      "modelUsed": true,
+      "ms": 9849,
+      "both": [
+        "secret_words",
+        "fake_support"
+      ]
+    },
+    {
+      "id": "scam-en-15",
+      "lang": "en",
+      "scam": true,
+      "rules": [],
+      "model": [
+        "emotional:I'm in the ER, I lost my wallet and phone."
+      ],
+      "modelUsed": true,
+      "ms": 6711,
+      "both": [
+        "emotional"
+      ]
+    },
+    {
+      "id": "scam-en-16",
+      "lang": "en",
+      "scam": true,
+      "rules": [
+        "too_good"
+      ],
+      "model": [
+        "prize:Get 10x your tokens! Send any amount to the event address and receive double back automatically.",
+        "too_good:Get 10x your tokens! Send any amount to the event address and receive double back automatically."
+      ],
+      "modelUsed": true,
+      "ms": 9877,
+      "both": [
+        "too_good",
+        "prize"
+      ]
+    },
+    {
+      "id": "ok-pt-01",
+      "lang": "pt",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 5560,
+      "both": []
+    },
+    {
+      "id": "ok-pt-02",
+      "lang": "pt",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 5517,
+      "both": []
+    },
+    {
+      "id": "ok-pt-03",
+      "lang": "pt",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 5585,
+      "both": []
+    },
+    {
+      "id": "ok-pt-04",
+      "lang": "pt",
+      "scam": false,
+      "rules": [
+        "urgency"
+      ],
+      "model": [],
+      "modelUsed": true,
+      "ms": 4872,
+      "both": [
+        "urgency"
+      ]
+    },
+    {
+      "id": "ok-pt-05",
+      "lang": "pt",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 5280,
+      "both": []
+    },
+    {
+      "id": "ok-pt-06",
+      "lang": "pt",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 5002,
+      "both": []
+    },
+    {
+      "id": "ok-pt-07",
+      "lang": "pt",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3978,
+      "both": []
+    },
+    {
+      "id": "ok-pt-08",
+      "lang": "pt",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3685,
+      "both": []
+    },
+    {
+      "id": "ok-pt-09",
+      "lang": "pt",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3512,
+      "both": []
+    },
+    {
+      "id": "ok-pt-10",
+      "lang": "pt",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3727,
+      "both": []
+    },
+    {
+      "id": "ok-pt-11",
+      "lang": "pt",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3600,
+      "both": []
+    },
+    {
+      "id": "ok-pt-12",
+      "lang": "pt",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3433,
+      "both": []
+    },
+    {
+      "id": "ok-pt-13",
+      "lang": "pt",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3452,
+      "both": []
+    },
+    {
+      "id": "ok-pt-14",
+      "lang": "pt",
+      "scam": false,
+      "rules": [
+        "urgency"
+      ],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3478,
+      "both": [
+        "urgency"
+      ]
+    },
+    {
+      "id": "ok-en-01",
+      "lang": "en",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3882,
+      "both": []
+    },
+    {
+      "id": "ok-en-02",
+      "lang": "en",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3875,
+      "both": []
+    },
+    {
+      "id": "ok-en-03",
+      "lang": "en",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3704,
+      "both": []
+    },
+    {
+      "id": "ok-en-04",
+      "lang": "en",
+      "scam": false,
+      "rules": [
+        "urgency"
+      ],
+      "model": [],
+      "modelUsed": true,
+      "ms": 4090,
+      "both": [
+        "urgency"
+      ]
+    },
+    {
+      "id": "ok-en-05",
+      "lang": "en",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3714,
+      "both": []
+    },
+    {
+      "id": "ok-en-06",
+      "lang": "en",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3999,
+      "both": []
+    },
+    {
+      "id": "ok-en-07",
+      "lang": "en",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 4488,
+      "both": []
+    },
+    {
+      "id": "ok-en-08",
+      "lang": "en",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 4706,
+      "both": []
+    },
+    {
+      "id": "ok-en-09",
+      "lang": "en",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3967,
+      "both": []
+    },
+    {
+      "id": "ok-en-10",
+      "lang": "en",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3456,
+      "both": []
+    },
+    {
+      "id": "ok-en-11",
+      "lang": "en",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3296,
+      "both": []
+    },
+    {
+      "id": "ok-en-12",
+      "lang": "en",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3322,
+      "both": []
+    },
+    {
+      "id": "ok-en-13",
+      "lang": "en",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3289,
+      "both": []
+    },
+    {
+      "id": "ok-en-14",
+      "lang": "en",
+      "scam": false,
+      "rules": [],
+      "model": [],
+      "modelUsed": true,
+      "ms": 3872,
+      "both": []
+    }
+  ]
+}

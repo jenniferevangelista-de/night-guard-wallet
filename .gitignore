@@ -10,3 +10,7 @@ keys/
 __pycache__/
 .pytest_cache/
 video/build/
+.claude/
+video/work/
+video/out/
+video/review/

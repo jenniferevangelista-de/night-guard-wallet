@@ -50,6 +50,12 @@ const T = {
     alerted: "Ana was told.", speed: "Simulated on Solana devnet and checked in", ai: "AI", gone: "Done, nothing was sent. Your money is safe.",
     trusted: "Trusted contacts", thinking: "is reading the message…", seconds: "s", wrote: "explanation written by", tpl: "fixed text", from: "From", via: "Via" },
 };
+const TACTIC = {
+  pt: { new_number: "\"troquei de número\"", urgency: "pressa", secrecy: "segredo", fake_support: "falso suporte/banco", safe_wallet: "\"carteira segura\"",
+    prize: "prêmio/grátis", fee_to_unlock: "taxa para liberar", secret_words: "pede palavras secretas", emotional: "susto/emergência", too_good: "lucro garantido" },
+  en: { new_number: "\"new number\"", urgency: "rush", secrecy: "secrecy", fake_support: "fake support/bank", safe_wallet: "\"safe wallet\"",
+    prize: "prize/free", fee_to_unlock: "fee to unlock", secret_words: "asks for secret words", emotional: "scare/emergency", too_good: "guaranteed profit" },
+};
 let lang = localStorage.lang || "pt", phone = false, fs = 22, scen = [], current = null, report = null, st = null;
 const $ = (s) => document.querySelector(s);
 const t = (k) => T[lang][k];
@@ -132,7 +138,7 @@ function render(id, done) {
   const tm = r.timings;
   const flags = r.flags.map((f) => `<li class="${f.level}">${esc(f[lang])}</li>`).join("");
   const tactics = r.tactics.length ? `<h2>${t("tricks")}</h2><div class="bubble">${hl(current.message[lang], r.tactics.map((x) => x.quote))}</div>
-    <div class="small">${r.tactics.map((x) => `${x.id} (${x.by === "model" ? "Gemma" : "rule"})`).join(" · ")}</div>` : "";
+    <div class="small">${r.tactics.map((x) => `${TACTIC[lang][x.id] ?? x.id} (${x.by === "model" ? "Gemma" : lang === "pt" ? "regra" : "rule"})`).join(" · ")}</div>` : "";
   const act = r.verdict === "OK"
     ? `<button class="big b-sign" onclick="signIt()">${t("sign")}</button>`
     : `<button class="big b-family" onclick="askFamily()">${current.vaultPath ? t("askAna") : t("alertAna")}</button><button class="big b-no" onclick="dont()">${t("dont")}</button>`;

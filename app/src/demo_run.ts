@@ -27,7 +27,9 @@ async function landFailing(ixs: TransactionInstruction[], signers: Keypair[]) {
   const sig = await w.conn.sendTransaction(tx, { skipPreflight: true });
   const res = await w.conn.confirmTransaction({ signature: sig, ...latest }, "confirmed");
   const ve = vaultErrorOf(res.value.err);
-  return { sig, link: explorer(sig), failed: !!res.value.err, error: ve ? `${ve.code} ${ve.name}: ${ve.msg}` : JSON.stringify(res.value.err) };
+  const code = (res.value.err as any)?.InstructionError?.[1]?.Custom;
+  const anchor: Record<number, string> = { 2001: "2001 ConstraintHasOne: the guardian must be the one saved in the vault" };
+  return { sig, link: explorer(sig), failed: !!res.value.err, error: ve ? `${ve.code} ${ve.name}: ${ve.msg}` : anchor[code] ?? JSON.stringify(res.value.err) };
 }
 
 async function main() {
@@ -114,8 +116,8 @@ async function main() {
   const legitRows = rows.filter((r) => r.kind === "legit");
   const summary = {
     when: new Date().toISOString(), model: AI === "ollama" ? MODEL : "templates", runsPerScenario: RUNS, checks,
-    scamsStopped: `${scamRows.filter((r) => r.verdicts.every((v: string) => v === "STOP")).length}/${scamRows.length}`,
-    legitLetThrough: `${legitRows.filter((r) => r.verdicts.every((v: string) => v !== "STOP")).length}/${legitRows.length}`,
+    scamsStopped: byScenario(scamRows, (r) => r.verdicts.every((v: string) => v === "STOP") && r.fastVerdicts.every((v: string) => v === "STOP")),
+    legitLetThrough: byScenario(legitRows, (r) => r.verdicts.every((v: string) => v !== "STOP") && r.fastVerdicts.every((v: string) => v !== "STOP")),
     verdictsAsExpected: `${correct}/${rows.length}`,
     medianVerdictMs: med(rows.map((r) => r.fastVerdictMs)), maxVerdictMs: Math.max(...rows.map((r) => r.fastVerdictMs)),
     medianTotalMs: med(rows.map((r) => r.median.totalMs)), medianSimulateMs: med(rows.map((r) => r.median.simulateMs)),
@@ -128,6 +130,11 @@ async function main() {
   writeFileSync("../docs/RESULTS.md", markdown(summary, rows, proofs));
   log(JSON.stringify(summary, null, 1));
   process.exit(0);
+}
+
+function byScenario(rows: any[], ok: (r: any) => boolean) {
+  const ids = [...new Set(rows.map((r) => r.id))];
+  return `${ids.filter((id) => rows.filter((r) => r.id === id).every(ok)).length}/${ids.length}`;
 }
 
 function markdown(s: any, rows: any[], proofs: any[]) {
