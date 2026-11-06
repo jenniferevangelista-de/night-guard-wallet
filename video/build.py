@@ -245,17 +245,17 @@ def paper_frame(tt, it):
         text(d, "Olive", 960, 120, 90, PURPLE, "mm", "impact.ttf")
         text(d, "Night Guard's owl · she reads every transaction before Lucy signs", 960, 200, 40, INK)
     elif key == "how":
-        steps = [("1  Simulate", "on Solana devnet:\nwhat really changes", NIGHT), ("2  Risk rules", "new wallet, look-alike,\nunlimited approve…", RED),
-                 ("3  Gemma reads", "the message: scam\ntricks, quoted", PURPLE), ("4  Vault program", "rules on-chain that\nnobody can switch off", GREEN)]
+        steps = [("1  Simulate", "on Solana devnet:\nwhat really changes", NIGHT), ("2  Risk rules", "drainers, look-alikes,\nnew wallets", RED),
+                 ("3  Gemma reads", "the message and\nquotes the tricks", PURPLE), ("4  Vault program", "rules on-chain that\nno one can switch off", GREEN)]
         for i, (big, small, col) in enumerate(steps):
             k = seg(rel, 0.2 + i * dur / 4.4, 0.8 + i * dur / 4.4)
             if k <= 0:
                 continue
-            x = 60 + i * 370; y = 220 + (1 - eout(k)) * 60
-            d.rounded_rectangle((x, y, x + 340, y + 300), 24, fill=(255, 255, 255)); wrect(d, x, y, x + 340, y + 300, tt, 40 + i, 6, col)
-            text(d, big, x + 170, y + 70, 46, col, "mm", "impact.ttf")
+            x = 50 + i * 455; y = 220 + (1 - eout(k)) * 60
+            d.rounded_rectangle((x, y, x + 420, y + 300), 24, fill=(255, 255, 255)); wrect(d, x, y, x + 420, y + 300, tt, 40 + i, 6, col)
+            text(d, big, x + 210, y + 70, 50, col, "mm", "impact.ttf")
             for j, ln in enumerate(small.split("\n")):
-                text(d, ln, x + 170, y + 160 + j * 46, 34, INK)
+                text(d, ln, x + 210, y + 165 + j * 46, 32, INK)
         text(d, "Before Lucy signs", 960, 130, 64, NIGHT, "mm", "impact.ttf")
         owl(im, tt, 1700, 1000, 330, m or 0.0, "talk")
     elif key == "proof":
@@ -279,7 +279,7 @@ def paper_frame(tt, it):
         text(d, "explorer.solana.com/tx/" + pr["sig"][:20] + "…?cluster=devnet", x0 + 40, y0 + 660, 26, PURPLE, "lm", "segoeui.ttf")
         text(d, "Forced through on purpose: the program says no", 760, 110, 50, NIGHT, "mm", "impact.ttf")
         if rel > 1.4:
-            stamp(im, "REFUSED ON-CHAIN: NotTrusted", 1000, 860, -4, RED, 64)
+            stamp(im, "REFUSED ON-CHAIN: NotTrusted", 1060, 330, -6, RED, 60)
         owl(im, tt, 1700, 1000, 340, m or 0.0, "talk", emo="proud" if rel > dur * 0.7 else "happy")
     elif key == "numbers":
         s = RES["summary"]
