@@ -1,0 +1,12 @@
+target/
+node_modules/
+.anchor/
+out/
+*.log
+.env
+keys/
+*-keypair.json
+.state*.json
+__pycache__/
+.pytest_cache/
+video/build/
