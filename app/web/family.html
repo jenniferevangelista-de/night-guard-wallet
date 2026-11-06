@@ -34,7 +34,7 @@ const T = {
     RequestOpened: "New request in the vault", GuardianDecided: "Decision recorded on Solana", Executed: "Money sent by the vault", Sent: "Everyday payment",
     Cancelled: "Request cancelled", TrustedChanged: "Trusted list changed", needs: "needs you", untrusted: "wallet NOT on the trusted list", over: "over today's limit", large: "big amount" },
 };
-let lang = localStorage.lang || "pt";
+let lang = localStorage.lang || "en";
 const $ = (s) => document.querySelector(s);
 const t = (k) => T[lang][k] ?? k;
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));

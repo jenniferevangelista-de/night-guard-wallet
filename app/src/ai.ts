@@ -132,7 +132,7 @@ Example: {"verdict":"STOP","amount":"1.8 SOL","facts":["You never sent to this w
 };
 const EXPLAIN_SCHEMA = { type: "object", properties: { text: { type: "string" } }, required: ["text"] };
 
-export async function explain(facts: { verdict: string; amount: string; lines: string[]; lang: Lang; fallback: string }, useModel = true) {
+export async function explain(facts: { verdict: string; amount: string; lines: string[]; lang: Lang; fallback: string; moneyOut?: boolean }, useModel = true) {
   const t0 = performance.now();
   if (AI !== "ollama" || !useModel) return { text: facts.fallback, ms: 0, by: "template" as const };
   const user = JSON.stringify({ veredito: facts.verdict, verdict: facts.verdict, valor: facts.amount, amount: facts.amount, fatos: facts.lines, facts: facts.lines });
@@ -146,7 +146,8 @@ export async function explain(facts: { verdict: string; amount: string; lines: s
   const okAmount = said.every((x) => real !== null && Math.abs(x - real) < 1e-9);
   const words = text.split(/\s+/).length;
   const saysSafe = /\b(seguro|safe|tranquil|pode seguir|go ahead)\b/i.test(text);
-  if (!text || !okAmount || words > 60 || (facts.verdict.startsWith("STOP") || facts.verdict.startsWith("PARE")) && saysSafe) {
+  const wrongWay = !!facts.moneyOut && /\b(recebeu|receber|recebe|recebendo|received|receive|receiving)\b/i.test(text); // money leaves: never "you received"
+  if (!text || !okAmount || wrongWay || words > 60 || (facts.verdict.startsWith("STOP") || facts.verdict.startsWith("PARE")) && saysSafe) {
     if (text) console.warn("[explain] model text rejected:", JSON.stringify(text).slice(0, 300));
     return { text: facts.fallback, ms, by: "template" as const };
   }

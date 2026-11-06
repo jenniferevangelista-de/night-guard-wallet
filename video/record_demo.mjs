@@ -8,7 +8,7 @@ const URL = process.env.NGW_URL ?? "http://localhost:8787";
 const W = 1152, H = 648;   // filmed at 1152x648 and scaled to 1536x864, so the letters read well in the video
 mkdirSync("video/work/raw", { recursive: true });
 const browser = await chromium.launch();
-const ctx = await browser.newContext({ viewport: { width: W, height: H }, recordVideo: { dir: "video/work/raw", size: { width: 1536, height: 864 } }, deviceScaleFactor: 1 });
+const ctx = await browser.newContext({ viewport: { width: W, height: H }, recordVideo: { dir: "video/work/raw", size: { width: W, height: H } }, deviceScaleFactor: 1 });
 await ctx.addInitScript(() => { localStorage.lang = "en"; window.speechSynthesis && (window.speechSynthesis.speak = () => {}); });
 const page = await ctx.newPage();
 const T0 = Date.now();

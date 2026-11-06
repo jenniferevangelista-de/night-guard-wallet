@@ -25,7 +25,17 @@ async function landFailing(ixs: TransactionInstruction[], signers: Keypair[]) {
   const tx = new VersionedTransaction(new TransactionMessage({ payerKey: signers[0].publicKey, recentBlockhash: latest.blockhash, instructions: ixs }).compileToV0Message());
   tx.sign(signers);
   const sig = await w.conn.sendTransaction(tx, { skipPreflight: true });
-  const res = await w.conn.confirmTransaction({ signature: sig, ...latest }, "confirmed");
+  let err: any = null;
+  try {
+    err = (await w.conn.confirmTransaction({ signature: sig, ...latest }, "confirmed")).value.err;
+  } catch (e: any) {
+    if (e?.InstructionError) err = e; // some RPC paths throw the transaction error instead of returning it
+    else {
+      await new Promise((r) => setTimeout(r, 3000));
+      err = (await w.conn.getSignatureStatus(sig, { searchTransactionHistory: true })).value?.err ?? null;
+    }
+  }
+  const res = { value: { err } };
   const ve = vaultErrorOf(res.value.err);
   const code = (res.value.err as any)?.InstructionError?.[1]?.Custom;
   const anchor: Record<number, string> = { 2001: "2001 ConstraintHasOne: the guardian must be the one saved in the vault" };

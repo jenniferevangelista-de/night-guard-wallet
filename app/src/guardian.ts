@@ -252,8 +252,9 @@ export async function check(conn: Connection, book: Book, input: CheckInput): Pr
     : (top[0] ? (lang === "pt" ? top[0].pt : top[0].en) : headline[lang]);
   const exp = await explain({
     verdict: verdict === "STOP" ? (lang === "pt" ? "PARE" : "STOP") : verdict === "CAUTION" ? (lang === "pt" ? "ATENÇÃO" : "CAUTION") : "OK",
-    amount: amountTxt, lang, fallback,
-    lines: [...top.slice(0, 4).map((f) => (lang === "pt" ? f.pt : f.en)), ...tactics.tactics.map((t) => `tactic ${t.id}: "${t.quote}"`)],
+    amount: amountTxt, lang, fallback, moneyOut: out > 0,
+    lines: [...changes.slice(0, 2).map((c) => (lang === "pt" ? `O que acontece: ${c.pt}` : `What happens: ${c.en}`)),
+      ...top.slice(0, 4).map((f) => (lang === "pt" ? f.pt : f.en)), ...tactics.tactics.map((t) => `tactic ${t.id}: "${t.quote}"`)],
   }, useModel);
 
   return {

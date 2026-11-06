@@ -113,8 +113,14 @@ export async function sendTx(conn: Connection, ixs: TransactionInstruction[], si
   const tx = new VersionedTransaction(new TransactionMessage({ payerKey: signers[0].publicKey, recentBlockhash: latest.blockhash, instructions: ixs }).compileToV0Message());
   tx.sign(signers);
   const sig = await conn.sendTransaction(tx, { maxRetries: 5 });
-  const res = await conn.confirmTransaction({ signature: sig, ...latest }, "confirmed");
-  if (res.value.err) throw new Error(`tx ${sig} failed: ${JSON.stringify(res.value.err)}`);
+  let err: any = null;
+  try {
+    err = (await conn.confirmTransaction({ signature: sig, ...latest }, "confirmed")).value.err;
+  } catch (e: any) {
+    err = e?.InstructionError ? e : (await conn.getSignatureStatus(sig, { searchTransactionHistory: true })).value?.err ?? null;
+    if (!err && !(await conn.getSignatureStatus(sig, { searchTransactionHistory: true })).value) throw e;
+  }
+  if (err) throw new Error(`tx ${sig} failed: ${JSON.stringify(err)}`);
   return { sig, ms: performance.now() - t0 };
 }
 

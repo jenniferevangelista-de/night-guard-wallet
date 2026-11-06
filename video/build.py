@@ -279,7 +279,7 @@ def paper_frame(tt, it):
         text(d, "explorer.solana.com/tx/" + pr["sig"][:20] + "…?cluster=devnet", x0 + 40, y0 + 660, 26, PURPLE, "lm", "segoeui.ttf")
         text(d, "Forced through on purpose: the program says no", 760, 110, 50, NIGHT, "mm", "impact.ttf")
         if rel > 1.4:
-            stamp(im, "REFUSED ON-CHAIN: NotTrusted", 1060, 330, -6, RED, 60)
+            stamp(im, "REFUSED ON-CHAIN: NotTrusted", 1080, 830, -5, RED, 50)
         owl(im, tt, 1700, 1000, 340, m or 0.0, "talk", emo="proud" if rel > dur * 0.7 else "happy")
     elif key == "numbers":
         s = RES["summary"]

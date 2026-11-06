@@ -6,7 +6,7 @@ MLH Solana Hackathon · AI Track ("security tools that explain what a transactio
 
 | **5/5** | **2/2** | **0.2 s** | **32/32 · 0** | **5** |
 |:-:|:-:|:-:|:-:|:-:|
-| scam scenarios stopped, in PT and EN, on every run | real family payments let through | from "check" to verdict on screen (median, devnet simulation included) | scam messages Gemma recognised · false alarms on 28 ordinary family messages | scams refused **by the program itself** on devnet, even when forced past the app |
+| scam scenarios stopped, on every run (English, plus Portuguese) | real family payments let through | from "check" to verdict on screen (median, devnet simulation included) | scam messages Gemma recognised · false alarms on 28 ordinary family messages | scams refused **by the program itself** on devnet, even when forced past the app |
 
 <sub>[docs/RESULTS.md](docs/RESULTS.md): 42 checks on Solana devnet (7 scenarios × 2 languages × 3 runs) and the on-chain proofs with explorer links. [docs/EVAL.md](docs/EVAL.md): 60 fictional messages, Gemma 4 E2B on a CPU. Every person and message in this repository is fictional.</sub>
 
@@ -20,7 +20,7 @@ People over 60 reported **$7.7 billion** lost to fraud in 2025, **$4.3 billion**
 
 1. **Simulate on Solana.** The wallet runs the transaction with `simulateTransaction` on devnet and compares every writable account before and after: SOL, tokens, **delegates (approvals)** and **owners (authorities)**. Instructions are decoded too: System, SPL Token and Token-2022, the vault's own IDL, Memo, and any unknown program.
 2. **Flag the risk** with rules on the simulated result: a wallet she never paid (and how new it is), an address that **looks like** a trusted contact's (address poisoning), most of her money leaving, an **unlimited `approve`**, **`SetAuthority`** or **`CloseAccount`** to a stranger (drainers), a **fake token** that calls itself USDC (Token-2022 metadata vs. the verified mint), a **phishing link or Blink** that imitates a Solana brand, a **Solana Pay QR**, and the vault refusing it.
-3. **Read the message with AI.** Gemma 4 (E2B, via Ollama, free, on our own machine) reads the WhatsApp or SMS that came with the request and lists the scam tricks (new number, rush, secrecy, fake support, "safe wallet", prize, fee to unlock, secret words, emergency, guaranteed profit), **each with a verbatim quote** that must exist in the message. Then it writes the explanation in plain Portuguese or English, which she can hear out loud.
+3. **Read the message with AI.** Gemma 4 (E2B, via Ollama, free, on our own machine) reads the WhatsApp or SMS that came with the request and lists the scam tricks (new number, rush, secrecy, fake support, "safe wallet", prize, fee to unlock, secret words, emergency, guaranteed profit), **each with a verbatim quote** that must exist in the message. Then it writes the explanation in plain English (Portuguese as an option), which she can hear out loud.
 4. **Lock and ask the family.** If the verdict is STOP, nothing is signed. One tap opens an **on-chain request**; Ana, her daughter and guardian, sees it live (read from the program's events) and approves or refuses **with her own signature**.
 
 The verdict never depends on the model: the simulation and the rules decide, and the model can only **add** warnings. If Gemma is slow or off, fixed texts are used. Any amount the model writes must be the real one.
@@ -42,8 +42,8 @@ Proven on devnet: transfers to the scammer and to the look-alike address, **forc
 | | Devnet address |
 |---|---|
 | Program `guardian_vault` | [`8vE76ymUvgkQdwBmtQ68kVuaxPvUVN7YymSpSkf3hwtn`](https://explorer.solana.com/address/8vE76ymUvgkQdwBmtQ68kVuaxPvUVN7YymSpSkf3hwtn?cluster=devnet) |
-| Lucy's vault (PDA) | [`61fPy5MYaTmuwytGHQcvX6QLqqeCNsKHcByyoG3TRWwh`](https://explorer.solana.com/address/61fPy5MYaTmuwytGHQcvX6QLqqeCNsKHcByyoG3TRWwh?cluster=devnet) |
-| The fake "USDC" airdropped to Lucy (Token-2022) | [`BsUTsjGgXJnNisSLDBAkbCCS6YQETwBkGqWyURjdcQvq`](https://explorer.solana.com/address/BsUTsjGgXJnNisSLDBAkbCCS6YQETwBkGqWyURjdcQvq?cluster=devnet) |
+| Lucy's vault (PDA) | [`GvUQKFn2i6HveBLfxLbjLyrbdmQAqRqBdzCeisEGNnXY`](https://explorer.solana.com/address/GvUQKFn2i6HveBLfxLbjLyrbdmQAqRqBdzCeisEGNnXY?cluster=devnet) |
+| The fake "USDC" airdropped to Lucy (Token-2022) | [`CDRpHjTvwXL3B9Wk3mrCzDVtE5ZSjui3WJicrRwUHyqd`](https://explorer.solana.com/address/CDRpHjTvwXL3B9Wk3mrCzDVtE5ZSjui3WJicrRwUHyqd?cluster=devnet) |
 
 ## The seven situations in the demo
 
@@ -53,7 +53,7 @@ Proven on devnet: transfers to the scammer and to the look-alike address, **forc
 | The "son" with a new number: 1.8 SOL, urgent, "don't tell dad" | WhatsApp, unknown number | vault refuses (`NotTrusted`), brand-new wallet, 68% of her money, Gemma quotes *new number · rush · secret* | ⛔ |
 | Fake wallet support: "authorize the migration to the safe wallet" | SMS + `phantom-seguranca.com` | `SetAuthority` hands her token account to a stranger, phishing link | ⛔ |
 | "You won 500 free USDC", claim now | Blink link `so1ana-airdrop.com` | **unlimited `approve`** to a stranger, phishing link, fake USDC | ⛔ |
-| Paying "Ana" with an address copied from history | Solana Pay QR | address **looks like** Ana's (`4QaK…qHpN` × `4QaK…TexR`), vault refuses | ⛔ |
+| Paying "Ana" with an address copied from history | Solana Pay QR | address **looks like** Ana's (`BsfE…RE5w` × `BsfE…pruP`), vault refuses | ⛔ |
 | "You got 1,000 USDC, pay the 0.4 SOL fee to unlock" | in-app message | the USDC in her wallet is **fake** (Token-2022 metadata, not the verified mint), new wallet, fee-to-unlock trick | ⛔ |
 | Pedro: 1 SOL for the car repair, no rush | call, saved number | trusted, but a big amount: request → Ana approves → **60 s cooling-off on-chain** (24 h in real life) → sent | ⚠️ then ✅ |
 
