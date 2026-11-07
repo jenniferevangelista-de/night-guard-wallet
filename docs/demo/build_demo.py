@@ -59,7 +59,9 @@ async function api(path, body) {
   if (path === "/api/check") {
     const kind = body.phoneMode ? "phone" : body.ai ? "full" : "fast";
     if (body.ai && !body.phoneMode) await sleep(1800);   // Gemma took several seconds on a CPU; shortened here
-    return getJ(`${D}check_${body.id}_${body.lang}_${kind}.json`);
+    const r = await getJ(`${D}check_${body.id}_${body.lang}_${kind}.json`);
+    r._audio = `${D}audio/${body.id}_${body.lang}_${kind}.mp3`;   // neural voice: Ava (EN) / Francisca (PT)
+    return r;
   }
   if (path === "/api/sign") { const p = await proof(/^legit: groceries/); return { sig: p.link.split("/tx/")[1].split("?")[0], link: p.link, ms: p.ms }; }
   if (path === "/api/ask-family") {
@@ -71,6 +73,20 @@ async function api(path, body) {
   }
   return {};
 }''')
+# "Listen" plays the recorded neural voice; the browser voice is only a fallback
+s = rep(s, '''function say() {
+  if (!report || !window.speechSynthesis) return;
+  speechSynthesis.cancel();''', '''let player = null;
+function say() {
+  if (!report) return;
+  if (player) { player.pause(); player = null; }
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  if (report._audio) {
+    player = new Audio(report._audio);
+    player.play().catch(() => {});   // browsers may block autoplay until the first click; the Listen button always works
+    return;
+  }
+  if (!window.speechSynthesis) return;''')
 # show what Ana did, from the real transactions
 s = rep(s, '''  $("#after").innerHTML = r.request ? `<p>👩 ${t("asked")} <a href="${r.link}" target="_blank">Explorer ↗</a></p>` : `<p>👩 ${t("alerted")} ${t("gone")}</p>`;
   loadState();''', '''  $("#after").innerHTML = r.request ? `<p>👩 ${t("asked")} <a href="${r.link}" target="_blank">Explorer ↗</a></p>

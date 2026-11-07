@@ -92,7 +92,9 @@ async function api(path, body) {
   if (path === "/api/check") {
     const kind = body.phoneMode ? "phone" : body.ai ? "full" : "fast";
     if (body.ai && !body.phoneMode) await sleep(1800);   // Gemma took several seconds on a CPU; shortened here
-    return getJ(`${D}check_${body.id}_${body.lang}_${kind}.json`);
+    const r = await getJ(`${D}check_${body.id}_${body.lang}_${kind}.json`);
+    r._audio = `${D}audio/${body.id}_${body.lang}_${kind}.mp3`;   // neural voice: Ava (EN) / Francisca (PT)
+    return r;
   }
   if (path === "/api/sign") { const p = await proof(/^legit: groceries/); return { sig: p.link.split("/tx/")[1].split("?")[0], link: p.link, ms: p.ms }; }
   if (path === "/api/ask-family") {
@@ -192,9 +194,17 @@ function render(id, done) {
     <p class="small">${t("speed")} ${((r.fastMs ?? tm.totalMs) / 1000).toFixed(2)} s (simulation ${Math.round(tm.simulateMs)} ms) · ${done ? `${t("ai")} ${esc(st?.ai)}: ${(Math.round(tm.aiTacticsMs + tm.aiExplainMs) / 1000).toFixed(1)} s · ${t("wrote")} ${r.explanation.by === "model" ? esc(st?.ai) : t("tpl")}` : (st?.ai !== "templates" ? `⏳ ${esc(st?.ai)} ${t("thinking")}` : "")} · ${r.simulation.unitsConsumed} CU</p>
     <div id="after"></div>`;
 }
+let player = null;
 function say() {
-  if (!report || !window.speechSynthesis) return;
-  speechSynthesis.cancel();
+  if (!report) return;
+  if (player) { player.pause(); player = null; }
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  if (report._audio) {
+    player = new Audio(report._audio);
+    player.play().catch(() => {});   // browsers may block autoplay until the first click; the Listen button always works
+    return;
+  }
+  if (!window.speechSynthesis) return;
   const u = new SpeechSynthesisUtterance(report.headline[lang] + " " + report.explanation.text);
   u.lang = lang === "pt" ? "pt-BR" : "en-US"; u.rate = 0.9;
   const v = speechSynthesis.getVoices().find((x) => x.lang.startsWith(u.lang.slice(0, 2)));
