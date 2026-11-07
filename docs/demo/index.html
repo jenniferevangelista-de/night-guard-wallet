@@ -20,12 +20,10 @@
   <button id="phone" title="phone"></button>
   <button id="bigger">A+</button>
   <button id="lang">EN</button>
-  <a class="pill" href="../screens/3_ana_guardian.png" target="_blank" data-t="familyPage"></a>
+  <a class="pill" href="family.html" target="_blank" data-t="familyPage"></a>
 </header>
 <div class="replay">
-  <b>🎬 Interactive replay of a real run on Solana devnet.</b> Every verdict, explanation, flag and source below is the
-  app's real answer (devnet simulation + Gemma 4), recorded <span id="when"></span>. Buttons that sign open the real
-  transactions on Solana Explorer. To run it live: <a href="https://github.com/jenniferevangelista-de/night-guard-wallet#run-it" target="_blank">README</a> ·
+  <b data-t="replayTitle"></b> <span data-t="replayText"></span> <span id="when"></span>. <span data-t="replayRun"></span> <a href="https://github.com/jenniferevangelista-de/night-guard-wallet#run-it" target="_blank">README</a> ·
   <a href="https://youtu.be/rZ3oyl6PMTw" target="_blank">video</a> · <a href="../" target="_blank">project page</a>
 </div>
 <main>
@@ -59,7 +57,7 @@ const T = {
     none: "Nenhum pedido no cofre.", pending: "aguardando a Ana", approved: "Ana aprovou", rejected: "Ana recusou", waiting: "Espera de segurança:",
     sendNow: "Enviar agora", cancel: "Cancelar", needsAna: "precisa da Ana", sent: "Enviado! Veja na Solana:", asked: "Pedido criado no cofre. A Ana foi avisada.",
     alerted: "A Ana foi avisada.", speed: "Simulado na Solana devnet e analisado em", ai: "IA", gone: "Pronto, nada foi enviado. Seu dinheiro está seguro.",
-    trusted: "Contatos de confiança", tryTitle: "🧪 Teste ao vivo: cole uma mensagem que você recebeu", tryHint: "Roda aqui no seu navegador, com as regras fixas do app (o Gemma roda na nossa máquina).", tryBtn: "Procurar truques de golpe", tryNone: "Nenhum truque das regras fixas encontrado. Isso não prova que é seguro: no app, o Gemma também lê a mensagem.", tryFound: "Truques encontrados:", thinking: "está lendo a mensagem…", seconds: "s", wrote: "explicação escrita por", tpl: "texto fixo", from: "De", via: "Por" },
+    trusted: "Contatos de confiança", replayTitle: "🎬 Repetição interativa de uma rodada real na devnet da Solana.", replayText: "Cada veredito, explicação, motivo e fonte é a resposta real do app (simulação na devnet + Gemma 4), gravada em", replayRun: "Os botões que assinam abrem as transações reais na Solana Explorer. Para rodar ao vivo:", tryTitle: "🧪 Teste ao vivo: cole uma mensagem que você recebeu", tryHint: "Roda aqui no seu navegador, com as regras fixas do app (o Gemma roda na nossa máquina).", tryBtn: "Procurar truques de golpe", tryNone: "Nenhum truque das regras fixas encontrado. Isso não prova que é seguro: no app, o Gemma também lê a mensagem.", tryFound: "Truques encontrados:", thinking: "está lendo a mensagem…", seconds: "s", wrote: "explicação escrita por", tpl: "texto fixo", from: "De", via: "Por" },
   en: { sub: "Lucy's wallet, 74 · Solana devnet", familyPage: "Ana's page (guardian) ↗", incoming: "Requests that arrived",
     check: "Before you sign", pick: "Pick a request and tap “Check before signing”.", onchain: "Requests in the vault (on Solana)",
     verify: "Check before signing", checking: "Simulating on Solana and reading the message…", listen: "🔊 Listen", sign: "Sign and send",
@@ -69,7 +67,7 @@ const T = {
     none: "No requests in the vault.", pending: "waiting for Ana", approved: "Ana approved", rejected: "Ana said no", waiting: "Safety wait:",
     sendNow: "Send now", cancel: "Cancel", needsAna: "needs Ana", sent: "Sent! See it on Solana:", asked: "Request created in the vault. Ana was told.",
     alerted: "Ana was told.", speed: "Simulated on Solana devnet and checked in", ai: "AI", gone: "Done, nothing was sent. Your money is safe.",
-    trusted: "Trusted contacts", tryTitle: "🧪 Live test: paste a message you got", tryHint: "Runs right here in your browser with the app's fixed rules (Gemma runs on our own machine).", tryBtn: "Find scam tricks", tryNone: "No fixed-rule trick found. That does not prove it is safe: in the app, Gemma reads the message too.", tryFound: "Tricks found:", thinking: "is reading the message…", seconds: "s", wrote: "explanation written by", tpl: "fixed text", from: "From", via: "Via" },
+    trusted: "Trusted contacts", replayTitle: "🎬 Interactive replay of a real run on Solana devnet.", replayText: "Every verdict, explanation, flag and source is the real answer of the app (devnet simulation + Gemma 4), recorded", replayRun: "Buttons that sign open the real transactions on Solana Explorer. To run it live:", tryTitle: "🧪 Live test: paste a message you got", tryHint: "Runs right here in your browser with the app's fixed rules (Gemma runs on our own machine).", tryBtn: "Find scam tricks", tryNone: "No fixed-rule trick found. That does not prove it is safe: in the app, Gemma reads the message too.", tryFound: "Tricks found:", thinking: "is reading the message…", seconds: "s", wrote: "explanation written by", tpl: "fixed text", from: "From", via: "Via" },
 };
 const TACTIC = {
   pt: { new_number: "\"troquei de número\"", urgency: "pressa", secrecy: "segredo", fake_support: "falso suporte/banco", safe_wallet: "\"carteira segura\"",
@@ -223,7 +221,7 @@ async function askFamily() {
   $("#after").innerHTML = "…";
   const r = await api("/api/ask-family", { id: current.id });
   $("#after").innerHTML = r.request ? `<p>👩 ${t("asked")} <a href="${r.link}" target="_blank">Explorer ↗</a></p>
-    <div class="ana"><img src="../screens/3_ana_guardian.png" alt="Ana's guardian page"><p>${r.car
+    <div class="ana"><a href="family.html" target="_blank"><img src="../screens/3_ana_guardian.png" alt="Ana's guardian page"></a><p>${r.car
       ? (lang === "pt" ? "Na tela dela, a Ana <b>aprovou</b> com a própria assinatura; o cofre ainda segurou o valor pelo período de espera." : "On her page, Ana <b>approved</b> with her own signature; the vault still held the money for the cooling-off.")
       : (lang === "pt" ? "Na tela dela, a Ana disse <b>não</b> com a própria assinatura e denunciou a carteira para todas as famílias." : "On her page, Ana said <b>no</b> with her own signature and reported the wallet to every family.")}
       <a href="${r.decided.link}" target="_blank">${lang === "pt" ? "Ver a decisão na Solana" : "See her decision on Solana"} ↗</a></p></div>` : `<p>👩 ${t("alerted")} ${t("gone")}</p>`;

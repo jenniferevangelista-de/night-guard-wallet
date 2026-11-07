@@ -22,12 +22,9 @@ def rep(s, old, new):
 
 s = src
 s = rep(s, '<title>Night Guard Wallet</title>', '<title>Night Guard Wallet · interactive demo</title>')
-s = rep(s, '<a class="pill" href="family.html" target="_blank" data-t="familyPage"></a>',
-        '<a class="pill" href="../screens/3_ana_guardian.png" target="_blank" data-t="familyPage"></a>')
+# the header link already points to family.html (the interactive guardian replay, built by build_family.py)
 s = rep(s, '<main>', '''<div class="replay">
-  <b>🎬 Interactive replay of a real run on Solana devnet.</b> Every verdict, explanation, flag and source below is the
-  app's real answer (devnet simulation + Gemma 4), recorded <span id="when"></span>. Buttons that sign open the real
-  transactions on Solana Explorer. To run it live: <a href="https://github.com/jenniferevangelista-de/night-guard-wallet#run-it" target="_blank">README</a> ·
+  <b data-t="replayTitle"></b> <span data-t="replayText"></span> <span id="when"></span>. <span data-t="replayRun"></span> <a href="https://github.com/jenniferevangelista-de/night-guard-wallet#run-it" target="_blank">README</a> ·
   <a href="https://youtu.be/rZ3oyl6PMTw" target="_blank">video</a> · <a href="../" target="_blank">project page</a>
 </div>
 <main>''')
@@ -42,8 +39,8 @@ s = rep(s, '''    <div id="scenarios"></div>
       <div id="tryOut"></div>
     </div>
   </section>''')
-s = rep(s, 'trusted: "Contatos de confiança",', 'trusted: "Contatos de confiança", tryTitle: "🧪 Teste ao vivo: cole uma mensagem que você recebeu", tryHint: "Roda aqui no seu navegador, com as regras fixas do app (o Gemma roda na nossa máquina).", tryBtn: "Procurar truques de golpe", tryNone: "Nenhum truque das regras fixas encontrado. Isso não prova que é seguro: no app, o Gemma também lê a mensagem.", tryFound: "Truques encontrados:",')
-s = rep(s, 'trusted: "Trusted contacts",', 'trusted: "Trusted contacts", tryTitle: "🧪 Live test: paste a message you got", tryHint: "Runs right here in your browser with the app\'s fixed rules (Gemma runs on our own machine).", tryBtn: "Find scam tricks", tryNone: "No fixed-rule trick found. That does not prove it is safe: in the app, Gemma reads the message too.", tryFound: "Tricks found:",')
+s = rep(s, 'trusted: "Contatos de confiança",', 'trusted: "Contatos de confiança", replayTitle: "🎬 Repetição interativa de uma rodada real na devnet da Solana.", replayText: "Cada veredito, explicação, motivo e fonte é a resposta real do app (simulação na devnet + Gemma 4), gravada em", replayRun: "Os botões que assinam abrem as transações reais na Solana Explorer. Para rodar ao vivo:", tryTitle: "🧪 Teste ao vivo: cole uma mensagem que você recebeu", tryHint: "Roda aqui no seu navegador, com as regras fixas do app (o Gemma roda na nossa máquina).", tryBtn: "Procurar truques de golpe", tryNone: "Nenhum truque das regras fixas encontrado. Isso não prova que é seguro: no app, o Gemma também lê a mensagem.", tryFound: "Truques encontrados:",')
+s = rep(s, 'trusted: "Trusted contacts",', 'trusted: "Trusted contacts", replayTitle: "🎬 Interactive replay of a real run on Solana devnet.", replayText: "Every verdict, explanation, flag and source is the real answer of the app (devnet simulation + Gemma 4), recorded", replayRun: "Buttons that sign open the real transactions on Solana Explorer. To run it live:", tryTitle: "🧪 Live test: paste a message you got", tryHint: "Runs right here in your browser with the app\'s fixed rules (Gemma runs on our own machine).", tryBtn: "Find scam tricks", tryNone: "No fixed-rule trick found. That does not prove it is safe: in the app, Gemma reads the message too.", tryFound: "Tricks found:",')
 # server calls -> recorded answers
 s = rep(s, '''async function api(path, body) {
   const r = await fetch(path, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : {});
@@ -90,7 +87,7 @@ function say() {
 # show what Ana did, from the real transactions
 s = rep(s, '''  $("#after").innerHTML = r.request ? `<p>👩 ${t("asked")} <a href="${r.link}" target="_blank">Explorer ↗</a></p>` : `<p>👩 ${t("alerted")} ${t("gone")}</p>`;
   loadState();''', '''  $("#after").innerHTML = r.request ? `<p>👩 ${t("asked")} <a href="${r.link}" target="_blank">Explorer ↗</a></p>
-    <div class="ana"><img src="../screens/3_ana_guardian.png" alt="Ana's guardian page"><p>${r.car
+    <div class="ana"><a href="family.html" target="_blank"><img src="../screens/3_ana_guardian.png" alt="Ana's guardian page"></a><p>${r.car
       ? (lang === "pt" ? "Na tela dela, a Ana <b>aprovou</b> com a própria assinatura; o cofre ainda segurou o valor pelo período de espera." : "On her page, Ana <b>approved</b> with her own signature; the vault still held the money for the cooling-off.")
       : (lang === "pt" ? "Na tela dela, a Ana disse <b>não</b> com a própria assinatura e denunciou a carteira para todas as famílias." : "On her page, Ana said <b>no</b> with her own signature and reported the wallet to every family.")}
       <a href="${r.decided.link}" target="_blank">${lang === "pt" ? "Ver a decisão na Solana" : "See her decision on Solana"} ↗</a></p></div>` : `<p>👩 ${t("alerted")} ${t("gone")}</p>`;''')

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Night Guard Wallet · Ana (interactive demo)</title>
+<link rel="stylesheet" href="style.css?v=4d3eefb5">
+<style>
+  .replay { max-width:1180px; margin:16px auto 0; padding:12px 18px; background:#fff3d6; border:2px solid #9a5b00; border-radius:14px; font-size:.8em; }
+  .ok { margin:0 0 12px; padding:12px 16px; border-radius:14px; background:#e3f6ea; border:3px solid var(--green); font-weight:600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>👩 Ana · <span data-t="title"></span> <small data-t="sub"></small></h1>
+  <button id="lang">EN</button>
+</header>
+<div class="replay"><b data-t="replayTitle"></b> <span data-t="replayText"></span>
+  <a href="index.html" data-t="backWallet"></a> · <a href="https://youtu.be/rZ3oyl6PMTw" target="_blank">video</a></div>
+<main>
+  <section class="card">
+    <h2 data-t="decide"></h2>
+    <div id="done"></div>
+    <div id="requests"></div>
+  </section>
+  <section class="card feed">
+    <h2 data-t="live"></h2>
+    <div id="feed"><p class="empty" data-t="quiet"></p></div>
+  </section>
+</main>
+<script>
+const T = {
+  pt: { title: "guardiã da Dona Lúcia", sub: "Alertas ao vivo, lidos direto da Solana", decide: "Pedidos esperando você", live: "Ao vivo",
+    quiet: "Nada por enquanto.", approve: "✅ Aprovar", reject: "⛔ Recusar", none: "Nenhum pedido esperando você.",
+    blocked: "Night Guard BLOQUEOU", help: "Sua mãe pediu ajuda com", wait: "espera de segurança até", signed: "assinado na Solana",
+    replayTitle: "🎬 Repetição interativa de uma rodada real na devnet da Solana.", replayText: "Os pedidos e alertas são os reais; cada decisão da Ana abre a transação real dela na Solana Explorer.", backWallet: "← Carteira da Dona Lúcia", doneNo: "A Ana disse NÃO, com a própria assinatura na Solana. O dinheiro não saiu.", doneYes: "A Ana aprovou, com a própria assinatura. O cofre ainda segura o valor pelo período de espera e depois envia.", doneReport: "E denunciou a carteira na lista comunitária: todas as famílias são avisadas.", seeTx: "Ver na Solana", RequestOpened: "Novo pedido no cofre", rejectReport: "⛔ Recusar e denunciar", report: "🚩 Denunciar para todas as famílias", reported: "Denunciada na lista comunitária da Solana", ScamReported: "Golpista denunciado na lista comunitária", GuardianDecided: "Decisão registrada na Solana", Executed: "Dinheiro enviado pelo cofre", Sent: "Pagamento do dia a dia",
+    Cancelled: "Pedido cancelado", TrustedChanged: "Lista de confiança mudou", needs: "precisa de você", untrusted: "carteira FORA da lista de confiança", over: "acima do limite do dia", large: "valor alto" },
+  en: { title: "Lucy's guardian", sub: "Live alerts, read straight from Solana", decide: "Requests waiting for you", live: "Live",
+    quiet: "Nothing yet.", approve: "✅ Approve", reject: "⛔ Say no", none: "No requests waiting for you.",
+    blocked: "Night Guard BLOCKED", help: "Your mom asked for help with", wait: "safety wait until", signed: "signed on Solana",
+    replayTitle: "🎬 Interactive replay of a real run on Solana devnet.", replayText: "The requests and alerts are the real ones; every decision Ana takes opens her real transaction on Solana Explorer.", backWallet: "← Lucy's wallet", doneNo: "Ana said NO, with her own signature on Solana. The money never left.", doneYes: "Ana approved, with her own signature. The vault still holds the money for the cooling-off, then sends it.", doneReport: "And she reported the wallet on the community list: every family is warned.", seeTx: "See it on Solana", RequestOpened: "New request in the vault", rejectReport: "⛔ Say no and report", report: "🚩 Report to every family", reported: "Reported on the community list on Solana", ScamReported: "Scammer reported on the community list", GuardianDecided: "Decision recorded on Solana", Executed: "Money sent by the vault", Sent: "Everyday payment",
+    Cancelled: "Request cancelled", TrustedChanged: "Trusted list changed", needs: "needs you", untrusted: "wallet NOT on the trusted list", over: "over today's limit", large: "big amount" },
+};
+let lang = "en";
+const $ = (s) => document.querySelector(s);
+const t = (k) => T[lang][k] ?? k;
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const D = "data/";
+const getJ = async (p) => (await fetch(p)).json();
+let PROOFS = null;
+const proof = async (re) => { PROOFS ??= (await getJ("../results.json")).proofs; return PROOFS.find((p) => re.test(p.name)); };
+const sigOf = (link) => link.split("/tx/")[1].split("?")[0];
+const short = (a) => `${a.slice(0, 4)}…${a.slice(-4)}`;
+const sol = (l) => `${(l / 1e9).toLocaleString(lang === "pt" ? "pt-BR" : "en-US", { maximumFractionDigits: 4 })} SOL`;
+let REQS = null, SC = null;
+async function init() {
+  if (REQS) return;
+  SC = await getJ(D + "scenarios.json");
+  const fr = await getJ(D + "check_fake-relative_en_fast.json");
+  const car = await getJ(D + "check_car-repair_en_fast.json");
+  const p1 = await proof(/request opened for the 'new number'/), p2 = await proof(/request opened: 1 SOL to Pedro/);
+  REQS = [
+    { address: "r1", id: 1, lamports: fr.amountLamports, to: fr.destination, toKnown: false, note: "fake-relative", link: p1.link, status: "pending" },
+    { address: "r2", id: 2, lamports: car.amountLamports, to: car.destination, toKnown: true, note: "car-repair", link: p2.link, status: "pending" },
+  ];
+  const now = Date.now();
+  for (const [i, id] of ["fake-support", "airdrop-drainer", "fake-token-fee"].entries()) {
+    const c = await getJ(`${D}check_${id}_en_fast.json`);
+    feed.push({ type: "blocked", id, title: SC.find((x) => x.id === id).title, lamports: c.amountLamports, flags: c.flags.slice(0, 3), at: now - (9 - i) * 60000 });
+  }
+  feed.push({ type: "chain", name: "RequestOpened", data: { needs_guardian: true, trusted: true, over_limit: true, large: true }, sig: sigOf(p2.link), link: p2.link, at: now - 120000 });
+  feed.push({ type: "chain", name: "RequestOpened", data: { needs_guardian: true, trusted: false, over_limit: true, large: true }, sig: sigOf(p1.link), link: p1.link, at: now - 60000 });
+  render();
+}
+async function api(p) {
+  await init();
+  return { requests: REQS.map((r) => ({ ...r, needsGuardian: true, amountTxt: sol(r.lamports), toName: r.toKnown ? (lang === "pt" ? "Pedro (filho)" : "Pedro (son)") : short(r.to) })) };
+}
+function labels() { document.querySelectorAll("[data-t]").forEach((e) => (e.textContent = t(e.dataset.t))); $("#lang").textContent = lang === "pt" ? "EN" : "PT"; }
+async function load() {
+  const st = await api("/api/state?lang=" + lang);
+  const rs = st.requests.filter((r) => r.needsGuardian && r.status === "pending");
+  $("#requests").innerHTML = rs.length ? rs.map((r) => `<div class="req"><b>${esc(r.amountTxt)} → ${esc(r.toName)}</b>
+    <div class="meta">#${r.id} · ${esc(r.note)} · <a href="${r.link}" target="_blank">Explorer ↗</a></div>
+    <div class="actions"><button class="big b-sign" onclick="decide('${r.address}', true)">${t("approve")}</button>
+    <button class="big b-family" onclick="decide('${r.address}', false)">${t("reject")}</button>
+    ${r.toKnown ? "" : `<button class="big b-report" onclick="decide('${r.address}', false, '${r.to}')">${t("rejectReport")}</button>`}</div></div>`).join("") : `<p class="empty">${t("none")}</p>`;
+}
+async function decide(req, approve, reportTo) {
+  const r = REQS.find((x) => x.address === req);
+  r.status = approve ? "approved" : "rejected";
+  const d = await proof(approve ? /guardian Ana approves/ : /guardian Ana says NO/);
+  feed.push({ type: "chain", name: "GuardianDecided", data: { approve }, sig: sigOf(d.link), link: d.link, at: Date.now() });
+  let html = `<p>${approve ? "✅" : "⛔"} ${approve ? t("doneYes") : t("doneNo")} <a href="${d.link}" target="_blank">${t("seeTx")} ↗</a></p>`;
+  if (reportTo) {
+    const rp = await proof(/^Ana reports/);
+    feed.push({ type: "chain", name: "ScamReported", data: {}, sig: sigOf(rp.link), link: rp.link, at: Date.now() + 1 });
+    html += `<p>🚩 ${t("doneReport")} <a href="${rp.link}" target="_blank">${t("seeTx")} ↗</a></p>`;
+  }
+  if (approve) {
+    const ex = await proof(/after the cooling-off/);
+    setTimeout(() => { feed.push({ type: "chain", name: "Executed", data: {}, sig: sigOf(ex.link), link: ex.link, at: Date.now() }); render(); }, 2500);
+  }
+  $("#done").innerHTML = `<div class="ok">${html}</div>`;
+  render(); load();
+}
+async function report(address, btn, request) {
+  if (btn) btn.disabled = true;
+  const r = await api("/api/guardian/report", { address, reason: 1, request });
+  if (btn) btn.outerHTML = `<span class="small">🚩 ${r.error ? esc(r.error) : t("reported")}</span>`;
+}
+const feed = [];
+function render() {
+  $("#feed").innerHTML = feed.slice().reverse().map((ev) => {
+    const time = new Date(ev.at).toLocaleTimeString(lang === "pt" ? "pt-BR" : "en-US");
+    if (ev.type === "blocked") return `<div class="ev blocked"><b>⛔ ${t("blocked")}: ${esc(ev.title[lang])}</b> ${ev.lamports ? sol(ev.lamports) : ""}
+      <ul class="flags">${ev.flags.map((f) => `<li class="${f.level}">${esc(f[lang])}</li>`).join("")}</ul>
+      <span class="small">${time}</span></div>`;
+    if (ev.type === "help") return `<div class="ev blocked"><b>🆘 ${t("help")}: ${esc(ev.title[lang])}</b><br><span class="small">${time}</span></div>`;
+    const d = ev.data || {};
+    let extra = "";
+    if (ev.name === "RequestOpened") extra = [d.needs_guardian === "true" || d.needs_guardian === true ? t("needs") : "", d.trusted === false || d.trusted === "false" ? t("untrusted") : "", d.over_limit === true || d.over_limit === "true" ? t("over") : "", d.large === true || d.large === "true" ? t("large") : ""].filter(Boolean).join(" · ");
+    if (ev.name === "GuardianDecided") extra = (d.approve === true || d.approve === "true") ? t("approve") : t("reject");
+    return `<div class="ev chain"><b>⛓️ ${t(ev.name)}</b> ${extra ? "· " + esc(extra) : ""}<br><span class="small">${time} · ${t("signed")} · <a href="${ev.link}" target="_blank">${ev.sig.slice(0, 12)}… ↗</a></span></div>`;
+  }).join("") || `<p class="empty">${t("quiet")}</p>`;
+}
+$("#lang").onclick = () => { lang = lang === "pt" ? "en" : "pt"; localStorage.lang = lang; labels(); render(); load(); };
+labels(); load();
+</script>
+</body>
+</html>
