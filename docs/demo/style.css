@@ -30,7 +30,7 @@ button.big { font-size: 1em; padding: 12px 20px; border-radius: 14px; border: 0;
 .b-check { background: var(--navy); color: #fff; }
 .b-sign { background: var(--green); color: #fff; }
 .b-family { background: var(--red); color: #fff; }
-.b-no { background: #e7e3db; color: var(--ink); }
+.b-no { background: #fff; color: var(--green); border: 3px solid var(--green) !important; }
 .b-listen { background: #fff; color: var(--navy); border: 3px solid var(--navy) !important; }
 .verdict { border-radius: 18px; padding: 18px 20px; margin-bottom: 14px; }
 .verdict h3 { margin: 0 0 6px; font-size: 1.7em; line-height: 1.1; }
@@ -59,3 +59,10 @@ a { color: #2747a8; }
 .timer { font-weight: 800; font-size: 1.2em; }
 #after:not(:empty) { margin-top:12px; padding:12px 16px; border-radius:14px; background:#e3f6ea; border:3px solid var(--green); font-weight:600; }
 #after p { margin:0 0 6px; }
+
+/* buttons feel alive: lift on hover, press down on click */
+button.big { transition: transform .08s ease, box-shadow .15s ease, filter .15s ease, background .15s ease; box-shadow: 0 3px 0 #0000002e; }
+button.big:hover { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 5px 12px #00000026; }
+button.big:active { transform: translateY(2px) scale(.97); box-shadow: 0 1px 0 #0000002e; filter: brightness(.95); }
+button.big:focus-visible { outline: 4px solid var(--gold); outline-offset: 2px; }
+.b-no:hover { background: var(--green); color: #fff; }
