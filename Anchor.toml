@@ -6,10 +6,10 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-guardian_vault = "8vE76ymUvgkQdwBmtQ68kVuaxPvUVN7YymSpSkf3hwtn"
+guardian_vault = "8BtGEAMv12hh24JQYmWUJZ8Y547y72n4LDfppv3CTDJ5"
 
 [programs.localnet]
-guardian_vault = "8vE76ymUvgkQdwBmtQ68kVuaxPvUVN7YymSpSkf3hwtn"
+guardian_vault = "8BtGEAMv12hh24JQYmWUJZ8Y547y72n4LDfppv3CTDJ5"
 
 [registry]
 url = "https://api.apr.dev"

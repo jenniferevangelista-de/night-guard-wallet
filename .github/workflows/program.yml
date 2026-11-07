@@ -1,0 +1,49 @@
+# Builds the Anchor program in the official image and deploys it to devnet. Keys come from the NGW_SEED secret,
+# live only in a temporary folder of the runner, and are deleted at the end. The IDL is uploaded as an artifact.
+name: program
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      NGW_SEED: ${{ secrets.NGW_SEED }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Keys from the seed (temporary folder)
+        working-directory: app
+        run: |
+          npm ci
+          npx tsx src/export_keys.ts /tmp/keys
+      - name: Build and deploy (official Anchor image)
+        run: |
+          docker run --rm --network host -v "$PWD":/work -v /tmp/keys:/keys -w /work solanafoundation/anchor:v0.31.1 bash -lc '
+            set -e
+            solana config set --url https://api.devnet.solana.com --keypair /keys/deployer.json > /dev/null
+            mkdir -p target/deploy && cp /keys/guardian_vault-keypair.json target/deploy/
+            anchor build
+            ls -la target/deploy/guardian_vault.so
+            solana balance
+            solana program deploy target/deploy/guardian_vault.so --program-id target/deploy/guardian_vault-keypair.json --max-sign-attempts 30
+            solana program show $(solana address -k target/deploy/guardian_vault-keypair.json)
+            solana balance
+            rm -f target/deploy/guardian_vault-keypair.json
+            chmod -R a+rwX target'
+      - name: Delete the keys
+        if: always()
+        run: rm -rf /tmp/keys
+      - uses: actions/upload-artifact@v4
+        with:
+          name: program-idl
+          retention-days: 7
+          path: |
+            target/idl/guardian_vault.json
+            target/types/guardian_vault.ts

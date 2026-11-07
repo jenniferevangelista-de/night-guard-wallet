@@ -14,7 +14,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::system_program;
 
-declare_id!("8vE76ymUvgkQdwBmtQ68kVuaxPvUVN7YymSpSkf3hwtn");
+declare_id!("8BtGEAMv12hh24JQYmWUJZ8Y547y72n4LDfppv3CTDJ5");
 
 pub const MAX_TRUSTED: usize = 8;
 const DAY: i64 = 86_400;
@@ -180,9 +180,14 @@ pub mod guardian_vault {
 
     /// Community scam list: a family guardian reports a wallet that tried to scam their family.
     /// One public record per wallet, counting how many different families reported it; every
-    /// Night Guard wallet reads it before signing. Each family can report a wallet only once.
+    /// Night Guard wallet reads it before signing. Each family can report a wallet only once,
+    /// and only with proof: a request from this family's vault to that wallet that the guardian refused.
+    /// Nobody can report a wallet that never asked their family for money.
     pub fn report_scam(ctx: Context<ReportScam>, address: Pubkey, reason: u8) -> Result<()> {
         require!(address != ctx.accounts.vault.owner && !ctx.accounts.vault.trusted.contains(&address), VaultError::BadSettings);
+        let proof = &ctx.accounts.proof;
+        require_keys_eq!(proof.to, address, VaultError::NoProof);
+        require!(proof.status == Status::Rejected as u8, VaultError::NoProof);
         let now = Clock::get()?.unix_timestamp;
         let r = &mut ctx.accounts.report;
         if r.reports == 0 {
@@ -195,6 +200,15 @@ pub mod guardian_vault {
         r.last_reason = reason;
         ctx.accounts.mark.bump = ctx.bumps.mark;
         emit!(ScamReported { address, vault: ctx.accounts.vault.key(), reports: r.reports, reason });
+        Ok(())
+    }
+
+    /// A family takes its own report back (a mistake). Its mark is closed, so it could report again later.
+    pub fn withdraw_report(ctx: Context<WithdrawReport>, address: Pubkey) -> Result<()> {
+        let r = &mut ctx.accounts.report;
+        r.reports = r.reports.saturating_sub(1);
+        r.last_at = Clock::get()?.unix_timestamp;
+        emit!(ScamReportWithdrawn { address, vault: ctx.accounts.vault.key(), reports: r.reports });
         Ok(())
     }
 }
@@ -368,6 +382,9 @@ pub struct ReportScam<'info> {
     pub guardian: Signer<'info>,
     #[account(has_one = guardian)]
     pub vault: Account<'info, Vault>,
+    /// The proof: a request of THIS vault, to this wallet, refused by the guardian.
+    #[account(has_one = vault @ VaultError::NoProof)]
+    pub proof: Account<'info, TransferRequest>,
     #[account(init_if_needed, payer = guardian, space = 8 + ScamReport::INIT_SPACE, seeds = [b"scam", address.as_ref()], bump)]
     pub report: Account<'info, ScamReport>,
     #[account(init, payer = guardian, space = 8 + ReportMark::INIT_SPACE, seeds = [b"reported", vault.key().as_ref(), address.as_ref()], bump)]
@@ -375,6 +392,21 @@ pub struct ReportScam<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[derive(Accounts)]
+#[instruction(address: Pubkey)]
+pub struct WithdrawReport<'info> {
+    #[account(mut)]
+    pub guardian: Signer<'info>,
+    #[account(has_one = guardian)]
+    pub vault: Account<'info, Vault>,
+    #[account(mut, seeds = [b"scam", address.as_ref()], bump = report.bump)]
+    pub report: Account<'info, ScamReport>,
+    #[account(mut, close = guardian, seeds = [b"reported", vault.key().as_ref(), address.as_ref()], bump = mark.bump)]
+    pub mark: Account<'info, ReportMark>,
+}
+
+#[event]
+pub struct ScamReportWithdrawn { pub address: Pubkey, pub vault: Pubkey, pub reports: u32 }
 #[event]
 pub struct ScamReported { pub address: Pubkey, pub vault: Pubkey, pub reports: u32, pub reason: u8 }
 #[event]
@@ -429,4 +461,6 @@ pub enum VaultError {
     BadSettings,
     #[msg("Amount must be more than zero")]
     ZeroAmount,
+    #[msg("No proof: only a wallet that asked this family for money, and was refused by the guardian, can be reported")]
+    NoProof,
 }
