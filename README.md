@@ -4,6 +4,10 @@
 
 And when one family's guardian refuses a scam, she can **report the wallet on a community scam list on Solana**: every Night Guard wallet reads it before signing, so **one family's "no" protects every family**. It is built to be fair: a family can only report a wallet that asked it for money and was refused by its guardian (the program checks that proof), each family counts once, one report is only a warning, it takes three families to block, a trusted contact is never blocked by reports, and a family can withdraw its report.
 
+[![Night Guard Wallet, the video (3:23)](https://img.youtube.com/vi/rZ3oyl6PMTw/hqdefault.jpg)](https://youtu.be/rZ3oyl6PMTw)
+
+**Watch the video (3:23):** https://youtu.be/rZ3oyl6PMTw · a real run on Solana devnet, narrated by Olive the owl
+
 MLH Solana Hackathon · AI Track ("security tools that explain what a transaction will do or flag risky programs, tokens and wallets before a user signs").
 
 | **5/5** | **2/2** | **0.2 s** | **32/32 · 0** | **7** | **1 → 3 families** |

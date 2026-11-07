@@ -8,7 +8,7 @@
 
 **Links**
 - Code: https://github.com/jenniferevangelista-de/night-guard-wallet
-- Video: VIDEO_LINK
+- Video: https://youtu.be/rZ3oyl6PMTw
 - Program on devnet: https://explorer.solana.com/address/8BtGEAMv12hh24JQYmWUJZ8Y547y72n4LDfppv3CTDJ5?cluster=devnet
 
 ## Inspiration
