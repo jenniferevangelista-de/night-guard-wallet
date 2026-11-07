@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Night Guard Wallet</title>
+<meta name="description" content="A Solana wallet guard for our parents, grandparents and the rest of us.">
+<style>
+  :root { --ink:#14213d; --muted:#4a5568; --bg:#f6f3ee; --card:#fff; --line:#e2ddd3; --navy:#0f1b3d; --gold:#f4c95d;
+          --red:#b42318; --green:#1d7a46; --purple:#6941c6; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:18px/1.55 "Segoe UI", system-ui, -apple-system, sans-serif; color:var(--ink); background:var(--bg); }
+  a { color:#2747a8; }
+  .wrap { max-width:1120px; margin:0 auto; padding:0 20px; }
+  header { background:var(--navy); color:#fff; padding:56px 0 40px; }
+  header h1 { font-size:clamp(36px,6vw,64px); margin:0 0 8px; line-height:1.05; }
+  header h1 span { color:var(--gold); }
+  header p { font-size:clamp(18px,2.4vw,24px); margin:0 0 22px; color:#dfe6fb; max-width:820px; }
+  .btns a { display:inline-block; margin:0 10px 10px 0; padding:12px 20px; border-radius:12px; font-weight:700; text-decoration:none; }
+  .b1 { background:var(--gold); color:var(--navy); } .b2 { background:#24345f; color:#fff; border:2px solid #3b4f86; }
+  .nums { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin:-28px auto 0; }
+  .num { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px; text-align:center; box-shadow:0 6px 18px #0000000f; }
+  .num b { display:block; font-size:40px; line-height:1.1; }
+  .num span { font-size:14px; color:var(--muted); }
+  .r b { color:var(--red); } .g b { color:var(--green); } .p b { color:var(--purple); } .n b { color:var(--navy); }
+  section { padding:44px 0 8px; }
+  h2 { font-size:30px; margin:0 0 14px; }
+  .video { position:relative; padding-top:56.25%; border-radius:18px; overflow:hidden; background:#000; }
+  .video iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .shots { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:18px; }
+  figure { margin:0; background:var(--card); border:1px solid var(--line); border-radius:18px; overflow:hidden; }
+  figure img { width:100%; display:block; }
+  figcaption { padding:12px 16px; font-size:16px; color:var(--muted); }
+  figcaption b { color:var(--ink); }
+  .arch img { width:100%; border-radius:18px; border:1px solid var(--line); background:#fff; }
+  table { width:100%; border-collapse:collapse; background:var(--card); border-radius:14px; overflow:hidden; font-size:16px; }
+  td, th { padding:10px 12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+  th { background:#eef1f7; }
+  code { background:#eef1f7; padding:1px 6px; border-radius:6px; font-size:15px; }
+  .steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+  .step { background:var(--card); border:1px solid var(--line); border-left:8px solid var(--navy); border-radius:14px; padding:14px 16px; }
+  .step:nth-child(2) { border-left-color:var(--red); } .step:nth-child(3) { border-left-color:var(--purple); } .step:nth-child(4) { border-left-color:var(--green); }
+  .step b { display:block; font-size:19px; }
+  footer { padding:40px 0 60px; color:var(--muted); font-size:15px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>🌙 Night Guard <span>Wallet</span></h1>
+    <p>A Solana wallet guard for our parents, grandparents and the rest of us. It simulates every transaction, checks where every part comes from, explains it in plain words with local AI, and locks risky payments behind a family guardian on-chain.</p>
+    <div class="btns">
+      <a class="b1" href="https://youtu.be/rZ3oyl6PMTw">▶ Watch the video (3:23)</a>
+      <a class="b2" href="https://github.com/jenniferevangelista-de/night-guard-wallet">Code on GitHub</a>
+      <a class="b2" href="https://github.com/jenniferevangelista-de/night-guard-wallet/blob/main/docs/RESULTS.md">On-chain proofs</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="nums">
+    <div class="num r"><b>5/5</b><span>scam scenarios stopped, every run</span></div>
+    <div class="num g"><b>2/2</b><span>real family payments let through</span></div>
+    <div class="num n"><b>0.2 s</b><span>to the verdict on screen (devnet simulation included)</span></div>
+    <div class="num p"><b>32/32</b><span>scam messages Gemma caught · 0 false alarms</span></div>
+    <div class="num r"><b>7</b><span>scams refused by the program itself on devnet</span></div>
+    <div class="num p"><b>1 → 3</b><span>families on the on-chain scam list: warning → block</span></div>
+  </div>
+
+  <section>
+    <h2>Why</h2>
+    <p>In 2025, people over 60 reported <b>$7.7 billion</b> lost to fraud to the FBI, <b>$4.3 billion</b> of it involving crypto, <b>$38,500</b> per victim on average (FBI IC3 2025 Internet Crime Report). On a blockchain there is no bank to call: one signature can't be undone.</p>
+  </section>
+
+  <section>
+    <h2>Watch it</h2>
+    <div class="video"><iframe src="https://www.youtube-nocookie.com/embed/rZ3oyl6PMTw" title="Night Guard Wallet video" allowfullscreen></iframe></div>
+  </section>
+
+  <section>
+    <h2>Before Lucy signs</h2>
+    <div class="steps">
+      <div class="step"><b>1 · Simulate on Solana</b>simulateTransaction on devnet: SOL, tokens, approvals and owners, before and after.</div>
+      <div class="step"><b>2 · Check the sources</b>Sender, link, every wallet, every program (age, verified?) and every token (real or fake).</div>
+      <div class="step"><b>3 · Gemma reads the message</b>Local and free. It quotes the scam tricks it finds and explains the verdict in plain words.</div>
+      <div class="step"><b>4 · The vault enforces it</b>An Anchor program: trusted contacts, daily limit, guardian approval, cooling-off, community scam list.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>See it</h2>
+    <div class="shots">
+      <figure><img src="screens/2_stop.png" alt="STOP screen"><figcaption><b>⛔ STOP, in plain words.</b> The "son" with a new number: not a saved contact, a brand-new wallet, and the vault itself refuses it.</figcaption></figure>
+      <figure><img src="screens/3_ana_guardian.png" alt="Guardian page"><figcaption><b>👩 Ana, the guardian.</b> Live alerts read from the program's events; she says no with her own signature and reports the wallet.</figcaption></figure>
+      <figure><img src="screens/4_community_list.png" alt="Community list warning"><figcaption><b>🚩 Families protect families.</b> Reported with on-chain proof; one report is a warning, three families block.</figcaption></figure>
+      <figure><img src="screens/1_wallet.png" alt="Lucy's wallet"><figcaption><b>👵 Lucy's wallet.</b> Savings in the on-chain vault, trusted contacts, daily limit, and a fake "USDC" flagged.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="arch">
+    <h2>Architecture</h2>
+    <img src="architecture.png" alt="Architecture of Night Guard Wallet">
+  </section>
+
+  <section>
+    <h2>What Solana does here</h2>
+    <table>
+      <tr><th>Rule, enforced on-chain</th><th>Proven on devnet</th></tr>
+      <tr><td>Money goes out at once only to trusted contacts, under the daily limit</td><td>Forced transfers to the scammer and to a look-alike address: refused, <code>NotTrusted</code></td></tr>
+      <tr><td>Adding a trusted contact needs the owner AND the guardian</td><td>A fake guardian could not add the scammer: <code>ConstraintHasOne</code></td></tr>
+      <tr><td>Anything else is a request the guardian approves or refuses</td><td>A refused request could not be sent: <code>Rejected</code></td></tr>
+      <tr><td>Big amounts wait a cooling-off period</td><td>Sending before it ended: <code>StillCoolingOff</code></td></tr>
+      <tr><td>Community scam list: report only with proof, one vote per family</td><td>No proof: <code>NoProof</code> · same family twice: refused · 1 → 2 → 3 families: warning → strong → block</td></tr>
+    </table>
+    <p>Program <code>guardian_vault</code>: <a href="https://explorer.solana.com/address/8BtGEAMv12hh24JQYmWUJZ8Y547y72n4LDfppv3CTDJ5?cluster=devnet">8BtGEAMv…CTDJ5</a> on devnet · every transaction linked in <a href="https://github.com/jenniferevangelista-de/night-guard-wallet/blob/main/docs/RESULTS.md">RESULTS.md</a>.</p>
+  </section>
+
+  <footer>
+    Built by Jennifer Evangelista during the MLH Solana Hackathon (November 2026) · Gemma 4 via Ollama · Anchor · Solana devnet · every person and message is fictional · MIT License
+  </footer>
+</div>
+</body>
+</html>
