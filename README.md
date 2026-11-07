@@ -6,11 +6,11 @@ And when one family's guardian refuses a scam, she can **report the wallet on a 
 
 MLH Solana Hackathon · AI Track ("security tools that explain what a transaction will do or flag risky programs, tokens and wallets before a user signs").
 
-| **5/5** | **2/2** | **0.2 s** | **32/32 · 0** | **6** | **1 → 3 families** |
+| **5/5** | **2/2** | **0.2 s** | **32/32 · 0** | **7** | **1 → 3 families** |
 |:-:|:-:|:-:|:-:|:-:|:-:|
 | scam scenarios stopped, on every run (English, plus Portuguese) | real family payments let through | from "check" to verdict on screen (median, devnet simulation included) | scam messages Gemma recognised · false alarms on 28 ordinary family messages | scams refused **by the program itself** on devnet, even when forced past the app | reported the same scam wallet on the on-chain community list, each with proof: 1 family = warning, 3 = block |
 
-<sub>[docs/RESULTS.md](docs/RESULTS.md): 42 checks on Solana devnet (7 scenarios × 2 languages × 3 runs) and the on-chain proofs with explorer links. [docs/EVAL.md](docs/EVAL.md): 60 fictional messages, Gemma 4 E2B on a CPU. Every person and message in this repository is fictional.</sub>
+<sub>[docs/RESULTS.md](docs/RESULTS.md): 42 checks on Solana devnet, the community-list steps (7 scenarios × 2 languages × 3 runs) and the on-chain proofs with explorer links. [docs/EVAL.md](docs/EVAL.md): 60 fictional messages, Gemma 4 E2B on a CPU. Every person and message in this repository is fictional.</sub>
 
 ## Why
 
