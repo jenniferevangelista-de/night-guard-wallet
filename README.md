@@ -65,7 +65,7 @@ Plus a **phone-scam mode** ("I'm on the phone with someone"): any payment to a w
 
 ## Run it
 
-Needs Node 20+, Docker (for the Anchor and Playwright images), and Ollama for the AI part. All free.
+Needs Node 24+, Docker (for the Anchor and Playwright images), and Ollama for the AI part. All free.
 
 ```bash
 git clone https://github.com/jenniferevangelista-de/night-guard-wallet
