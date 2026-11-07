@@ -118,5 +118,8 @@ s = rep(s, '</style>' if '</style>' in s else '<link rel="stylesheet" href="styl
   @media (max-width:900px) { .ana { grid-template-columns:1fr; } }
 </style>''')
 s = s.replace('let lang = localStorage.lang || "en"', 'let lang = "en"')
+import hashlib
+ver = hashlib.sha1((ROOT / "app" / "web" / "style.css").read_bytes()).hexdigest()[:8]
+s = s.replace('<link rel="stylesheet" href="style.css">', f'<link rel="stylesheet" href="style.css?v={ver}">')   # new styles reach every browser
 (ROOT / "docs" / "demo" / "index.html").write_text(s, encoding="utf-8", newline="\n")
 print("docs/demo/index.html built")
