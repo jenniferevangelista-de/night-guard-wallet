@@ -172,7 +172,9 @@ async function checkIt(id) {
     if (current?.id !== id) return;
     if (report.verdict === "STOP") full.verdict = "STOP", full.headline = report.headline; // the model can only add warnings
     full.timings.simulateMs = report.timings.simulateMs; full.fastMs = report.timings.totalMs;
+    const kept = document.getElementById("after")?.innerHTML ?? "";
     report = full; render(id, true);
+    if (kept) document.getElementById("after").innerHTML = kept;
   }
 }
 function render(id, done) {
@@ -187,12 +189,12 @@ function render(id, done) {
   $("#result").innerHTML = `
     <div class="verdict v-${r.verdict}"><h3>${r.verdict === "STOP" ? "⛔" : r.verdict === "CAUTION" ? "⚠️" : "✅"} ${esc(r.headline[lang])}</h3><p>${esc(r.explanation.text)}</p></div>
     <div class="actions"><button class="big b-listen" onclick="say()">${t("listen")}</button>${act}</div>
+    <div id="after"></div>
     <h2 style="margin-top:16px">${t("what")}</h2><ul class="changes">${r.changes.map((c) => `<li>${esc(c[lang])}</li>`).join("")}</ul>
     ${flags ? `<h2>${t("why")}</h2><ul class="flags">${flags}</ul>` : ""}
     ${(r.sources ?? []).length ? `<h2>${t("sources")}</h2><ul class="sources">${r.sources.map((x) => `<li class="s-${x.ok === true ? "ok" : x.ok === false ? "bad" : "unk"}">${x.ok === true ? "✅" : x.ok === false ? "❌" : "❔"} ${esc(x[lang])}</li>`).join("")}</ul>` : ""}
     ${tactics}
-    <p class="small">${t("speed")} ${((r.fastMs ?? tm.totalMs) / 1000).toFixed(2)} s (simulation ${Math.round(tm.simulateMs)} ms) · ${done ? `${t("ai")} ${esc(st?.ai)}: ${(Math.round(tm.aiTacticsMs + tm.aiExplainMs) / 1000).toFixed(1)} s · ${t("wrote")} ${r.explanation.by === "model" ? esc(st?.ai) : t("tpl")}` : (st?.ai !== "templates" ? `⏳ ${esc(st?.ai)} ${t("thinking")}` : "")} · ${r.simulation.unitsConsumed} CU</p>
-    <div id="after"></div>`;
+    <p class="small">${t("speed")} ${((r.fastMs ?? tm.totalMs) / 1000).toFixed(2)} s (simulation ${Math.round(tm.simulateMs)} ms) · ${done ? `${t("ai")} ${esc(st?.ai)}: ${(Math.round(tm.aiTacticsMs + tm.aiExplainMs) / 1000).toFixed(1)} s · ${t("wrote")} ${r.explanation.by === "model" ? esc(st?.ai) : t("tpl")}` : (st?.ai !== "templates" ? `⏳ ${esc(st?.ai)} ${t("thinking")}` : "")} · ${r.simulation.unitsConsumed} CU</p>`;
 }
 let player = null;
 function say() {
@@ -226,7 +228,7 @@ async function askFamily() {
       : (lang === "pt" ? "Na tela dela, a Ana disse <b>não</b> com a própria assinatura e denunciou a carteira para todas as famílias." : "On her page, Ana said <b>no</b> with her own signature and reported the wallet to every family.")}
       <a href="${r.decided.link}" target="_blank">${lang === "pt" ? "Ver a decisão na Solana" : "See her decision on Solana"} ↗</a></p></div>` : `<p>👩 ${t("alerted")} ${t("gone")}</p>`;
 }
-function dont() { $("#after").innerHTML = `<p>✅ ${t("gone")}</p>`; }
+function dont() { $("#after").innerHTML = `<p>✅ ${t("gone")}</p>`; document.getElementById("after").scrollIntoView({ block: "center", behavior: "smooth" }); }
 async function execReq(a) { const r = await api("/api/execute", { request: a }); if (r.error) alert(r.error); loadState(); }
 async function cancelReq(a) { await api("/api/cancel", { request: a }); loadState(); }
 $("#lang").onclick = () => { lang = lang === "pt" ? "en" : "pt"; localStorage.lang = lang; labels(); loadScenarios(); loadState(); $("#result").innerHTML = `<p class="empty">${t("pick")}</p>`; };

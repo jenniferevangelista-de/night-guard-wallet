@@ -57,3 +57,5 @@ a { color: #2747a8; }
 .feed .ev.blocked { border-color: var(--red); background: var(--red-bg); }
 .feed .ev.chain { border-color: #7a5af8; }
 .timer { font-weight: 800; font-size: 1.2em; }
+#after:not(:empty) { margin-top:12px; padding:12px 16px; border-radius:14px; background:#e3f6ea; border:3px solid var(--green); font-weight:600; }
+#after p { margin:0 0 6px; }
