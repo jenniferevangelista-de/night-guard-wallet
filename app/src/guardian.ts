@@ -6,8 +6,9 @@ import { Connection, PublicKey, VersionedTransaction } from "@solana/web3.js";
 import { explain, Found, Lang, scamTactics } from "./ai.js";
 import { LAMPORTS } from "./config.js";
 import { Action, decodeAll, instructionsOf, isUnlimited } from "./decode.js";
-import { FAMOUS_SYMBOLS, hostOf, KNOWN_PROGRAMS, lookalikeBrand, looksLike, VERIFIED_TOKENS } from "./known.js";
+import { FAMOUS_SYMBOLS, hostOf, isOfficial, KNOWN_PROGRAMS, lookalikeBrand, looksLike, VERIFIED_TOKENS } from "./known.js";
 import { simulate, Simulation } from "./simulate.js";
+import { fetchReports } from "./vault.js";
 
 export type Level = "critical" | "high" | "medium" | "info";
 export interface Flag { id: string; level: Level; pt: string; en: string }
@@ -21,7 +22,12 @@ export interface Book {
   names: Record<string, string>; // address book: address -> name
   usualPayment?: number; // lamports, median of past payments
 }
-export interface CheckInput { tx: VersionedTransaction; message?: string; link?: string; lang?: Lang; phoneMode?: boolean; useModel?: boolean }
+export interface CheckInput {
+  tx: VersionedTransaction; message?: string; link?: string; lang?: Lang; phoneMode?: boolean; useModel?: boolean;
+  sender?: { known: boolean; label: { pt: string; en: string } }; // who sent the request (saved contact or not)
+}
+/** One line of the "where does this come from" check: ok = true (checked, fine), false (bad), null (unknown). */
+export interface Source { kind: "sender" | "link" | "wallet" | "program" | "token"; ok: boolean | null; pt: string; en: string }
 export interface Report {
   verdict: Verdict;
   headline: { pt: string; en: string };
@@ -29,8 +35,10 @@ export interface Report {
   flags: Flag[];
   tactics: Found[];
   changes: { pt: string; en: string; tone: "out" | "in" | "warn" }[];
+  sources: Source[];
   amountLamports: number;
   destination: string | null;
+  counterparties: string[]; // who would get money or power: the wallets that can be reported
   simulation: Pick<Simulation, "ok" | "error" | "vaultError" | "unitsConsumed" | "logs">;
   timings: { decodeMs: number; simulateMs: number; lookupsMs: number; rulesMs: number; aiTacticsMs: number; aiExplainMs: number; totalMs: number };
 }
@@ -66,6 +74,37 @@ async function mintInfoUncached(conn: Connection, mint: string): Promise<MintInf
   } catch {
     return { mint, symbol: null, name: null, verified: false };
   }
+}
+
+const LOADER_UPGRADEABLE = "BPFLoaderUpgradeab1e11111111111111111111111";
+interface ProgramInfo { id: string; name: string | null; ageDays: number | null; upgradeable: boolean | null; verified: boolean | null }
+const progCache = new Map<string, ProgramInfo>();
+/** Where a program comes from: a known name, how long ago it was deployed, whether someone can still change it,
+ *  and whether its source is verified (OtterSec verified-builds registry; best effort). */
+async function programInfo(conn: Connection, id: string): Promise<ProgramInfo> {
+  if (KNOWN_PROGRAMS[id]) return { id, name: KNOWN_PROGRAMS[id], ageDays: null, upgradeable: null, verified: true };
+  const c = progCache.get(id);
+  if (c) return c;
+  const out: ProgramInfo = { id, name: null, ageDays: null, upgradeable: null, verified: null };
+  try {
+    const acc = await conn.getAccountInfo(new PublicKey(id), "confirmed");
+    if (acc && acc.owner.toBase58() === LOADER_UPGRADEABLE && acc.data.length >= 36) {
+      const pd = await conn.getAccountInfo(new PublicKey(acc.data.subarray(4, 36)), "confirmed");
+      if (pd) {
+        const slot = Number(pd.data.readBigUInt64LE(4));
+        out.upgradeable = pd.data[12] === 1;
+        const bt = await conn.getBlockTime(slot).catch(() => null);
+        if (bt) out.ageDays = Math.max(0, Math.round((Date.now() / 1000 - bt) / 86400));
+      }
+    }
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 2500);
+    const r = await fetch(`https://verify.osec.io/status/${id}`, { signal: ctrl.signal }).catch(() => null);
+    clearTimeout(t);
+    if (r?.ok) out.verified = !!((await r.json()) as any)?.is_verified;
+  } catch { /* unknown stays unknown */ }
+  progCache.set(id, out);
+  return out;
 }
 
 async function holdings(conn: Connection, owner: string): Promise<{ mint: string; amount: bigint }[]> {
@@ -109,9 +148,20 @@ export async function check(conn: Connection, book: Book, input: CheckInput): Pr
   const tokenMints = new Set<string>();
   for (const c of sim.changes) { if (c.tokenBefore) tokenMints.add(c.tokenBefore.mint); if (c.tokenAfter) tokenMints.add(c.tokenAfter.mint); }
   for (const a of actions) if ((a.kind === "approve" || a.kind === "token_transfer") && a.mint) tokenMints.add(a.mint);
-  const [destInfo, held] = await Promise.all([
+  // everyone who would receive money or power over her accounts
+  const counterparties = new Set<string>();
+  if (dest) counterparties.add(dest);
+  for (const a of actions) {
+    if (a.kind === "approve" && !mine.has(a.delegate)) counterparties.add(a.delegate);
+    if (a.kind === "set_authority" && a.newAuthority && !mine.has(a.newAuthority)) counterparties.add(a.newAuthority);
+    if (a.kind === "close_account" && !mine.has(a.destination)) counterparties.add(a.destination);
+  }
+  const programIds = [...new Set(ixs.map((ix) => ix.programId.toBase58()))];
+  const [destInfo, held, reports, programs] = await Promise.all([
     dest && !book.trusted.includes(dest) ? destinationInfo(conn, dest) : Promise.resolve(null),
     holdings(conn, book.owner).catch(() => []),
+    fetchReports(conn, [...counterparties]).catch(() => ({} as Awaited<ReturnType<typeof fetchReports>>)),
+    Promise.all(programIds.map((id) => programInfo(conn, id))),
   ]);
   const involved = new Set(tokenMints);
   for (const h of held) tokenMints.add(h.mint);
@@ -125,6 +175,19 @@ export async function check(conn: Connection, book: Book, input: CheckInput): Pr
   const name = (a: string) => book.names[a] ?? null;
   const trustedDest = dest ? book.trusted.includes(dest) : false;
 
+  for (const [addr, r] of Object.entries(reports)) {
+    const days = Math.max(0, Math.round((Date.now() / 1000 - r.firstAt) / 86400));
+    const fam = (n: number, pt: boolean) => (n === 1 ? (pt ? "1 família" : "1 family") : (pt ? `${n} famílias` : `${n} families`));
+    add("community_reported", "critical",
+      `A carteira ${short(addr)} já foi DENUNCIADA como golpe por ${fam(r.reports, true)} na lista comunitária da Solana${days ? ` (primeira denúncia há ${days} dias)` : ""}.`,
+      `The wallet ${short(addr)} was already REPORTED as a scam by ${fam(r.reports, false)} on the community list on Solana${days ? ` (first report ${days} days ago)` : ""}.`);
+  }
+  for (const pinfo of programs) {
+    if (pinfo.name) continue;
+    add("unknown_program", pinfo.ageDays !== null && pinfo.ageDays < 30 ? "high" : "medium",
+      `Usa um programa desconhecido${pinfo.ageDays !== null ? `, publicado há ${pinfo.ageDays} dias` : ""}${pinfo.upgradeable ? ", que o dono ainda pode mudar" : ""}${pinfo.verified === false ? ", sem código verificado" : ""}.`,
+      `It uses an unknown program${pinfo.ageDays !== null ? `, deployed ${pinfo.ageDays} days ago` : ""}${pinfo.upgradeable ? ", which its owner can still change" : ""}${pinfo.verified === false ? ", with no verified source code" : ""}.`);
+  }
   if (sim.vaultError) {
     const e = sim.vaultError.name;
     const ptMsg: Record<string, string> = {
@@ -180,9 +243,6 @@ export async function check(conn: Connection, book: Book, input: CheckInput): Pr
     if (a.kind === "close_account" && !mine.has(a.destination)) {
       add("close_account", "high", `Isso fecha uma conta sua e manda o que sobra para outra carteira (${short(a.destination)}).`,
         `This closes one of your accounts and sends what is left to another wallet (${short(a.destination)}).`);
-    }
-    if (a.kind === "unknown_program") {
-      add("unknown_program", "medium", "Usa um programa desconhecido, que não está na lista de programas conhecidos.", "It uses an unknown program that is not on the known list.");
     }
   }
   // Token that pretends to be a famous one
@@ -257,9 +317,49 @@ export async function check(conn: Connection, book: Book, input: CheckInput): Pr
       ...top.slice(0, 4).map((f) => (lang === "pt" ? f.pt : f.en)), ...tactics.tactics.map((t) => `tactic ${t.id}: "${t.quote}"`)],
   }, useModel);
 
+  // Where does each part of this request come from?
+  const sources: Source[] = [];
+  if (input.sender) sources.push({ kind: "sender", ok: input.sender.known,
+    pt: `Quem pediu: ${input.sender.label.pt} · ${input.sender.known ? "contato salvo" : "NÃO é um contato salvo"}`,
+    en: `Who asked: ${input.sender.label.en} · ${input.sender.known ? "a saved contact" : "NOT a saved contact"}` });
+  if (input.link) {
+    const host = input.link.startsWith("solana:") ? null : hostOf(input.link);
+    if (host) {
+      const bad = lookalikeBrand(host);
+      sources.push({ kind: "link", ok: bad ? false : isOfficial(host) ? true : null,
+        pt: `Link: ${host} · ${bad ? `IMITA ${bad}` : isOfficial(host) ? "site oficial" : "site desconhecido"}`,
+        en: `Link: ${host} · ${bad ? `IMITATES ${bad}` : isOfficial(host) ? "official site" : "unknown site"}` });
+    } else sources.push({ kind: "link", ok: null, pt: "QR Solana Pay: o endereço do QR é conferido abaixo", en: "Solana Pay QR: its address is checked below" });
+  }
+  for (const c of counterparties) {
+    const r = reports[c];
+    const known = book.trusted.includes(c);
+    const lk = !known ? book.trusted.find((t) => looksLike(c, t)) : undefined;
+    const isNew = !!destInfo && c === dest && destInfo.txCount <= 3;
+    const ok = r || lk || isNew ? false : known ? true : null;
+    const whatPt = r ? `denunciada por ${r.reports} família(s)` : known ? "contato de confiança" : lk ? `imita ${name(lk) ?? short(lk)}`
+      : c === dest && destInfo ? (destInfo.txCount === 0 ? "nunca usada" : `só ${destInfo.txCount} movimentações`) : "desconhecida";
+    const whatEn = r ? `reported by ${r.reports} family(ies)` : known ? "trusted contact" : lk ? `imitates ${name(lk) ?? short(lk)}`
+      : c === dest && destInfo ? (destInfo.txCount === 0 ? "never used" : `only ${destInfo.txCount} transactions`) : "unknown";
+    sources.push({ kind: "wallet", ok, pt: `Carteira ${name(c) ?? short(c)} · ${whatPt}`, en: `Wallet ${name(c) ?? short(c)} · ${whatEn}` });
+  }
+  for (const pi of programs) {
+    if (pi.name && ["Compute Budget", "Memo"].includes(pi.name)) continue;
+    sources.push({ kind: "program", ok: pi.name ? true : false,
+      pt: `Programa ${pi.name ?? short(pi.id)} · ${pi.name ? "conhecido" : `desconhecido${pi.ageDays !== null ? `, ${pi.ageDays} dias` : ""}${pi.verified === false ? ", código não verificado" : ""}`}`,
+      en: `Program ${pi.name ?? short(pi.id)} · ${pi.name ? "known" : `unknown${pi.ageDays !== null ? `, ${pi.ageDays} days old` : ""}${pi.verified === false ? ", source not verified" : ""}`}` });
+  }
+  for (const m of mints) {
+    if (!(involved.has(m.mint) || (m.symbol && mentioned.includes(m.symbol.toUpperCase())))) continue;
+    sources.push({ kind: "token", ok: m.verified,
+      pt: `Token ${m.symbol ?? short(m.mint)} · ${m.verified ? "verificado" : "FALSO / não verificado"}`,
+      en: `Token ${m.symbol ?? short(m.mint)} · ${m.verified ? "verified" : "FAKE / not verified"}` });
+  }
+
   return {
+    sources,
     verdict, headline, explanation: { text: exp.text, by: exp.by }, flags: top, tactics: tactics.tactics, changes,
-    amountLamports: out, destination: dest,
+    amountLamports: out, destination: dest, counterparties: [...counterparties],
     simulation: { ok: sim.ok, error: sim.error, vaultError: sim.vaultError, unitsConsumed: sim.unitsConsumed, logs: sim.logs.slice(-12) },
     timings: {
       decodeMs: decodeMs, simulateMs: sim.ms, lookupsMs, rulesMs, aiTacticsMs: tactics.modelMs, aiExplainMs: exp.ms,

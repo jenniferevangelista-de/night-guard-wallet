@@ -1,0 +1,122 @@
+# The whole demo on a GitHub runner: the devnet family (rebuilt from the NGW_SEED secret), the measured run with
+# its on-chain proofs, and, if asked, the video (real recording of the app + drawn scenes). Results are artifacts.
+name: demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: "Guardian runs per scenario and language"
+        default: "3"
+      video:
+        description: "Record and build the video"
+        type: boolean
+        default: true
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      NGW_SEED: ${{ secrets.NGW_SEED }}
+      OLLAMA_MODELS: /home/runner/.ollama-models
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Cached demo keys that are not derived from the seed (the look-alike wallet)
+        uses: actions/cache@v4
+        with:
+          path: ~/.config/ngw/demo
+          key: ngw-demo-v2
+
+      - name: Cached Gemma model
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/.ollama-models
+          key: ollama-gemma4-e2b-v1
+
+      - name: Solana CLI (only to grind the look-alike wallet once)
+        run: |
+          if [ ! -f ~/.config/ngw/demo/lookalike.json ]; then
+            sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
+            echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+          fi
+
+      - name: Ollama + Gemma 4 E2B (CPU)
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          sudo systemctl stop ollama || true
+          OLLAMA_MODELS=$OLLAMA_MODELS OLLAMA_KEEP_ALIVE=60m nohup ollama serve > /tmp/ollama.log 2>&1 &
+          sleep 5
+          ollama pull gemma4:e2b
+
+      - name: Install
+        working-directory: app
+        run: npm ci
+
+      - name: Offline tests and type check
+        working-directory: app
+        run: |
+          npm test
+          npx tsc --noEmit
+
+      - name: Devnet family (idempotent)
+        working-directory: app
+        run: |
+          npx tsx src/reclaim.ts || true
+          npx tsx src/setup.ts
+
+      - name: Measured demo + on-chain proofs
+        working-directory: app
+        run: |
+          RUNS=${{ inputs.runs }} npx tsx src/demo_run.ts 2>&1 | grep -v '^\[explain\]'
+          npx tsx src/proof_card.ts
+
+      - name: Video tools
+        if: ${{ inputs.video }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core > /dev/null
+          python3 -m venv /tmp/venv && /tmp/venv/bin/pip install -q pillow numpy soundfile edge-tts
+          mkdir -p /tmp/fonts && cd /tmp/fonts
+          curl -sSL -o segoeprb.ttf https://github.com/google/fonts/raw/main/ofl/kalam/Kalam-Bold.ttf
+          curl -sSL -o impact.ttf https://github.com/google/fonts/raw/main/ofl/anton/Anton-Regular.ttf
+          cp /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf segoeui.ttf
+          cp /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf segoeuib.ttf
+          cd "$GITHUB_WORKSPACE/video" && npm init -y > /dev/null && npm i -s playwright@1.49.1 && npx playwright install --with-deps chromium > /dev/null
+
+      - name: Record the real app
+        if: ${{ inputs.video }}
+        run: |
+          (cd app && npx tsx src/setup.ts | grep -E "topped|cancelled|elder wallet")
+          (cd app && nohup npx tsx src/server.ts > /tmp/server.log 2>&1 &)
+          for i in $(seq 1 60); do curl -sf localhost:8787/api/state > /dev/null && break; sleep 2; done
+          node video/record_demo.mjs
+          tail -5 /tmp/server.log
+
+      - name: Build the video
+        if: ${{ inputs.video }}
+        env:
+          FONT_DIR: /tmp/fonts
+          NGW_FRAMES: /tmp/frames
+        run: |
+          pkill -f "ollama serve" || true
+          /tmp/venv/bin/python video/script.py
+          /tmp/venv/bin/python video/build.py --stills
+          /tmp/venv/bin/python video/build.py
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: night-guard-wallet-results
+          retention-days: 7
+          path: |
+            docs/RESULTS.md
+            app/out/results.json
+            video/out/*.mp4
+            video/review/frame_*.jpg
+            video/work/proof.json

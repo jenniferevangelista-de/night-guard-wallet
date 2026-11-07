@@ -44,7 +44,8 @@ await pause(2500);
 await waitCut(gemmaDone());
 await page.evaluate(() => document.getElementById("resultCard").scrollIntoView({ behavior: "smooth" }));
 await pause(4000);
-await page.mouse.wheel(0, 380); await pause(3500);
+await page.mouse.wheel(0, 380); await pause(3000);
+await page.mouse.wheel(0, 420); await pause(3500);   // "where each part comes from"
 end(s);
 
 s = scene("askana");
@@ -60,12 +61,19 @@ await page.goto(URL + "/family.html");
 await page.waitForSelector(".req .b-family", { timeout: 60000 }); shown(s);
 await pause(4500);
 const before_b_family = await page.locator("#requests .req").count();
-await page.locator(".req .b-family").first().click();
+await page.locator(".req .b-report").first().click();   // say no AND report the wallet on the community list
 await page.waitForFunction((n) => document.querySelectorAll("#requests .req").length < n, before_b_family, { timeout: 120000 });   // gone from Ana's list: decided on-chain
 await pause(4500); end(s);
 
 await page.goto(URL);
 await page.waitForSelector(".bal b");
+s = scene("community");
+await check("fake-relative"); shown(s);
+await page.evaluate(() => document.getElementById("resultCard").scrollIntoView({ behavior: "smooth" }));
+await pause(2500);
+await page.mouse.wheel(0, 330); await pause(5500);
+end(s);
+
 s = scene("others");
 for (const id of ["fake-support", "airdrop-drainer", "address-poisoning", "fake-token-fee"]) {
   await check(id);

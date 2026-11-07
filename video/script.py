@@ -13,27 +13,29 @@ import edge_tts
 
 HERE = Path(__file__).resolve().parent
 WORK = HERE / "work"
-VOICE = "en-US-AvaMultilingualNeural"
+VOICE = "en-US-AvaNeural"   # English-only Ava: the multilingual voice read the name with a Spanish accent
 STYLE = {"jennifer": dict(rate="-4%", pitch="+0Hz"), "olive": dict(rate="+6%", pitch="+16Hz")}
 
 # kind: paper (drawn scene) or rec (the real recording, key = scene in video/work/scenes.json)
 LINES = [
     ("hello", "paper", "jennifer", "Night Guard Wallet",
-     "Hi, I'm Jennifer Evangelista. I built Night Guard to protect kids online. This time, I built a guard for the people scammers target the most: our parents and grandparents."),
+     "Hi, I'm Jennifer Evangelista. This is Night Guard Wallet: a guard for the people scammers target the most, our parents and grandparents. And it protects the rest of us, too."),
     ("problem", "paper", "jennifer", "The problem",
      "In 2025, people over sixty reported seven point seven billion dollars lost to fraud, to the FBI. Four point three billion involved crypto. And on a blockchain, one signature can't be undone."),
     ("olive", "paper", "olive", "Meet Olive",
-     "Hi! I'm Olive, Night Guard's owl. I look at every transaction before Lucy signs it, and I tell her what it really does, in plain words."),
+     "Hi! I'm Olive, the wallet's owl. I look at every transaction before Lucy signs it, and I tell her what it really does, in plain words."),
     ("how", "paper", "olive", "How it works",
-     "First, I simulate it on Solana, so I see exactly what would change. My rules check the result. Gemma, running with Ollama on our own machine, for free, reads the message that came with it. And a vault program on Solana keeps the rules that nobody can switch off."),
+     "First, I simulate it on Solana, so I see exactly what would change. Then I check where every part comes from: the sender, the link, the wallet, the program and the token. Gemma, running with Ollama on our own machine, reads the message. And a vault program on Solana keeps the rules that nobody can switch off."),
     ("wallet", "rec", "olive", "Lucy's wallet",
      "This is Lucy's wallet, live on devnet. Her savings sit in the vault. Only Ana and Pedro are trusted, and there's a daily limit."),
     ("relative", "rec", "olive", "The new number",
-     "A message from a new number asks for one point eight SOL, urgently, and says: don't tell dad. Stop! The vault itself refuses that wallet. And Gemma quotes the tricks: a new number, a rush, a secret."),
+     "A message from a new number asks for one point eight SOL, urgently, and says: don't tell dad. Stop! It's not a saved contact, the wallet is brand new, and the vault itself refuses it. Gemma quotes the tricks: a new number, a rush, a secret."),
     ("askana", "rec", "olive", "Ask Ana",
      "Lucy doesn't have to decide alone. One tap opens a request on chain, and Ana is told right away."),
     ("ana", "rec", "olive", "Ana decides",
-     "Ana sees why it was blocked, read straight from Solana. She says no, with her own signature. The money never moves."),
+     "Ana sees why it was blocked, read straight from Solana. She says no with her own signature, and reports that wallet to every family."),
+    ("community", "rec", "olive", "Families protect families",
+     "Now that wallet is on a public scam list on Solana. Any family using Night Guard gets the warning before signing. One family's no protects every family."),
     ("others", "rec", "olive", "Four more scams",
      "Fake wallet support that wants her token account. A free airdrop that is really an unlimited approval. A look-alike of Ana's address. A fake USDC with a fee to unlock it. All stopped, each with its reason."),
     ("groceries", "rec", "olive", "The real Ana",
@@ -45,7 +47,7 @@ LINES = [
     ("numbers", "paper", "olive", "Measured",
      "Five out of five scams stopped, and both real payments went through. The verdict shows in under a second. And Gemma recognised thirty two out of thirty two scam messages, with zero false alarms."),
     ("end", "paper", "jennifer", "Thank you",
-     "Night Guard Wallet. Solana does the guarding, AI does the explaining, and the family stays in the loop. Thank you!"),
+     "Night Guard Wallet. Solana does the guarding, AI does the explaining, and families protect each other. Thank you!"),
 ]
 
 

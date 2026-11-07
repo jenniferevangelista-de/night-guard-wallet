@@ -6,7 +6,7 @@
   </defs>
   <rect width="1600" height="900" fill="#f6f3ee"/>
   <text x="40" y="58" font-size="38" font-weight="800" fill="#0f1b3d">🌙 Night Guard Wallet · architecture</text>
-  <text x="40" y="94" font-size="20" fill="#4a5568">Simulate on Solana → flag the scam → explain in plain words → the vault program enforces what nobody can switch off</text>
+  <text x="40" y="94" font-size="20" fill="#4a5568">Simulate on Solana → check the sources → explain in plain words → the vault enforces it → families warn each other</text>
 
   <!-- Inputs -->
   <rect x="40" y="140" width="300" height="300" rx="22" fill="#fff" stroke="#e2ddd3" stroke-width="2"/>
@@ -32,9 +32,9 @@
     <text x="444" y="308" font-size="19" font-weight="700" fill="#0f1b3d">② Simulate on Solana devnet</text>
     <text x="444" y="334" font-size="15" fill="#4a5568">simulateTransaction: SOL, tokens, delegates, owners before → after</text>
     <rect x="424" y="360" width="512" height="86" rx="14" fill="#fde8e7"/>
-    <text x="444" y="390" font-size="19" font-weight="700" fill="#b42318">③ Risk rules on the simulated result</text>
-    <text x="444" y="414" font-size="15" fill="#4a5568">new wallet · look-alike address · drains balance · unlimited approve</text>
-    <text x="444" y="434" font-size="15" fill="#4a5568">SetAuthority · CloseAccount · fake token · phishing link · vault refused</text>
+    <text x="444" y="390" font-size="19" font-weight="700" fill="#b42318">③ Risk rules + where it all comes from</text>
+    <text x="444" y="414" font-size="15" fill="#4a5568">sender · link · wallets (new, look-alike, reported) · programs · tokens</text>
+    <text x="444" y="434" font-size="15" fill="#4a5568">drains balance · unlimited approve · SetAuthority · CloseAccount</text>
     <rect x="424" y="458" width="512" height="86" rx="14" fill="#efe9fd"/>
     <text x="444" y="488" font-size="19" font-weight="700" fill="#6941c6">④ Gemma 4 (local, Ollama, free)</text>
     <text x="444" y="512" font-size="15" fill="#4a5568">reads the message: 10 scam tricks, each with a verbatim quote</text>
@@ -53,11 +53,11 @@
     <text x="1044" y="346">🆕 Anything else → on-chain request</text>
     <text x="1044" y="380">👩 Guardian approves or refuses (signature)</text>
     <text x="1044" y="414">⏳ Cooling-off for big amounts</text>
-    <text x="1044" y="448">📣 Events for every step</text>
+    <text x="1044" y="448">🚩 Community scam list: one vote per family</text>
   </g>
   <rect x="1044" y="474" width="492" height="102" rx="14" fill="#1d2b55"/>
   <text x="1064" y="504" font-size="16" fill="#f4c95d" font-weight="700">send · request · guardian_decide · execute</text>
-  <text x="1064" y="530" font-size="16" fill="#c9d3ee">add_trusted · remove_trusted · set_limits · cancel</text>
+  <text x="1064" y="530" font-size="16" fill="#c9d3ee">report_scam · add_trusted · set_limits · cancel · events</text>
   <text x="1064" y="556" font-size="15" fill="#c9d3ee">Even if the app is bypassed, the chain refuses.</text>
 
   <!-- Family -->
@@ -66,7 +66,7 @@
   <text x="1044" y="728" font-size="17" fill="#14213d">Live alerts read from the program's events (onLogs)</text>
   <text x="1044" y="760" font-size="17" fill="#14213d">⛔ "Night Guard blocked…" with the reasons</text>
   <text x="1044" y="792" font-size="17" fill="#14213d">✅ Approve / ⛔ Refuse = her own on-chain signature</text>
-  <text x="1044" y="824" font-size="15" fill="#4a5568">Human in the loop, like Night Guard for kids</text>
+  <text x="1044" y="824" font-size="15" fill="#4a5568">"Say no and report": one family's no protects every family</text>
 
   <!-- Bottom left: outcome -->
   <rect x="40" y="650" width="920" height="200" rx="24" fill="#fff" stroke="#e2ddd3" stroke-width="2"/>

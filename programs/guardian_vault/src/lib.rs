@@ -8,6 +8,8 @@
 //! - Anything else becomes a **request**: a new wallet, over the limit or a big amount needs the
 //!   guardian's on-chain approval, and big amounts wait a **cooling-off period** before they can go out.
 //! - Every request emits an event, so the family sees it live from the chain.
+//! - A community scam list: when a guardian refuses a scam, they can report the wallet on-chain.
+//!   Every Night Guard wallet reads the list, so one family's "no" protects every other family.
 
 use anchor_lang::prelude::*;
 use anchor_lang::system_program;
@@ -175,6 +177,26 @@ pub mod guardian_vault {
         emit!(Cancelled { request: ctx.accounts.req.key(), by: ctx.accounts.signer.key() });
         Ok(())
     }
+
+    /// Community scam list: a family guardian reports a wallet that tried to scam their family.
+    /// One public record per wallet, counting how many different families reported it; every
+    /// Night Guard wallet reads it before signing. Each family can report a wallet only once.
+    pub fn report_scam(ctx: Context<ReportScam>, address: Pubkey, reason: u8) -> Result<()> {
+        require!(address != ctx.accounts.vault.owner && !ctx.accounts.vault.trusted.contains(&address), VaultError::BadSettings);
+        let now = Clock::get()?.unix_timestamp;
+        let r = &mut ctx.accounts.report;
+        if r.reports == 0 {
+            r.address = address;
+            r.first_at = now;
+            r.bump = ctx.bumps.report;
+        }
+        r.reports = r.reports.saturating_add(1);
+        r.last_at = now;
+        r.last_reason = reason;
+        ctx.accounts.mark.bump = ctx.bumps.mark;
+        emit!(ScamReported { address, vault: ctx.accounts.vault.key(), reports: r.reports, reason });
+        Ok(())
+    }
 }
 
 fn roll_day(v: &mut Vault, now: i64) {
@@ -321,6 +343,40 @@ pub struct Cancel<'info> {
     pub req: Account<'info, TransferRequest>,
 }
 
+#[account]
+#[derive(InitSpace)]
+pub struct ScamReport {
+    pub address: Pubkey,
+    pub reports: u32,
+    pub first_at: i64,
+    pub last_at: i64,
+    pub last_reason: u8,
+    pub bump: u8,
+}
+
+/// Marks that one family (vault) already reported an address, so it counts once.
+#[account]
+#[derive(InitSpace)]
+pub struct ReportMark {
+    pub bump: u8,
+}
+
+#[derive(Accounts)]
+#[instruction(address: Pubkey)]
+pub struct ReportScam<'info> {
+    #[account(mut)]
+    pub guardian: Signer<'info>,
+    #[account(has_one = guardian)]
+    pub vault: Account<'info, Vault>,
+    #[account(init_if_needed, payer = guardian, space = 8 + ScamReport::INIT_SPACE, seeds = [b"scam", address.as_ref()], bump)]
+    pub report: Account<'info, ScamReport>,
+    #[account(init, payer = guardian, space = 8 + ReportMark::INIT_SPACE, seeds = [b"reported", vault.key().as_ref(), address.as_ref()], bump)]
+    pub mark: Account<'info, ReportMark>,
+    pub system_program: Program<'info, System>,
+}
+
+#[event]
+pub struct ScamReported { pub address: Pubkey, pub vault: Pubkey, pub reports: u32, pub reason: u8 }
 #[event]
 pub struct VaultOpened { pub vault: Pubkey, pub owner: Pubkey, pub guardian: Pubkey, pub daily_limit: u64, pub large_amount: u64, pub cooling_off_secs: i64 }
 #[event]

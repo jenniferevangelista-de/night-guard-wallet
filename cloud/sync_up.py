@@ -13,7 +13,7 @@ with tarfile.open(out, "w:gz") as t:
         with open(os.path.join(root, f), "rb") as fh:
             t.addfile(ti, fh)
 gh = r"C:\Program Files\GitHub CLI\gh.exe"
-subprocess.run([gh, "codespace", "cp", "-c", CS, "-e", out, "remote:/tmp/ngw/ngw_sync.tar.gz"], check=True)
-cmd = f"mkdir -p {DEST} && cd {DEST} && python3 -c \"import tarfile; t=tarfile.open('/tmp/ngw/ngw_sync.tar.gz'); t.extractall('.', filter='data')\" && echo synced {len(files)} files"
+subprocess.run([gh, "codespace", "cp", "-c", CS, "-e", out, "remote:/workspaces/ngw_sync.tar.gz"], check=True)
+cmd = f"mkdir -p {DEST} && cd {DEST} && python3 -c \"import tarfile; t=tarfile.open('/workspaces/ngw_sync.tar.gz'); t.extractall('.', filter='data')\" && echo synced {len(files)} files"
 subprocess.run([gh, "codespace", "ssh", "-c", CS, "--", cmd], check=True)
 os.remove(out)

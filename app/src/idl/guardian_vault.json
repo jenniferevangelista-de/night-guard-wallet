@@ -381,6 +381,101 @@
       ]
     },
     {
+      "name": "report_scam",
+      "docs": [
+        "Community scam list: a family guardian reports a wallet that tried to scam their family.",
+        "One public record per wallet, counting how many different families reported it; every",
+        "Night Guard wallet reads it before signing. Each family can report a wallet only once."
+      ],
+      "discriminator": [
+        217,
+        184,
+        188,
+        131,
+        158,
+        217,
+        227,
+        239
+      ],
+      "accounts": [
+        {
+          "name": "guardian",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "vault"
+          ]
+        },
+        {
+          "name": "vault"
+        },
+        {
+          "name": "report",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  99,
+                  97,
+                  109
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "address"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mark",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  112,
+                  111,
+                  114,
+                  116,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "arg",
+                "path": "address"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "address",
+          "type": "pubkey"
+        },
+        {
+          "name": "reason",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "request",
       "docs": [
         "Asks to send money that the everyday path refuses. The chain decides, from its own rules,",
@@ -605,6 +700,32 @@
   ],
   "accounts": [
     {
+      "name": "ReportMark",
+      "discriminator": [
+        247,
+        225,
+        13,
+        195,
+        39,
+        153,
+        158,
+        132
+      ]
+    },
+    {
+      "name": "ScamReport",
+      "discriminator": [
+        19,
+        17,
+        184,
+        47,
+        228,
+        134,
+        81,
+        237
+      ]
+    },
+    {
       "name": "TransferRequest",
       "discriminator": [
         200,
@@ -695,6 +816,19 @@
         83,
         195,
         82
+      ]
+    },
+    {
+      "name": "ScamReported",
+      "discriminator": [
+        86,
+        101,
+        162,
+        121,
+        87,
+        222,
+        167,
+        5
       ]
     },
     {
@@ -892,6 +1026,21 @@
       }
     },
     {
+      "name": "ReportMark",
+      "docs": [
+        "Marks that one family (vault) already reported an address, so it counts once."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
       "name": "RequestOpened",
       "type": {
         "kind": "struct",
@@ -935,6 +1084,62 @@
           {
             "name": "large",
             "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ScamReport",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "reports",
+            "type": "u32"
+          },
+          {
+            "name": "first_at",
+            "type": "i64"
+          },
+          {
+            "name": "last_at",
+            "type": "i64"
+          },
+          {
+            "name": "last_reason",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ScamReported",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "reports",
+            "type": "u32"
+          },
+          {
+            "name": "reason",
+            "type": "u8"
           }
         ]
       }

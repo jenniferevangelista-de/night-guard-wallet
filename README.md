@@ -1,6 +1,8 @@
 # 🌙 Night Guard Wallet
 
-**A guard for the people scammers target the most: our parents and grandparents.** Before Lucy (74) signs anything, Night Guard Wallet **simulates the transaction on Solana**, shows in big plain words what would really change, **flags the scam** (with Gemma reading the message that came with it), and keeps her savings in an **on-chain vault** whose rules nobody can switch off: trusted contacts, a daily limit, a family guardian who approves with her own signature, and a cooling-off period for big amounts.
+**A guard for the people scammers target the most, our parents and grandparents, and for the rest of us too.** Before Lucy (74) signs anything, Night Guard Wallet **simulates the transaction on Solana**, shows in big plain words what would really change, **checks where every part comes from** (sender, link, wallet, program, token), **flags the scam** (with Gemma reading the message that came with it), and keeps her savings in an **on-chain vault** whose rules nobody can switch off: trusted contacts, a daily limit, a family guardian who approves with her own signature, and a cooling-off period for big amounts.
+
+And when one family's guardian refuses a scam, she can **report the wallet on a community scam list on Solana**: every Night Guard wallet reads it before signing, so **one family's "no" protects every family**.
 
 MLH Solana Hackathon · AI Track ("security tools that explain what a transaction will do or flag risky programs, tokens and wallets before a user signs").
 
@@ -20,8 +22,9 @@ People over 60 reported **$7.7 billion** lost to fraud in 2025, **$4.3 billion**
 
 1. **Simulate on Solana.** The wallet runs the transaction with `simulateTransaction` on devnet and compares every writable account before and after: SOL, tokens, **delegates (approvals)** and **owners (authorities)**. Instructions are decoded too: System, SPL Token and Token-2022, the vault's own IDL, Memo, and any unknown program.
 2. **Flag the risk** with rules on the simulated result: a wallet she never paid (and how new it is), an address that **looks like** a trusted contact's (address poisoning), most of her money leaving, an **unlimited `approve`**, **`SetAuthority`** or **`CloseAccount`** to a stranger (drainers), a **fake token** that calls itself USDC (Token-2022 metadata vs. the verified mint), a **phishing link or Blink** that imitates a Solana brand, a **Solana Pay QR**, and the vault refusing it.
-3. **Read the message with AI.** Gemma 4 (E2B, via Ollama, free, on our own machine) reads the WhatsApp or SMS that came with the request and lists the scam tricks (new number, rush, secrecy, fake support, "safe wallet", prize, fee to unlock, secret words, emergency, guaranteed profit), **each with a verbatim quote** that must exist in the message. Then it writes the explanation in plain English (Portuguese as an option), which she can hear out loud.
-4. **Lock and ask the family.** If the verdict is STOP, nothing is signed. One tap opens an **on-chain request**; Ana, her daughter and guardian, sees it live (read from the program's events) and approves or refuses **with her own signature**.
+3. **Check the sources.** Where does each part come from? The sender (saved contact or not), the link (official site or a look-alike), every wallet that would get money or power (trusted, brand new, look-alike, or **already reported by other families on-chain**), every program (known, or unknown: how many days ago it was deployed, whether its owner can still change it, whether its source is verified) and every token (verified mint or fake).
+4. **Read the message with AI.** Gemma 4 (E2B, via Ollama, free, on our own machine) reads the WhatsApp or SMS that came with the request and lists the scam tricks (new number, rush, secrecy, fake support, "safe wallet", prize, fee to unlock, secret words, emergency, guaranteed profit), **each with a verbatim quote** that must exist in the message. Then it writes the explanation in plain English (Portuguese as an option), which she can hear out loud.
+5. **Lock and ask the family.** If the verdict is STOP, nothing is signed. One tap opens an **on-chain request**; Ana, her daughter and guardian, sees it live (read from the program's events) and approves or refuses **with her own signature**, and with one more tap **reports the scam wallet to every family**.
 
 The verdict never depends on the model: the simulation and the rules decide, and the model can only **add** warnings. If Gemma is slow or off, fixed texts are used. Any amount the model writes must be the real one.
 
@@ -36,6 +39,7 @@ The `guardian_vault` Anchor program ([programs/guardian_vault/src/lib.rs](progra
 | Anything else is a **request**; the program itself decides if the guardian must approve (new wallet or over the limit) and how long it waits (big amount) | `request` → `guardian_decide` → `execute` |
 | A refused request can never be sent; a big one can't leave before the **cooling-off** ends | `Rejected`, `StillCoolingOff` |
 | Every step emits an **event**; the family page listens to the program's logs, so the alert comes from the chain | `RequestOpened`, `GuardianDecided`, `Executed`… |
+| **Community scam list**: a guardian reports a wallet; one public record per wallet counts how many different families reported it, each family only once; every wallet reads it before signing | `report_scam` (PDA `["scam", wallet]` + one `["reported", vault, wallet]` mark per family) |
 
 Proven on devnet: transfers to the scammer and to the look-alike address, **forced through without preflight**, failed on-chain with `NotTrusted`; a fake "guardian" could not add the scammer; a rejected request could not be sent; a big payment could not leave before its cooling-off ([links](docs/RESULTS.md#on-chain-proofs-devnet)).
 

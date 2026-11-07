@@ -11,7 +11,7 @@ import { PublicKey } from "@solana/web3.js";
 import { Lang } from "./ai.js";
 import { AI, IDL, MODEL, PORT, PROGRAM_ID } from "./config.js";
 import { Book, check, fmtSol, Report } from "./guardian.js";
-import { qrFor, SCENARIOS } from "./scenarios.js";
+import { qrFor, SCENARIOS, senderOf } from "./scenarios.js";
 import { explorer, explorerAddr, fetchVault, ix, listRequests, requestPda, sendTx } from "./vault.js";
 import { kp, loadWorld, World } from "./world.js";
 
@@ -26,7 +26,7 @@ const last = new Map<string, Report>();
 export async function bookFor(world: World, lang: Lang): Promise<Book> {
   const v = await fetchVault(world.conn, world.vault);
   const hist = world.file.history ?? [];
-  const sorted = hist.map((h) => h.lamports).sort((a, b) => a - b);
+  const sorted = (hist.length ? hist.map((h) => h.lamports) : [0.05 * 1e9]).sort((a, b) => a - b);   // setup always makes one 0.05 SOL grocery payment
   return {
     owner: world.elder.toBase58(), vault: world.vault.toBase58(), vaultBalance: v?.available ?? 0,
     trusted: v?.trusted ?? [], names: world.names(lang), usualPayment: sorted.length ? sorted[Math.floor(sorted.length / 2)] : undefined,
@@ -86,7 +86,7 @@ async function stateUncached(lang: Lang) {
     elder: w.elder.toBase58(), elderLink: explorerAddr(w.elder.toBase58()), wallet: bal, walletTxt: fmtSol(bal, lang),
     vault: v && { ...v, availableTxt: fmtSol(v.available, lang), dailyLimitTxt: fmtSol(v.dailyLimit, lang), spentTodayTxt: fmtSol(v.spentToday, lang), largeTxt: fmtSol(v.largeAmount, lang), link: explorerAddr(v.address) },
     trusted: (v?.trusted ?? []).map((t) => ({ address: t, name: names[t] ?? t })),
-    requests: reqs.map((r) => ({ ...r, amountTxt: fmtSol(r.amount, lang), toName: names[r.to] ?? `${r.to.slice(0, 4)}…${r.to.slice(-4)}`, link: explorerAddr(r.address) })),
+    requests: reqs.map((r) => ({ ...r, amountTxt: fmtSol(r.amount, lang), toName: names[r.to] ?? `${r.to.slice(0, 4)}…${r.to.slice(-4)}`, toKnown: !!names[r.to], link: explorerAddr(r.address) })),
     tokens: [
       nusd && { symbol: "nUSD", amount: nusd.value.uiAmountString, verified: true },
       fake && { symbol: "USDC", amount: fake.value.uiAmountString, verified: false, mint: w.fakeUsdcMint!.toBase58() },
@@ -106,11 +106,11 @@ const routes: Record<string, (req: IncomingMessage, res: ServerResponse, q: URLS
     const lang: Lang = b.lang === "en" ? "en" : "pt";
     const { tx } = await s.build(w);
     // fast pass: simulation + rules (no model) so the verdict shows at once; then the full pass with Gemma
-    const report = await check(w.conn, await bookFor(w, lang), { tx, message: s.message[lang], link: s.link ?? qrFor(s, w), lang, phoneMode: !!b.phoneMode, useModel: !!b.ai });
+    const report = await check(w.conn, await bookFor(w, lang), { tx, message: s.message[lang], link: s.link ?? qrFor(s, w), lang, phoneMode: !!b.phoneMode, useModel: !!b.ai, sender: senderOf(s) });
     const prev = last.get(s.id);
     last.set(s.id, prev && prev.verdict === "STOP" ? { ...report, verdict: "STOP" } : report);
     if (report.verdict === "STOP" && !b.ai) {
-      push({ type: "blocked", id: s.id, title: s.title, amountTxt: report.amountLamports ? fmtSol(report.amountLamports, lang) : "", flags: report.flags.slice(0, 3), tactics: report.tactics });
+      push({ type: "blocked", id: s.id, title: s.title, amountTxt: report.amountLamports ? fmtSol(report.amountLamports, lang) : "", flags: report.flags.slice(0, 3), tactics: report.tactics, suspects: report.counterparties.filter((c) => !report.flags.every((f) => f.id === "vault_refused") && c !== w.ana.toBase58() && c !== w.pedro.toBase58()) });
     }
     json(res, 200, report);
   },
@@ -150,6 +150,17 @@ const routes: Record<string, (req: IncomingMessage, res: ServerResponse, q: URLS
     const b = await body(req);
     const r = await sendTx(w.conn, [await ix(w.conn).decide(kp("ana").publicKey, w.elder, new PublicKey(b.request), !!b.approve)], [kp("ana")]);
     json(res, 200, { sig: r.sig, link: explorer(r.sig), ms: r.ms });
+  },
+  // Ana reports a scam wallet on the community list (her own on-chain signature, once per family).
+  "POST /api/guardian/report": async (req, res) => {
+    dropState();
+    const b = await body(req);
+    try {
+      const r = await sendTx(w.conn, [await ix(w.conn).reportScam(kp("ana").publicKey, w.elder, new PublicKey(b.address), Number(b.reason ?? 1))], [kp("ana")]);
+      json(res, 200, { sig: r.sig, link: explorer(r.sig), ms: r.ms });
+    } catch (e: any) {
+      json(res, 409, { error: /already in use|0x0/.test(String(e?.message)) ? "already reported by this family" : String(e?.message ?? e).slice(0, 200) });
+    }
   },
   "POST /api/execute": async (req, res) => {
     dropState();

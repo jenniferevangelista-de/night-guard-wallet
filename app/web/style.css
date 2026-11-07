@@ -43,6 +43,11 @@ ul.changes li, ul.flags li { padding: 8px 12px; border-radius: 10px; margin-bott
 ul.flags li.critical { background: var(--red-bg); border-left: 8px solid var(--red); }
 ul.flags li.high { background: #fdeee4; border-left: 8px solid #c4501b; }
 ul.flags li.medium { background: var(--amber-bg); border-left: 8px solid var(--amber); }
+ul.sources { padding-left: 0; list-style: none; margin: 6px 0 14px; }
+ul.sources li { padding: 6px 12px; border-radius: 10px; margin-bottom: 5px; background: #f3f4f7; font-size: .9em; }
+ul.sources li.s-bad { background: var(--red-bg); color: var(--red); font-weight: 600; }
+ul.sources li.s-ok { background: var(--green-bg); color: var(--green); }
+.b-report { background: #6941c6; color: #fff; }
 .quote { background: #fff1a8; padding: 0 4px; border-radius: 4px; }
 .small { font-size: .7em; color: var(--muted); }
 .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }

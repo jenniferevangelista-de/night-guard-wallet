@@ -5,11 +5,20 @@ import { Keypair, LAMPORTS_PER_SOL, SystemProgram } from "@solana/web3.js";
 import { KEY_DIR } from "./config.js";
 import { makeConnection } from "./rpc.js";
 import { sendTx } from "./vault.js";
-import { deployer } from "./world.js";
+import { deployer, kp } from "./world.js";
+import { seedHex } from "./keys.js";
 
 const conn = makeConnection();
 const to = deployer().publicKey;
 const keep = 0.01 * LAMPORTS_PER_SOL;
+if (seedHex()) {
+  const p = kp("pedro");
+  const bal = await conn.getBalance(p.publicKey);
+  if (bal > keep + 0.05 * LAMPORTS_PER_SOL) {
+    const r = await sendTx(conn, [SystemProgram.transfer({ fromPubkey: p.publicKey, toPubkey: to, lamports: bal - keep })], [p]);
+    console.log("pedro", ((bal - keep) / LAMPORTS_PER_SOL).toFixed(3), "SOL back", r.sig.slice(0, 12));
+  }
+}
 for (const [dir, roles] of [["demo", ["pedro"]], ["demo_v1", ["pedro", "elder", "ana"]]] as const) {
   for (const role of roles) {
     const f = join(KEY_DIR, dir, `${role}.json`);

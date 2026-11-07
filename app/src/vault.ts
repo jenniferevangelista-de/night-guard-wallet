@@ -15,6 +15,25 @@ export const requestPda = (vault: PublicKey, id: number | bigint) => {
   return PublicKey.findProgramAddressSync([Buffer.from("req"), vault.toBuffer(), b], PROGRAM_ID)[0];
 };
 
+export const scamPda = (address: PublicKey) => PublicKey.findProgramAddressSync([Buffer.from("scam"), address.toBuffer()], PROGRAM_ID)[0];
+export const markPda = (vault: PublicKey, address: PublicKey) =>
+  PublicKey.findProgramAddressSync([Buffer.from("reported"), vault.toBuffer(), address.toBuffer()], PROGRAM_ID)[0];
+
+export interface ScamReportState { address: string; reports: number; firstAt: number; lastAt: number; reason: number }
+/** Reads the community scam list for these addresses (one RPC call). */
+export async function fetchReports(conn: Connection, addresses: string[]): Promise<Record<string, ScamReportState>> {
+  const uniq = [...new Set(addresses)];
+  if (!uniq.length) return {};
+  const infos = await conn.getMultipleAccountsInfo(uniq.map((a) => scamPda(new PublicKey(a))), "confirmed");
+  const out: Record<string, ScamReportState> = {};
+  infos.forEach((info, i) => {
+    if (!info) return;
+    const r: any = coder.accounts.decode("ScamReport", info.data);
+    out[uniq[i]] = { address: uniq[i], reports: Number(r.reports), firstAt: Number(r.first_at), lastAt: Number(r.last_at), reason: Number(r.last_reason) };
+  });
+  return out;
+}
+
 export function programFor(conn: Connection) {
   const provider = new AnchorProvider(conn, new Wallet(Keypair.generate()), { commitment: "confirmed" });
   return new Program(IDL as Idl, provider);
@@ -98,6 +117,10 @@ export function ix(conn: Connection) {
       p.methods.guardianDecide(approve).accountsPartial({ guardian, vault: vaultPda(owner), req }).instruction(),
     execute: (owner: PublicKey, req: PublicKey, to: PublicKey) =>
       p.methods.execute().accountsPartial({ owner, vault: vaultPda(owner), req, to }).instruction(),
+    reportScam: (guardian: PublicKey, owner: PublicKey, address: PublicKey, reason: number) =>
+      p.methods.reportScam(address, reason).accountsPartial({
+        guardian, vault: vaultPda(owner), report: scamPda(address), mark: markPda(vaultPda(owner), address), systemProgram: SystemProgram.programId,
+      }).instruction(),
     cancel: (signer: PublicKey, owner: PublicKey, req: PublicKey) =>
       p.methods.cancel().accountsPartial({ signer, rentTo: owner, vault: vaultPda(owner), req }).instruction(),
   };

@@ -21,6 +21,7 @@ export interface Scenario {
   qr?: string; // Solana Pay URL
   // what to do if the person asks the family: open a vault request (on-chain) or just alert
   vaultPath: boolean;
+  senderKnown?: boolean; // the sender is a saved contact (undefined: not a person, e.g. her own history)
   build: (w: World) => Promise<{ tx: VersionedTransaction; to: PublicKey | null; lamports: number }>;
 }
 
@@ -30,7 +31,7 @@ const memo = (t: string) => new TransactionInstruction({ programId: new PublicKe
 
 export const SCENARIOS: Scenario[] = [
   {
-    id: "groceries", expect: "OK", kind: "legit", vaultPath: true,
+    id: "groceries", senderKnown: true, expect: "OK", kind: "legit", vaultPath: true,
     title: { pt: "Ana pede o dinheiro do mercado", en: "Ana asks for the grocery money" },
     channel: { pt: "WhatsApp (número salvo da Ana)", en: "WhatsApp (Ana's saved number)" },
     from: { pt: "Ana (filha)", en: "Ana (daughter)" },
@@ -41,7 +42,7 @@ export const SCENARIOS: Scenario[] = [
     build: async (w) => ({ tx: await buildTx(w.conn, w.elder, [await ix(w.conn).send(w.elder, w.ana, SOL(0.05))]), to: w.ana, lamports: SOL(0.05) }),
   },
   {
-    id: "fake-relative", expect: "STOP", kind: "scam", vaultPath: true,
+    id: "fake-relative", senderKnown: false, expect: "STOP", kind: "scam", vaultPath: true,
     title: { pt: "O \"filho\" que trocou de número", en: "The \"son\" with a new number" },
     channel: { pt: "WhatsApp (número desconhecido)", en: "WhatsApp (unknown number)" },
     from: { pt: "+55 11 9xxxx-4821", en: "+1 (555) 014-4821" },
@@ -52,7 +53,7 @@ export const SCENARIOS: Scenario[] = [
     build: async (w) => ({ tx: await buildTx(w.conn, w.elder, [await ix(w.conn).send(w.elder, w.fakeRelative, SOL(1.8))]), to: w.fakeRelative, lamports: SOL(1.8) }),
   },
   {
-    id: "fake-support", expect: "STOP", kind: "scam", vaultPath: false,
+    id: "fake-support", senderKnown: false, expect: "STOP", kind: "scam", vaultPath: false,
     title: { pt: "Falso suporte da carteira", en: "Fake wallet support" },
     channel: { pt: "SMS + site", en: "SMS + website" },
     from: { pt: "\"Central de Segurança Phantom\"", en: "\"Phantom Security Center\"" },
@@ -70,7 +71,7 @@ export const SCENARIOS: Scenario[] = [
     }),
   },
   {
-    id: "airdrop-drainer", expect: "STOP", kind: "scam", vaultPath: false,
+    id: "airdrop-drainer", senderKnown: false, expect: "STOP", kind: "scam", vaultPath: false,
     title: { pt: "\"Airdrop grátis\" que esvazia a carteira", en: "\"Free airdrop\" that empties the wallet" },
     channel: { pt: "Link (Blink) no grupo da família", en: "Link (Blink) in the family group" },
     from: { pt: "Contato do grupo", en: "Group contact" },
@@ -100,7 +101,7 @@ export const SCENARIOS: Scenario[] = [
     build: async (w) => ({ tx: await buildTx(w.conn, w.elder, [await ix(w.conn).send(w.elder, w.lookalike, SOL(0.25))]), to: w.lookalike, lamports: SOL(0.25) }),
   },
   {
-    id: "fake-token-fee", expect: "STOP", kind: "scam", vaultPath: false,
+    id: "fake-token-fee", senderKnown: false, expect: "STOP", kind: "scam", vaultPath: false,
     title: { pt: "\"Você recebeu 1.000 USDC, pague a taxa\"", en: "\"You got 1,000 USDC, pay the fee\"" },
     channel: { pt: "Mensagem no app", en: "In-app message" },
     from: { pt: "\"Suporte de Saques\"", en: "\"Withdrawal Support\"" },
@@ -111,7 +112,7 @@ export const SCENARIOS: Scenario[] = [
     build: async (w) => ({ tx: await buildTx(w.conn, w.elder, [SystemProgram.transfer({ fromPubkey: w.elder, toPubkey: w.feeScammer, lamports: SOL(0.4) })]), to: w.feeScammer, lamports: SOL(0.4) }),
   },
   {
-    id: "car-repair", expect: "CAUTION", kind: "legit", vaultPath: true,
+    id: "car-repair", senderKnown: true, expect: "CAUTION", kind: "legit", vaultPath: true,
     title: { pt: "Pedro: conserto do carro (valor alto)", en: "Pedro: car repair (big amount)" },
     channel: { pt: "Ligação do Pedro (número salvo)", en: "Call from Pedro (saved number)" },
     from: { pt: "Pedro (filho)", en: "Pedro (son)" },
@@ -122,6 +123,10 @@ export const SCENARIOS: Scenario[] = [
     build: async (w) => ({ tx: await buildTx(w.conn, w.elder, [await ix(w.conn).send(w.elder, w.pedro, SOL(1.0))]), to: w.pedro, lamports: SOL(1.0) }),
   },
 ];
+
+export function senderOf(s: Scenario) {
+  return s.senderKnown === undefined ? undefined : { known: s.senderKnown, label: s.from };
+}
 
 export function qrFor(s: Scenario, w: World) {
   return s.qr?.replace("{lookalike}", w.lookalike.toBase58());

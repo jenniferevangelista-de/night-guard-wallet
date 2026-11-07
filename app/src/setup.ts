@@ -3,7 +3,7 @@
 // Run in the Codespace:  npm run setup
 
 import { execFileSync } from "node:child_process";
-import { existsSync, readdirSync, renameSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, renameSync } from "node:fs";
 import { join } from "node:path";
 import {
   createAssociatedTokenAccountIdempotentInstruction, createInitializeMetadataPointerInstruction, createInitializeMintInstruction,
@@ -14,7 +14,7 @@ import { createInitializeInstruction, pack } from "@solana/spl-token-metadata";
 import { Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram } from "@solana/web3.js";
 import { COOLING_OFF_SECS, DAILY_LIMIT, DEMO_DIR, LARGE_AMOUNT } from "./config.js";
 import { fetchVault, ix, listRequests, sendTx, vaultPda } from "./vault.js";
-import { deployer, ensureKey, readWorld, ROLES, writeWorld } from "./world.js";
+import { deployer, ensureKey, mintKeys, readWorld, ROLES, writeWorld } from "./world.js";
 import { makeConnection } from "./rpc.js";
 
 const conn = makeConnection();
@@ -26,11 +26,15 @@ async function main() {
   const k = Object.fromEntries(ROLES.map((r) => [r, ensureKey(r)])) as Record<(typeof ROLES)[number], Keypair>;
 
   // Address poisoning: a wallet that starts with the same 4 characters as Ana's.
+  mkdirSync(DEMO_DIR, { recursive: true });
   if (!existsSync(join(DEMO_DIR, "lookalike.json"))) {
     const prefix = k.ana.publicKey.toBase58().slice(0, 4);
     log("grinding a look-alike of Ana starting with", prefix, "(solana-keygen grind)");
     const before = new Set(readdirSync(DEMO_DIR));
-    execFileSync("bash", ["../cloud/anchor.sh", `cd /keys/demo && solana-keygen grind --starts-with ${prefix}:1 --num-threads 4 >/dev/null`], { stdio: "inherit" });
+    // solana-keygen on this machine (e.g. a GitHub runner), or inside the Anchor image (Codespace)
+    const local = execFileSync("bash", ["-c", "command -v solana-keygen || true"]).toString().trim();
+    if (local) execFileSync("bash", ["-c", `cd "${DEMO_DIR}" && solana-keygen grind --starts-with ${prefix}:1 >/dev/null`], { stdio: "inherit" });
+    else execFileSync("bash", ["../cloud/anchor.sh", `cd /keys/demo && solana-keygen grind --starts-with ${prefix}:1 --num-threads 4 >/dev/null`], { stdio: "inherit" });
     const made = readdirSync(DEMO_DIR).find((f) => !before.has(f) && f.startsWith(prefix) && f.endsWith(".json"));
     if (!made) throw new Error("grind produced no key");
     renameSync(join(DEMO_DIR, made), join(DEMO_DIR, "lookalike.json"));
@@ -52,6 +56,7 @@ async function main() {
   const I = ix(conn);
   const vault = vaultPda(k.elder.publicKey);
   let v = await fetchVault(conn, vault);
+  const newVault = !v;
   if (!v) {
     const r = await sendTx(conn, [await I.initialize(k.elder.publicKey, k.ana.publicKey, DAILY_LIMIT, LARGE_AMOUNT, COOLING_OFF_SECS),
       await I.deposit(k.elder.publicKey, k.elder.publicKey, 2.0 * LAMPORTS_PER_SOL)], [k.elder]);
@@ -71,9 +76,11 @@ async function main() {
   }
 
   const w = readWorld();
+  const mk = mintKeys();
+  const exists = async (k?: PublicKey) => !!k && !!(await conn.getAccountInfo(k));
   // A demo dollar the family really uses (classic SPL token), 500 in Lucy's wallet
-  if (!w.nusdMint) {
-    const mint = Keypair.generate();
+  if (mk ? !(await exists(mk.nusd.publicKey)) : !w.nusdMint) {
+    const mint = mk?.nusd ?? Keypair.generate();
     const ata = getAssociatedTokenAddressSync(mint.publicKey, k.elder.publicKey);
     const r = await sendTx(conn, [
       SystemProgram.createAccount({ fromPubkey: payer.publicKey, newAccountPubkey: mint.publicKey, space: MINT_SIZE, lamports: await conn.getMinimumBalanceForRentExemption(MINT_SIZE), programId: TOKEN_PROGRAM_ID }),
@@ -85,8 +92,8 @@ async function main() {
     log("nUSD demo dollar", w.nusdMint, r.sig);
   }
   // The scam: a Token-2022 token that calls itself "USD Coin / USDC", airdropped to Lucy
-  if (!w.fakeUsdcMint) {
-    const mint = Keypair.generate();
+  if (mk ? !(await exists(mk.fakeUsdc.publicKey)) : !w.fakeUsdcMint) {
+    const mint = mk?.fakeUsdc ?? Keypair.generate();
     const md = { mint: mint.publicKey, name: "USD Coin", symbol: "USDC", uri: "", additionalMetadata: [] as [string, string][], updateAuthority: payer.publicKey };
     const mintLen = getMintLen([ExtensionType.MetadataPointer]);
     const mdLen = TYPE_SIZE + LENGTH_SIZE + pack(md).length;
@@ -103,7 +110,7 @@ async function main() {
     log("FAKE USDC airdropped to Lucy", w.fakeUsdcMint, r.sig);
   }
   // Address poisoning: the look-alike sends Lucy a tiny "dust" payment so it shows up in her history
-  if (!w.history?.length) {
+  if (newVault || (!mintKeys() && !w.history?.length)) {
     const dust = await sendTx(conn, [SystemProgram.transfer({ fromPubkey: lookalike.publicKey, toPubkey: k.elder.publicKey, lamports: 1000 })], [lookalike]);
     log("look-alike dust sent to Lucy", dust.sig);
     // One real everyday payment: groceries to Ana last week (the "usual payment")

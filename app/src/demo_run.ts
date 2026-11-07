@@ -9,9 +9,13 @@ import { Lang } from "./ai.js";
 import { AI, COOLING_OFF_SECS, MODEL } from "./config.js";
 import { vaultErrorOf } from "./decode.js";
 import { check, Report } from "./guardian.js";
-import { qrFor, SCENARIOS } from "./scenarios.js";
+import { qrFor, SCENARIOS, senderOf } from "./scenarios.js";
 import { bookFor } from "./server.js";
-import { explorer, fetchVault, ix, listRequests, requestPda, sendTx } from "./vault.js";
+import { explorer, fetchReports, fetchVault, ix, listRequests, requestPda, sendTx, vaultPda } from "./vault.js";
+import { derived, seedHex } from "./keys.js";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { KEY_DIR } from "./config.js";
 import { deployer, kp, loadWorld } from "./world.js";
 
 const RUNS = Number(process.env.RUNS ?? 3);
@@ -38,10 +42,11 @@ async function landFailing(ixs: TransactionInstruction[], signers: Keypair[]) {
   const res = { value: { err } };
   const ve = vaultErrorOf(res.value.err);
   const code = (res.value.err as any)?.InstructionError?.[1]?.Custom;
-  const anchor: Record<number, string> = { 2001: "2001 ConstraintHasOne: the guardian must be the one saved in the vault" };
+  const anchor: Record<number, string> = { 2001: "2001 ConstraintHasOne: the guardian must be the one saved in the vault", 0: "account already in use: this family already reported this wallet" };
   return { sig, link: explorer(sig), failed: !!res.value.err, error: ve ? `${ve.code} ${ve.name}: ${ve.msg}` : anchor[code] ?? JSON.stringify(res.value.err) };
 }
 
+let community: any = null;
 async function main() {
   const elder = kp("elder"), ana = kp("ana");
   const I = ix(w.conn);
@@ -60,7 +65,7 @@ async function main() {
       const fast: Report[] = [];
       for (let i = 0; i < RUNS; i++) {
         const { tx } = await s.build(w);
-        const inp = { tx, message: s.message[lang], link: s.link ?? qrFor(s, w), lang };
+        const inp = { tx, message: s.message[lang], link: s.link ?? qrFor(s, w), lang, sender: senderOf(s) };
         fast.push(await check(w.conn, await bookFor(w, lang), { ...inp, useModel: false }));
         reports.push(await check(w.conn, await bookFor(w, lang), inp));
       }
@@ -103,6 +108,31 @@ async function main() {
   const d1 = await sendTx(w.conn, [await I.decide(ana.publicKey, elder.publicKey, req1, false)], [ana]);
   P("guardian Ana says NO, signed on-chain", { link: explorer(d1.sig), ms: d1.ms, failed: false });
   P("sending the rejected request anyway", await landFailing([await I.execute(elder.publicKey, req1, w.fakeRelative)], [elder]));
+  // f) the community scam list: Ana reports the wallet; the same family can't count twice; a second family reports it too
+  const before = (await fetchReports(w.conn, [w.fakeRelative.toBase58()]))[w.fakeRelative.toBase58()]?.reports ?? 0;
+  try {
+    const rep1 = await sendTx(w.conn, [await I.reportScam(ana.publicKey, elder.publicKey, w.fakeRelative, 1)], [ana]);
+    P("Ana reports the 'new number' wallet on the community scam list", { link: explorer(rep1.sig), ms: rep1.ms, failed: false });
+  } catch { log("Ana already reported this wallet in an earlier run"); }
+  P("the same family reports it again (counts once)", await landFailing([await I.reportScam(ana.publicKey, elder.publicKey, w.fakeRelative, 1)], [ana]));
+  try {
+    const kf = (dir: string, role: string) => Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(join(KEY_DIR, dir, `${role}.json`), "utf8"))));
+    // the other family: from the seed (GitHub runner) or the archived family (Codespace)
+    const otherGuardian = seedHex() ? derived("ana2") : kf("demo_v1", "ana");
+    const otherOwner = seedHex() ? derived("elder2") : kf("demo_v1", "elder");
+    for (const who of [otherGuardian, otherOwner])
+      if ((await w.conn.getBalance(who.publicKey)) < 0.006 * LAMPORTS_PER_SOL)
+        await sendTx(w.conn, [SystemProgram.transfer({ fromPubkey: deployer().publicKey, toPubkey: who.publicKey, lamports: 0.02 * LAMPORTS_PER_SOL })], [deployer()]);
+    if (!(await fetchVault(w.conn, vaultPda(otherOwner.publicKey))))
+      await sendTx(w.conn, [await I.initialize(otherOwner.publicKey, otherGuardian.publicKey, 0.1 * LAMPORTS_PER_SOL, 0.5 * LAMPORTS_PER_SOL, 60)], [otherOwner]);
+    const rep2 = await sendTx(w.conn, [await I.reportScam(otherGuardian.publicKey, otherOwner.publicKey, w.fakeRelative, 1)], [otherGuardian]);
+    P("a second family (another vault's guardian) reports the same wallet", { link: explorer(rep2.sig), ms: rep2.ms, failed: false });
+  } catch (e: any) { log("second family report skipped:", String(e?.message ?? e).slice(0, 120)); }
+  const after = (await fetchReports(w.conn, [w.fakeRelative.toBase58()]))[w.fakeRelative.toBase58()]?.reports ?? 0;
+  const fr = SCENARIOS.find((x) => x.id === "fake-relative")!;
+  const re = await check(w.conn, await bookFor(w, "en"), { tx: (await fr.build(w)).tx, message: fr.message.en, lang: "en", sender: senderOf(fr), useModel: false });
+  community = { reportsBefore: before, reportsAfter: after, flagAfter: re.flags.find((f) => f.id === "community_reported")?.en ?? null, verdictAfter: re.verdict, verdictMs: re.timings.totalMs };
+  log("community list:", JSON.stringify(community));
   await sendTx(w.conn, [await I.cancel(elder.publicKey, elder.publicKey, req1)], [elder]);
   // e) big payment to a trusted son: guardian approves, then the cooling-off holds it
   v = await fetchVault(w.conn, w.vault);
@@ -133,7 +163,7 @@ async function main() {
     medianTotalMs: med(rows.map((r) => r.median.totalMs)), medianSimulateMs: med(rows.map((r) => r.median.simulateMs)),
     medianAiMs: med(rows.map((r) => r.median.aiTacticsMs + r.median.aiExplainMs)),
     explanationsByModel: `${rows.filter((r) => r.explanationBy === "model").length}/${rows.length}`,
-    onchainRefusals: proofs.filter((p) => p.failed).length, medianConfirmMs: med(proofs.filter((p) => p.ms).map((p) => p.ms)),
+    onchainRefusals: proofs.filter((p) => p.failed).length, community, medianConfirmMs: med(proofs.filter((p) => p.ms).map((p) => p.ms)),
   };
   mkdirSync("out", { recursive: true });
   writeFileSync("out/results.json", JSON.stringify({ summary, rows, proofs }, null, 2));
@@ -153,6 +183,7 @@ function markdown(s: any, rows: any[], proofs: any[]) {
   md += `| Scams stopped | Legit payments let through | Verdicts as expected | Verdict on screen (median) | Simulation on devnet (median) | Gemma reads + explains (median) | Refusals proven on-chain |\n|:-:|:-:|:-:|:-:|:-:|:-:|:-:|\n`;
   md += `| **${s.scamsStopped}** | **${s.legitLetThrough}** | ${s.verdictsAsExpected} | **${ms(s.medianVerdictMs)}** | ${ms(s.medianSimulateMs)} | ${(s.medianAiMs / 1000).toFixed(1)} s | **${s.onchainRefusals}** |\n\n`;
   md += `The verdict comes from the simulation and the rules, so it is on screen before the model answers. Gemma then adds the tricks it finds in the message (it can only add warnings) and writes the plain-language explanation.\n\n`;
+  if (s.community) md += `**Community scam list:** after Ana refused the "new number" request, she reported the wallet on-chain; a second family reported it too, and the same family could not count twice. The wallet now has **${s.community.reportsAfter} reports**, and the next check shows: _${s.community.flagAfter}_ (verdict ${s.community.verdictAfter} in ${Math.round(s.community.verdictMs)} ms).\n\n`;
   md += `## Every scenario\n\n| Scenario | Lang | Expected | Verdicts (with Gemma) | Flags | Scam tricks found | Vault said | Verdict on screen | Simulation | Gemma |\n|---|---|---|---|---|---|---|--:|--:|--:|\n`;
   for (const r of rows) md += `| ${r.id} | ${r.lang} | ${r.expect} | ${r.verdicts.join(", ")} ${r.correct ? "✅" : "❌"} | ${r.flags.join("<br>")} | ${r.tactics.join(", ") || "none"} | ${r.vaultError ?? "ok"} | ${ms(r.fastVerdictMs)} | ${ms(r.median.simulateMs)} | ${((r.median.aiTacticsMs + r.median.aiExplainMs) / 1000).toFixed(1)} s |\n`;
   md += `\n## What the person reads (last run)\n\n`;

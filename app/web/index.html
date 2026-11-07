@@ -33,7 +33,7 @@ const T = {
     check: "Antes de assinar", pick: "Escolha um pedido e toque em “Verificar antes de assinar”.", onchain: "Pedidos no cofre (na Solana)",
     verify: "Verificar antes de assinar", checking: "Simulando na Solana e lendo a mensagem…", listen: "🔊 Ouvir", sign: "Assinar e enviar",
     askAna: "Pedir para a Ana decidir", alertAna: "Avisar a Ana", dont: "Não enviar", what: "O que muda na sua carteira", why: "Por quê",
-    tricks: "Truques de golpe na mensagem", vault: "Seu cofre (protegido na Solana)", wallet: "Carteira do dia a dia", today: "Gasto hoje",
+    tricks: "Truques de golpe na mensagem", sources: "De onde vem cada parte", vault: "Seu cofre (protegido na Solana)", wallet: "Carteira do dia a dia", today: "Gasto hoje",
     of: "de", tokens: "Seus tokens", fake: "FALSO", phoneOff: "📞 Estou no telefone com alguém", phoneOn: "📞 Modo golpe de telefone LIGADO",
     none: "Nenhum pedido no cofre.", pending: "aguardando a Ana", approved: "Ana aprovou", rejected: "Ana recusou", waiting: "Espera de segurança:",
     sendNow: "Enviar agora", cancel: "Cancelar", needsAna: "precisa da Ana", sent: "Enviado! Veja na Solana:", asked: "Pedido criado no cofre. A Ana foi avisada.",
@@ -43,7 +43,7 @@ const T = {
     check: "Before you sign", pick: "Pick a request and tap “Check before signing”.", onchain: "Requests in the vault (on Solana)",
     verify: "Check before signing", checking: "Simulating on Solana and reading the message…", listen: "🔊 Listen", sign: "Sign and send",
     askAna: "Ask Ana to decide", alertAna: "Tell Ana", dont: "Don't send", what: "What changes in your wallet", why: "Why",
-    tricks: "Scam tricks in the message", vault: "Your vault (protected on Solana)", wallet: "Everyday wallet", today: "Spent today",
+    tricks: "Scam tricks in the message", sources: "Where each part comes from", vault: "Your vault (protected on Solana)", wallet: "Everyday wallet", today: "Spent today",
     of: "of", tokens: "Your tokens", fake: "FAKE", phoneOff: "📞 I'm on the phone with someone", phoneOn: "📞 Phone-scam mode ON",
     none: "No requests in the vault.", pending: "waiting for Ana", approved: "Ana approved", rejected: "Ana said no", waiting: "Safety wait:",
     sendNow: "Send now", cancel: "Cancel", needsAna: "needs Ana", sent: "Sent! See it on Solana:", asked: "Request created in the vault. Ana was told.",
@@ -147,6 +147,7 @@ function render(id, done) {
     <div class="actions"><button class="big b-listen" onclick="say()">${t("listen")}</button>${act}</div>
     <h2 style="margin-top:16px">${t("what")}</h2><ul class="changes">${r.changes.map((c) => `<li>${esc(c[lang])}</li>`).join("")}</ul>
     ${flags ? `<h2>${t("why")}</h2><ul class="flags">${flags}</ul>` : ""}
+    ${(r.sources ?? []).length ? `<h2>${t("sources")}</h2><ul class="sources">${r.sources.map((x) => `<li class="s-${x.ok === true ? "ok" : x.ok === false ? "bad" : "unk"}">${x.ok === true ? "✅" : x.ok === false ? "❌" : "❔"} ${esc(x[lang])}</li>`).join("")}</ul>` : ""}
     ${tactics}
     <p class="small">${t("speed")} ${((r.fastMs ?? tm.totalMs) / 1000).toFixed(2)} s (simulation ${Math.round(tm.simulateMs)} ms) · ${done ? `${t("ai")} ${esc(st?.ai)}: ${(Math.round(tm.aiTacticsMs + tm.aiExplainMs) / 1000).toFixed(1)} s · ${t("wrote")} ${r.explanation.by === "model" ? esc(st?.ai) : t("tpl")}` : (st?.ai !== "templates" ? `⏳ ${esc(st?.ai)} ${t("thinking")}` : "")} · ${r.simulation.unitsConsumed} CU</p>
     <div id="after"></div>`;

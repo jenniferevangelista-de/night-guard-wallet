@@ -182,7 +182,7 @@ def rec_frame(tt, it):
     for i, ln in enumerate(textwrap.wrap(it["title"], 10)):
         text(d, ln, cx, 220 + i * 66, 58, NIGHT, "mm", "impact.ttf")
     m = beak(tt)
-    owl(im, tt, cx, 1000, 330, m or 0.0, "talk" if m is not None else "listen", emo="alarm" if it["id"] in ("relative", "others") and rel < 3 else "happy")
+    owl(im, tt, cx, 1000, 330, m or 0.0, "talk" if m is not None else "listen", emo="alarm" if it["id"] in ("relative", "others") and rel < 3 else "proud" if it["id"] == "community" and rel > 2 else "happy")
     d = ImageDraw.Draw(im)
     subtitle(d, tt, FX + FW / 2, FY + FH - 30)
     return im
@@ -229,7 +229,7 @@ def paper_frame(tt, it):
         k = seg(rel, 0, 0.8)
         d.ellipse((900, 170, 1020, 290), fill=(255, 211, 110)); d.ellipse((930, 160, 1040, 270), fill=(247, 242, 230))
         text(d, "Night Guard Wallet", 960, 400 - (1 - eout(k)) * 40, 120, NIGHT, "mm", "impact.ttf")
-        text(d, "a guard for our parents' and grandparents' crypto", 960, 510, 50, INK)
+        text(d, "a Solana wallet guard for our parents, grandparents, and the rest of us", 960, 510, 46, INK)
         text(d, "Jennifer Evangelista · MLH Solana Hackathon · November 2026", 960, 590, 34, SOFT)
         owl(im, tt, 960, 1000, 300, 0.0, "sleep" if rel < dur * 0.6 else "listen")
     elif key == "problem":
@@ -243,9 +243,9 @@ def paper_frame(tt, it):
     elif key == "olive":
         owl(im, tt, 960, 900, 560, m or 0.0, "talk", wave=1.0 if rel < 2.5 else 0.0)
         text(d, "Olive", 960, 120, 90, PURPLE, "mm", "impact.ttf")
-        text(d, "Night Guard's owl · she reads every transaction before Lucy signs", 960, 200, 40, INK)
+        text(d, "the wallet's owl · she reads every transaction before Lucy signs", 960, 200, 40, INK)
     elif key == "how":
-        steps = [("1  Simulate", "on Solana devnet:\nwhat really changes", NIGHT), ("2  Risk rules", "drainers, look-alikes,\nnew wallets", RED),
+        steps = [("1  Simulate", "on Solana devnet:\nwhat really changes", NIGHT), ("2  Check sources", "sender, link, wallet,\nprogram, token", RED),
                  ("3  Gemma reads", "the message and\nquotes the tricks", PURPLE), ("4  Vault program", "rules on-chain that\nno one can switch off", GREEN)]
         for i, (big, small, col) in enumerate(steps):
             k = seg(rel, 0.2 + i * dur / 4.4, 0.8 + i * dur / 4.4)
@@ -295,7 +295,7 @@ def paper_frame(tt, it):
         owl(im, tt, 1720, 1000, 330, m or 0.0, "talk", emo="proud")
     elif key == "end":
         text(d, "Night Guard Wallet", 960, 260, 110, NIGHT, "mm", "impact.ttf")
-        text(d, "Solana does the guarding · AI does the explaining · the family stays in the loop", 960, 380, 42, INK)
+        text(d, "Solana does the guarding · AI does the explaining · families protect each other", 960, 380, 42, INK)
         text(d, "github.com/jenniferevangelista-de/night-guard-wallet", 960, 470, 40, PURPLE)
         text(d, "Gemma 4 via Ollama · Anchor · Solana devnet · built during the MLH Solana Hackathon", 960, 540, 32, SOFT)
         owl(im, tt, 960, 1010, 380, 0.0, "listen" if rel < dur + 0.5 else "sleep", wave=1.0 if rel > dur * 0.5 else 0.0)

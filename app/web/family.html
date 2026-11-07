@@ -26,12 +26,12 @@ const T = {
   pt: { title: "guardiã da Dona Lúcia", sub: "Alertas ao vivo, lidos direto da Solana", decide: "Pedidos esperando você", live: "Ao vivo",
     quiet: "Nada por enquanto.", approve: "✅ Aprovar", reject: "⛔ Recusar", none: "Nenhum pedido esperando você.",
     blocked: "Night Guard BLOQUEOU", help: "Sua mãe pediu ajuda com", wait: "espera de segurança até", signed: "assinado na Solana",
-    RequestOpened: "Novo pedido no cofre", GuardianDecided: "Decisão registrada na Solana", Executed: "Dinheiro enviado pelo cofre", Sent: "Pagamento do dia a dia",
+    RequestOpened: "Novo pedido no cofre", rejectReport: "⛔ Recusar e denunciar", report: "🚩 Denunciar para todas as famílias", reported: "Denunciada na lista comunitária da Solana", ScamReported: "Golpista denunciado na lista comunitária", GuardianDecided: "Decisão registrada na Solana", Executed: "Dinheiro enviado pelo cofre", Sent: "Pagamento do dia a dia",
     Cancelled: "Pedido cancelado", TrustedChanged: "Lista de confiança mudou", needs: "precisa de você", untrusted: "carteira FORA da lista de confiança", over: "acima do limite do dia", large: "valor alto" },
   en: { title: "Lucy's guardian", sub: "Live alerts, read straight from Solana", decide: "Requests waiting for you", live: "Live",
     quiet: "Nothing yet.", approve: "✅ Approve", reject: "⛔ Say no", none: "No requests waiting for you.",
     blocked: "Night Guard BLOCKED", help: "Your mom asked for help with", wait: "safety wait until", signed: "signed on Solana",
-    RequestOpened: "New request in the vault", GuardianDecided: "Decision recorded on Solana", Executed: "Money sent by the vault", Sent: "Everyday payment",
+    RequestOpened: "New request in the vault", rejectReport: "⛔ Say no and report", report: "🚩 Report to every family", reported: "Reported on the community list on Solana", ScamReported: "Scammer reported on the community list", GuardianDecided: "Decision recorded on Solana", Executed: "Money sent by the vault", Sent: "Everyday payment",
     Cancelled: "Request cancelled", TrustedChanged: "Trusted list changed", needs: "needs you", untrusted: "wallet NOT on the trusted list", over: "over today's limit", large: "big amount" },
 };
 let lang = localStorage.lang || "en";
@@ -46,20 +46,29 @@ async function load() {
   $("#requests").innerHTML = rs.length ? rs.map((r) => `<div class="req"><b>${esc(r.amountTxt)} → ${esc(r.toName)}</b>
     <div class="meta">#${r.id} · ${esc(r.note)} · <a href="${r.link}" target="_blank">Explorer ↗</a></div>
     <div class="actions"><button class="big b-sign" onclick="decide('${r.address}', true)">${t("approve")}</button>
-    <button class="big b-family" onclick="decide('${r.address}', false)">${t("reject")}</button></div></div>`).join("") : `<p class="empty">${t("none")}</p>`;
+    <button class="big b-family" onclick="decide('${r.address}', false)">${t("reject")}</button>
+    ${r.toKnown ? "" : `<button class="big b-report" onclick="decide('${r.address}', false, '${r.to}')">${t("rejectReport")}</button>`}</div></div>`).join("") : `<p class="empty">${t("none")}</p>`;
 }
-async function decide(req, approve) {
+async function decide(req, approve, reportTo) {
   document.querySelectorAll(".req button").forEach((b) => (b.disabled = true));
   const r = await api("/api/guardian/decide", { request: req, approve });
   if (r.error) { alert(r.error); }
+  if (reportTo) await report(reportTo);
   load();
+}
+async function report(address, btn) {
+  if (btn) btn.disabled = true;
+  const r = await api("/api/guardian/report", { address, reason: 1 });
+  if (btn) btn.outerHTML = `<span class="small">🚩 ${r.error ? esc(r.error) : t("reported")}</span>`;
 }
 const feed = [];
 function render() {
   $("#feed").innerHTML = feed.slice().reverse().map((ev) => {
     const time = new Date(ev.at).toLocaleTimeString(lang === "pt" ? "pt-BR" : "en-US");
     if (ev.type === "blocked") return `<div class="ev blocked"><b>⛔ ${t("blocked")}: ${esc(ev.title[lang])}</b> ${esc(ev.amountTxt)}
-      <ul class="flags">${ev.flags.map((f) => `<li class="${f.level}">${esc(f[lang])}</li>`).join("")}</ul><span class="small">${time}</span></div>`;
+      <ul class="flags">${ev.flags.map((f) => `<li class="${f.level}">${esc(f[lang])}</li>`).join("")}</ul>
+      ${(ev.suspects ?? []).map((a) => `<button class="big b-report" onclick="report('${a}', this)">${t("report")} · ${a.slice(0, 4)}…${a.slice(-4)}</button>`).join(" ")}
+      <span class="small">${time}</span></div>`;
     if (ev.type === "help") return `<div class="ev blocked"><b>🆘 ${t("help")}: ${esc(ev.title[lang])}</b><br><span class="small">${time}</span></div>`;
     const d = ev.data || {};
     let extra = "";
