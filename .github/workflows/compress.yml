@@ -1,0 +1,37 @@
+# A 720p copy of the video under 10 MB (for a browser upload), from the artifact of a demo run.
+name: compress
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Demo run that has the video"
+        required: true
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  compress:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the video
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download ${{ inputs.run_id }} --repo ${{ github.repository }} -n night-guard-wallet-results -D in
+      - name: 720p, two-pass, about 9.5 MB
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          V=in/video/out/night_guard_wallet.mp4
+          D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 $V)
+          VB=$(python3 -c "print(int((9.4*8*1024*1024/$D - 96000)/1000))")
+          echo "duration $D s, video $VB kbps"
+          ffmpeg -v error -y -i $V -vf scale=1280:720:flags=lanczos -c:v libx264 -preset veryslow -tune stillimage -b:v ${VB}k -pass 1 -an -f null /dev/null
+          ffmpeg -v error -y -i $V -vf scale=1280:720:flags=lanczos -c:v libx264 -preset veryslow -tune stillimage -b:v ${VB}k -pass 2 -c:a aac -b:a 96k -ar 48000 -movflags +faststart night_guard_wallet_720p.mp4
+          ls -la night_guard_wallet_720p.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: video-720p
+          retention-days: 7
+          path: night_guard_wallet_720p.mp4
