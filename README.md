@@ -1,36 +1,68 @@
 # 🌙 Night Guard Wallet
 
-**A guard for the people scammers target the most, our parents and grandparents, and for the rest of us too.** Before Lucy (74) signs anything, Night Guard Wallet **simulates the transaction on Solana**, shows in big plain words what would really change, **checks where every part comes from** (sender, link, wallet, program, token), **flags the scam** (with Gemma reading the message that came with it), and keeps her savings in an **on-chain vault** whose rules nobody can switch off: trusted contacts, a daily limit, a family guardian who approves with her own signature, and a cooling-off period for big amounts.
+**A Solana wallet guard for the people scammers target the most, our parents and grandparents, and for the rest of us too.** Before Lucy (74) signs anything, it **simulates the transaction on Solana**, **checks where every part comes from**, lets **Gemma** read the message that came with it, explains the verdict **in big plain words**, and keeps her savings in an **on-chain vault** whose rules nobody can switch off. When her daughter refuses a scam, the wallet goes on a **community scam list on Solana**, so **one family's "no" protects every family**.
 
-And when one family's guardian refuses a scam, she can **report the wallet on a community scam list on Solana**: every Night Guard wallet reads it before signing, so **one family's "no" protects every family**. It is built to be fair: a family can only report a wallet that asked it for money and was refused by its guardian (the program checks that proof), each family counts once, one report is only a warning, it takes three families to block, a trusted contact is never blocked by reports, and a family can withdraw its report.
+Built for the [MLH Solana Hackathon](https://events.mlh.com/events/15200-solana-hackathon) · AI Track · Top 3 · DeFi · Beginner
 
-[![Night Guard Wallet, the video (3:23)](https://img.youtube.com/vi/rZ3oyl6PMTw/hqdefault.jpg)](https://youtu.be/rZ3oyl6PMTw)
+[![ci](https://github.com/jenniferevangelista-de/night-guard-wallet/actions/workflows/ci.yml/badge.svg)](https://github.com/jenniferevangelista-de/night-guard-wallet/actions/workflows/ci.yml)
+[![devnet program](https://img.shields.io/badge/Solana%20devnet-guardian__vault-14F195?logo=solana&logoColor=white)](https://explorer.solana.com/address/8BtGEAMv12hh24JQYmWUJZ8Y547y72n4LDfppv3CTDJ5?cluster=devnet)
+[![Gemma 4](https://img.shields.io/badge/AI-Gemma%204%20E2B%20via%20Ollama-6941c6)](docs/EVAL.md)
+[![license](https://img.shields.io/badge/license-MIT-0f1b3d)](LICENSE)
 
-**Watch the video (3:23):** https://youtu.be/rZ3oyl6PMTw · a real run on Solana devnet, narrated by Olive the owl
+[![Watch the 3-minute Night Guard Wallet video on YouTube](docs/img/video_thumb.jpg)](https://youtu.be/rZ3oyl6PMTw)
 
-MLH Solana Hackathon · AI Track ("security tools that explain what a transaction will do or flag risky programs, tokens and wallets before a user signs").
+**Video (3:23):** [watch on YouTube](https://youtu.be/rZ3oyl6PMTw): the problem, how it works, and a real run on Solana devnet, narrated by Olive the owl · **Showcase page:** [jenniferevangelista-de.github.io/night-guard-wallet](https://jenniferevangelista-de.github.io/night-guard-wallet/) · **Every on-chain proof:** [docs/RESULTS.md](docs/RESULTS.md)
 
-| **5/5** | **2/2** | **0.2 s** | **32/32 · 0** | **7** | **1 → 3 families** |
+![The "son with a new number" asks for 1.8 SOL: Night Guard says STOP in plain words, and Lucy asks Ana to decide](docs/img/demo.gif)
+
+## Measured results
+
+| **5/5** | **2/2** | **0.2 s** | **32/32 · 0** | **7** | **1 → 3** |
 |:-:|:-:|:-:|:-:|:-:|:-:|
-| scam scenarios stopped, on every run (English, plus Portuguese) | real family payments let through | from "check" to verdict on screen (median, devnet simulation included) | scam messages Gemma recognised · false alarms on 28 ordinary family messages | scams refused **by the program itself** on devnet, even when forced past the app | reported the same scam wallet on the on-chain community list, each with proof: 1 family = warning, 3 = block |
+| scam scenarios stopped, on every run (English + Portuguese) | real family payments let through | from "check" to the verdict on screen (median, devnet simulation included) | scam messages Gemma recognised · false alarms on 28 ordinary messages | scam attempts refused **by the program itself** on devnet | families on the on-chain scam list: warning → block |
 
-<sub>[docs/RESULTS.md](docs/RESULTS.md): 42 checks on Solana devnet, the community-list steps (7 scenarios × 2 languages × 3 runs) and the on-chain proofs with explorer links. [docs/EVAL.md](docs/EVAL.md): 60 fictional messages, Gemma 4 E2B on a CPU. Every person and message in this repository is fictional.</sub>
+<sub>42 checks on Solana devnet (7 scenarios × 2 languages × 3 runs), the community-list steps and every transaction with its explorer link: [docs/RESULTS.md](docs/RESULTS.md). 60-message evaluation, Gemma 4 E2B on a CPU: [docs/EVAL.md](docs/EVAL.md). Charts: [docs/make_charts.py](docs/make_charts.py). Every person and message here is fictional.</sub>
 
-## Why
+![The verdict is on screen in a fraction of a second; Gemma's explanation arrives after and can only add warnings](docs/img/chart_speed.png)
 
-People over 60 reported **$7.7 billion** lost to fraud in 2025, **$4.3 billion** of it involving crypto, an average of **$38,500** per victim ([FBI IC3 2025 Internet Crime Report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf), Elder Fraud section). On a blockchain there is no bank to call: one signature can't be undone. The scams are always the same few stories: the "son" with a new number, the fake bank or wallet support, the free airdrop, the prize with a fee to unlock, the address copied from history.
+---
+
+## The problem
+
+At 9 pm, Lucy gets a WhatsApp from a number she doesn't know: *"Hi mom, it's me, I changed my number. I'm in trouble and need to pay a bill urgently today. Send 1.8 SOL to this wallet and don't tell dad."* Her bank would call her back. A blockchain won't: **one signature is final**.
+
+In 2025, people over 60 reported **$7.7 billion** lost to fraud to the FBI, **$4.3 billion** of it involving crypto, **$38,500** per victim on average ([FBI IC3 2025 Internet Crime Report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf), Elder Fraud section). The stories are always the same few: the "son" with a new number, the fake bank or wallet support, the free airdrop, the prize with a fee to unlock, the address copied from history. Wallets show *what* will be signed in a language only developers read. Nobody tells Lucy, in her words, that this is the scam she was warned about, and nobody can stop her money once she taps "approve".
+
+## What happens
+
+```
+Lucy's wallet   "son" with a new number asks for 1.8 SOL · Check before signing
+Night Guard     ⛔ STOP. Do not sign.
+                Stop! Someone asked for 1.8 SOL and said they changed their number.
+                This is a scam, so do not send the money and call your family right away.   🔊 Listen
+                What changes:  1.8 SOL leaves your vault → iVF1…Wf4j (unknown) · the vault on Solana refuses it
+                Why:           not a saved contact · brand-new wallet (0 min old) · 67% of all your money
+                Scam tricks:   "changed my number" · "urgently today" · "don't tell dad"   (quoted by Gemma)
+Lucy            [Ask Ana to decide]          → an on-chain request, needs the guardian
+Ana (guardian)  ⛓️ New request in the vault · wallet NOT on the trusted list · over today's limit
+                [Say no and report]          → her own signature on Solana + a report with on-chain proof
+Any family      🚩 The wallet iVF1…Wf4j was REPORTED as a scam by 1 family on the community list.
+                One report is a warning, not proof: check with your family.
+```
 
 ## See it
 
 | ⛔ Before Lucy signs: STOP, in plain words | 👩 Ana, the guardian: live from Solana, "say no and report" |
 |:-:|:-:|
-| ![STOP screen](https://raw.githubusercontent.com/jenniferevangelista-de/night-guard-wallet/main/docs/screens/2_stop.png) | ![Guardian page](https://raw.githubusercontent.com/jenniferevangelista-de/night-guard-wallet/main/docs/screens/3_ana_guardian.png) |
-| **👵 Lucy's wallet: savings in the on-chain vault, fake USDC flagged** | **🚩 The community list: "reported by 1 family, a warning, not proof"** |
-| ![Wallet](https://raw.githubusercontent.com/jenniferevangelista-de/night-guard-wallet/main/docs/screens/1_wallet.png) | ![Community list warning](https://raw.githubusercontent.com/jenniferevangelista-de/night-guard-wallet/main/docs/screens/4_community_list.png) |
+| ![STOP screen](docs/screens/2_stop.png) | ![Guardian page](docs/screens/3_ana_guardian.png) |
+| **👵 Lucy's wallet: savings in the on-chain vault, fake USDC flagged** | **🚩 The community list: one report is a warning, not proof** |
+| ![Wallet](docs/screens/1_wallet.png) | ![Community list warning](docs/screens/4_community_list.png) |
+
+## Architecture at a glance
+
+![Architecture: Lucy's wallet, the Night Guard guardian (decode, simulate on devnet, risk rules + sources, Gemma), the guardian_vault Anchor program and Ana's guardian page](docs/architecture.png)
 
 ## What it does
-
-![Architecture](https://raw.githubusercontent.com/jenniferevangelista-de/night-guard-wallet/main/docs/architecture.png)
 
 1. **Simulate on Solana.** The wallet runs the transaction with `simulateTransaction` on devnet and compares every writable account before and after: SOL, tokens, **delegates (approvals)** and **owners (authorities)**. Instructions are decoded too: System, SPL Token and Token-2022, the vault's own IDL, Memo, and any unknown program.
 2. **Flag the risk** with rules on the simulated result: a wallet she never paid (and how new it is), an address that **looks like** a trusted contact's (address poisoning), most of her money leaving, an **unlimited `approve`**, **`SetAuthority`** or **`CloseAccount`** to a stranger (drainers), a **fake token** that calls itself USDC (Token-2022 metadata vs. the verified mint), a **phishing link or Blink** that imitates a Solana brand, a **Solana Pay QR**, and the vault refusing it.
@@ -39,6 +71,8 @@ People over 60 reported **$7.7 billion** lost to fraud in 2025, **$4.3 billion**
 5. **Lock and ask the family.** If the verdict is STOP, nothing is signed. One tap opens an **on-chain request**; Ana, her daughter and guardian, sees it live (read from the program's events) and approves or refuses **with her own signature**, and with one more tap **reports the scam wallet to every family**.
 
 The verdict never depends on the model: the simulation and the rules decide, and the model can only **add** warnings. If Gemma is slow or off, fixed texts are used. Any amount the model writes must be the real one.
+
+![Gemma recognised 32/32 scam messages with 0 false alarms; fixed rules alone caught 22/32 with 3 false alarms](docs/img/chart_eval.png)
 
 ### What Solana does here (not a chain bolted onto a web2 app)
 
@@ -54,6 +88,10 @@ The `guardian_vault` Anchor program ([programs/guardian_vault/src/lib.rs](progra
 | **Community scam list**: a guardian reports a wallet **only with proof**, a request of her vault to that wallet that she refused; one public record per wallet counts how many different families reported it, each family once; the weight grows with the count (1 warning, 2 strong, 3+ block) | `report_scam` (needs the refused `TransferRequest`; PDA `["scam", wallet]` + one `["reported", vault, wallet]` mark per family), `withdraw_report` |
 
 Proven on devnet: transfers to the scammer and to the look-alike address, **forced through without preflight**, failed on-chain with `NotTrusted`; a fake "guardian" could not add the scammer; a rejected request could not be sent; a big payment could not leave before its cooling-off; the same family could not report a wallet twice; a family could not report a wallet that never asked it for money (`NoProof`) ([links](docs/RESULTS.md#on-chain-proofs-devnet)).
+
+![Families protect families, fairly: 1 report = warning, 2 = strong, 3 = block, and a family can withdraw its report](docs/img/chart_community.png)
+
+![7 scam attempts refused by the program itself on devnet](docs/img/chart_onchain.png)
 
 | | Devnet address |
 |---|---|
