@@ -36,6 +36,7 @@ FRAMES = Path(os.environ.get("NGW_FRAMES", "/tmp/ngw/frames"))
 
 narr = json.loads((WORK / "narration.json").read_text(encoding="utf-8"))
 RES = json.loads((ROOT / "app" / "out" / "results.json").read_text(encoding="utf-8"))
+PROGRAM_ID = json.loads((ROOT / "app" / "src" / "idl" / "guardian_vault.json").read_text(encoding="utf-8"))["address"]
 EVAL = json.loads((ROOT / "app" / "eval" / "results_gemma4_e2b.json").read_text(encoding="utf-8"))["summary"]
 
 
@@ -84,7 +85,7 @@ for n in narr:
         s = scenes[n["id"]]
         v0, v1 = new_time(s["start"]), new_time(s["end"])
         rec_len = max(0.5, v1 - v0)
-        speed = min(2.6, max(1.0, rec_len / (d + 0.8)))
+        speed = min(3.0, max(1.0, rec_len / (d + 0.8)))
         item.update(v0=v0, v1=v1, speed=speed)
         seg_len = max(d + 0.8, rec_len / speed)
     else:
@@ -268,7 +269,7 @@ def paper_frame(tt, it):
             d.rectangle((x, y - 18, x + 120, y + 18), fill=(240, 226, 170))
         text(d, "Transaction on Solana devnet, read back from the chain", x0 + 40, y0 + 60, 40, NIGHT, "lm", "impact.ttf")
         rows_ = [("Signature", pr["sig"][:44] + "…"), ("Slot", f'{pr["slot"]:,}'), ("What", "vault send · 1.8 SOL → the \"new number\" wallet · forced, no preflight"),
-                 ("Status", "FAILED"), ("Program", "guardian_vault  8vE76ymUvgkQ…YymSpSkf3hwtn")]
+                 ("Status", "FAILED"), ("Program", f"guardian_vault  {PROGRAM_ID[:12]}…{PROGRAM_ID[-12:]}")]
         for i, (a_, b_) in enumerate(rows_):
             text(d, a_, x0 + 40, y0 + 140 + i * 58, 32, SOFT, "lm", "segoeuib.ttf")
             text(d, b_, x0 + 260, y0 + 140 + i * 58, 32, RED if a_ == "Status" else INK, "lm", "segoeuib.ttf" if a_ == "Status" else "segoeui.ttf")

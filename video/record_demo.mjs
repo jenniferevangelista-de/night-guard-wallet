@@ -70,8 +70,12 @@ await page.waitForSelector(".bal b");
 s = scene("community");
 await check("fake-relative"); shown(s);
 await page.evaluate(() => document.getElementById("resultCard").scrollIntoView({ behavior: "smooth" }));
-await pause(2500);
-await page.mouse.wheel(0, 330); await pause(5500);
+await pause(2000);
+await page.evaluate(() => {   // bring the community-list warning to the middle of the screen and mark it
+  const li = [...document.querySelectorAll("ul.flags li")].find((x) => /REPORTED/.test(x.textContent));
+  if (li) { li.style.outline = "4px solid #6941c6"; li.scrollIntoView({ block: "center", behavior: "smooth" }); }
+});
+await pause(6500);
 end(s);
 
 s = scene("others");
