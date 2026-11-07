@@ -20,9 +20,17 @@ MLH Solana Hackathon · AI Track ("security tools that explain what a transactio
 
 People over 60 reported **$7.7 billion** lost to fraud in 2025, **$4.3 billion** of it involving crypto, an average of **$38,500** per victim ([FBI IC3 2025 Internet Crime Report](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf), Elder Fraud section). On a blockchain there is no bank to call: one signature can't be undone. The scams are always the same few stories: the "son" with a new number, the fake bank or wallet support, the free airdrop, the prize with a fee to unlock, the address copied from history.
 
+## See it
+
+| ⛔ Before Lucy signs: STOP, in plain words | 👩 Ana, the guardian: live from Solana, "say no and report" |
+|:-:|:-:|
+| ![STOP screen](https://raw.githubusercontent.com/jenniferevangelista-de/night-guard-wallet/main/docs/screens/2_stop.png) | ![Guardian page](https://raw.githubusercontent.com/jenniferevangelista-de/night-guard-wallet/main/docs/screens/3_ana_guardian.png) |
+| **👵 Lucy's wallet: savings in the on-chain vault, fake USDC flagged** | **🚩 The community list: "reported by 1 family, a warning, not proof"** |
+| ![Wallet](https://raw.githubusercontent.com/jenniferevangelista-de/night-guard-wallet/main/docs/screens/1_wallet.png) | ![Community list warning](https://raw.githubusercontent.com/jenniferevangelista-de/night-guard-wallet/main/docs/screens/4_community_list.png) |
+
 ## What it does
 
-![Architecture](docs/architecture.png)
+![Architecture](https://raw.githubusercontent.com/jenniferevangelista-de/night-guard-wallet/main/docs/architecture.png)
 
 1. **Simulate on Solana.** The wallet runs the transaction with `simulateTransaction` on devnet and compares every writable account before and after: SOL, tokens, **delegates (approvals)** and **owners (authorities)**. Instructions are decoded too: System, SPL Token and Token-2022, the vault's own IDL, Memo, and any unknown program.
 2. **Flag the risk** with rules on the simulated result: a wallet she never paid (and how new it is), an address that **looks like** a trusted contact's (address poisoning), most of her money leaving, an **unlimited `approve`**, **`SetAuthority`** or **`CloseAccount`** to a stranger (drainers), a **fake token** that calls itself USDC (Token-2022 metadata vs. the verified mint), a **phishing link or Blink** that imitates a Solana brand, a **Solana Pay QR**, and the vault refusing it.
