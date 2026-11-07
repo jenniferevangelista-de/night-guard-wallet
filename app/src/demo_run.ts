@@ -108,30 +108,51 @@ async function main() {
   const d1 = await sendTx(w.conn, [await I.decide(ana.publicKey, elder.publicKey, req1, false)], [ana]);
   P("guardian Ana says NO, signed on-chain", { link: explorer(d1.sig), ms: d1.ms, failed: false });
   P("sending the rejected request anyway", await landFailing([await I.execute(elder.publicKey, req1, w.fakeRelative)], [elder]));
-  // f) the community scam list: Ana reports the wallet; the same family can't count twice; a second family reports it too
-  const before = (await fetchReports(w.conn, [w.fakeRelative.toBase58()]))[w.fakeRelative.toBase58()]?.reports ?? 0;
-  try {
-    const rep1 = await sendTx(w.conn, [await I.reportScam(ana.publicKey, elder.publicKey, w.fakeRelative, 1)], [ana]);
-    P("Ana reports the 'new number' wallet on the community scam list", { link: explorer(rep1.sig), ms: rep1.ms, failed: false });
-  } catch { log("Ana already reported this wallet in an earlier run"); }
-  P("the same family reports it again (counts once)", await landFailing([await I.reportScam(ana.publicKey, elder.publicKey, w.fakeRelative, 1)], [ana]));
-  try {
-    const kf = (dir: string, role: string) => Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(join(KEY_DIR, dir, `${role}.json`), "utf8"))));
-    // the other family: from the seed (GitHub runner) or the archived family (Codespace)
-    const otherGuardian = seedHex() ? derived("ana2") : kf("demo_v1", "ana");
-    const otherOwner = seedHex() ? derived("elder2") : kf("demo_v1", "elder");
-    for (const who of [otherGuardian, otherOwner])
-      if ((await w.conn.getBalance(who.publicKey)) < 0.006 * LAMPORTS_PER_SOL)
-        await sendTx(w.conn, [SystemProgram.transfer({ fromPubkey: deployer().publicKey, toPubkey: who.publicKey, lamports: 0.02 * LAMPORTS_PER_SOL })], [deployer()]);
-    if (!(await fetchVault(w.conn, vaultPda(otherOwner.publicKey))))
-      await sendTx(w.conn, [await I.initialize(otherOwner.publicKey, otherGuardian.publicKey, 0.1 * LAMPORTS_PER_SOL, 0.5 * LAMPORTS_PER_SOL, 60)], [otherOwner]);
-    const rep2 = await sendTx(w.conn, [await I.reportScam(otherGuardian.publicKey, otherOwner.publicKey, w.fakeRelative, 1)], [otherGuardian]);
-    P("a second family (another vault's guardian) reports the same wallet", { link: explorer(rep2.sig), ms: rep2.ms, failed: false });
-  } catch (e: any) { log("second family report skipped:", String(e?.message ?? e).slice(0, 120)); }
-  const after = (await fetchReports(w.conn, [w.fakeRelative.toBase58()]))[w.fakeRelative.toBase58()]?.reports ?? 0;
+  // f) the community scam list. A report needs proof (a refused request of the family's vault to that wallet),
+  //    each family counts once, the weight grows with the number of families, and a family can withdraw its report.
+  const addr = w.fakeRelative.toBase58();
+  const count = async () => (await fetchReports(w.conn, [addr]))[addr]?.reports ?? 0;
   const fr = SCENARIOS.find((x) => x.id === "fake-relative")!;
-  const re = await check(w.conn, await bookFor(w, "en"), { tx: (await fr.build(w)).tx, message: fr.message.en, lang: "en", sender: senderOf(fr), useModel: false });
-  community = { reportsBefore: before, reportsAfter: after, flagAfter: re.flags.find((f) => f.id === "community_reported")?.en ?? null, verdictAfter: re.verdict, verdictMs: re.timings.totalMs };
+  const levelNow = async () => {
+    const re = await check(w.conn, await bookFor(w, "en"), { tx: (await fr.build(w)).tx, message: fr.message.en, lang: "en", sender: senderOf(fr), useModel: false });
+    const f = re.flags.find((x) => x.id === "community_reported");
+    return { reports: await count(), level: f?.level ?? "none", flag: f?.en ?? null, verdict: re.verdict };
+  };
+  const steps: any[] = [];
+  steps.push({ step: "before any report", ...(await levelNow()) });
+  P("Ana tries to report a wallet that never asked her family for money (no proof)",
+    await landFailing([await I.reportScam(ana.publicKey, elder.publicKey, w.drainer, 1, req1)], [ana]));
+  const rep1 = await sendTx(w.conn, [await I.reportScam(ana.publicKey, elder.publicKey, w.fakeRelative, 1, req1)], [ana]);
+  P("Ana reports the 'new number' wallet, with the refused request as proof", { link: explorer(rep1.sig), ms: rep1.ms, failed: false });
+  steps.push({ step: "1 family", ...(await levelNow()) });
+  P("the same family reports it again (counts once)", await landFailing([await I.reportScam(ana.publicKey, elder.publicKey, w.fakeRelative, 1, req1)], [ana]));
+  // two more families that the same scammer also asked for money
+  const family = async (i: number) => {
+    const owner = derived(`elder${i}`), guardian = derived(`ana${i}`);
+    for (const who of [guardian, owner])
+      if ((await w.conn.getBalance(who.publicKey)) < 0.01 * LAMPORTS_PER_SOL)
+        await sendTx(w.conn, [SystemProgram.transfer({ fromPubkey: deployer().publicKey, toPubkey: who.publicKey, lamports: 0.03 * LAMPORTS_PER_SOL })], [deployer()]);
+    if (!(await fetchVault(w.conn, vaultPda(owner.publicKey))))
+      await sendTx(w.conn, [await I.initialize(owner.publicKey, guardian.publicKey, 0.1 * LAMPORTS_PER_SOL, 0.5 * LAMPORTS_PER_SOL, 60)], [owner]);
+    const v = await fetchVault(w.conn, vaultPda(owner.publicKey));
+    const rq = requestPda(vaultPda(owner.publicKey), v!.nextRequest);
+    await sendTx(w.conn, [await I.request(owner.publicKey, w.fakeRelative, 1.0 * LAMPORTS_PER_SOL, v!.nextRequest, "new number")], [owner]);
+    await sendTx(w.conn, [await I.decide(guardian.publicKey, owner.publicKey, rq, false)], [guardian]);
+    const r = await sendTx(w.conn, [await I.reportScam(guardian.publicKey, owner.publicKey, w.fakeRelative, 1, rq)], [guardian]);
+    return { owner, guardian, sig: r.sig, ms: r.ms };
+  };
+  if (seedHex()) {
+    const f2 = await family(2);
+    P("a second family, asked for money by the same wallet, reports it with its own proof", { link: explorer(f2.sig), ms: f2.ms, failed: false });
+    steps.push({ step: "2 families", ...(await levelNow()) });
+    const f3 = await family(3);
+    P("a third family reports it too", { link: explorer(f3.sig), ms: f3.ms, failed: false });
+    steps.push({ step: "3 families", ...(await levelNow()) });
+    const wd = await sendTx(w.conn, [await I.withdrawReport(f3.guardian.publicKey, f3.owner.publicKey, w.fakeRelative)], [f3.guardian]);
+    P("the third family withdraws its report (a mistake can be undone)", { link: explorer(wd.sig), ms: wd.ms, failed: false });
+    steps.push({ step: "after one withdrawal", ...(await levelNow()) });
+  }
+  community = { steps };
   log("community list:", JSON.stringify(community));
   await sendTx(w.conn, [await I.cancel(elder.publicKey, elder.publicKey, req1)], [elder]);
   // e) big payment to a trusted son: guardian approves, then the cooling-off holds it
@@ -183,7 +204,11 @@ function markdown(s: any, rows: any[], proofs: any[]) {
   md += `| Scams stopped | Legit payments let through | Verdicts as expected | Verdict on screen (median) | Simulation on devnet (median) | Gemma reads + explains (median) | Refusals proven on-chain |\n|:-:|:-:|:-:|:-:|:-:|:-:|:-:|\n`;
   md += `| **${s.scamsStopped}** | **${s.legitLetThrough}** | ${s.verdictsAsExpected} | **${ms(s.medianVerdictMs)}** | ${ms(s.medianSimulateMs)} | ${(s.medianAiMs / 1000).toFixed(1)} s | **${s.onchainRefusals}** |\n\n`;
   md += `The verdict comes from the simulation and the rules, so it is on screen before the model answers. Gemma then adds the tricks it finds in the message (it can only add warnings) and writes the plain-language explanation.\n\n`;
-  if (s.community) md += `**Community scam list:** after Ana refused the "new number" request, she reported the wallet on-chain; a second family reported it too, and the same family could not count twice. The wallet now has **${s.community.reportsAfter} reports**, and the next check shows: _${s.community.flagAfter}_ (verdict ${s.community.verdictAfter} in ${Math.round(s.community.verdictMs)} ms).\n\n`;
+  if (s.community) {
+    md += `## Community scam list\n\nA report needs on-chain proof (a request of the family's vault to that wallet, refused by its guardian), each family counts once, the weight grows with the number of families (1 = warning, 2 = strong, 3+ = block; a trusted contact is never blocked), and a family can withdraw its report.\n\n| Step | Reports | Level of the flag | Verdict for the "new number" request |\n|---|:-:|:-:|:-:|\n`;
+    for (const st of s.community.steps) md += `| ${st.step} | ${st.reports} | ${st.level} | ${st.verdict} |\n`;
+    md += `\n`;
+  }
   md += `## Every scenario\n\n| Scenario | Lang | Expected | Verdicts (with Gemma) | Flags | Scam tricks found | Vault said | Verdict on screen | Simulation | Gemma |\n|---|---|---|---|---|---|---|--:|--:|--:|\n`;
   for (const r of rows) md += `| ${r.id} | ${r.lang} | ${r.expect} | ${r.verdicts.join(", ")} ${r.correct ? "✅" : "❌"} | ${r.flags.join("<br>")} | ${r.tactics.join(", ") || "none"} | ${r.vaultError ?? "ok"} | ${ms(r.fastVerdictMs)} | ${ms(r.median.simulateMs)} | ${((r.median.aiTacticsMs + r.median.aiExplainMs) / 1000).toFixed(1)} s |\n`;
   md += `\n## What the person reads (last run)\n\n`;

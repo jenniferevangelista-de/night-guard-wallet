@@ -53,12 +53,12 @@ async function decide(req, approve, reportTo) {
   document.querySelectorAll(".req button").forEach((b) => (b.disabled = true));
   const r = await api("/api/guardian/decide", { request: req, approve });
   if (r.error) { alert(r.error); }
-  if (reportTo) await report(reportTo);
+  if (reportTo) await report(reportTo, null, req);
   load();
 }
-async function report(address, btn) {
+async function report(address, btn, request) {
   if (btn) btn.disabled = true;
-  const r = await api("/api/guardian/report", { address, reason: 1 });
+  const r = await api("/api/guardian/report", { address, reason: 1, request });
   if (btn) btn.outerHTML = `<span class="small">🚩 ${r.error ? esc(r.error) : t("reported")}</span>`;
 }
 const feed = [];
@@ -67,7 +67,6 @@ function render() {
     const time = new Date(ev.at).toLocaleTimeString(lang === "pt" ? "pt-BR" : "en-US");
     if (ev.type === "blocked") return `<div class="ev blocked"><b>⛔ ${t("blocked")}: ${esc(ev.title[lang])}</b> ${esc(ev.amountTxt)}
       <ul class="flags">${ev.flags.map((f) => `<li class="${f.level}">${esc(f[lang])}</li>`).join("")}</ul>
-      ${(ev.suspects ?? []).map((a) => `<button class="big b-report" onclick="report('${a}', this)">${t("report")} · ${a.slice(0, 4)}…${a.slice(-4)}</button>`).join(" ")}
       <span class="small">${time}</span></div>`;
     if (ev.type === "help") return `<div class="ev blocked"><b>🆘 ${t("help")}: ${esc(ev.title[lang])}</b><br><span class="small">${time}</span></div>`;
     const d = ev.data || {};

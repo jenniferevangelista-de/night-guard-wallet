@@ -2,13 +2,13 @@
 
 **A guard for the people scammers target the most, our parents and grandparents, and for the rest of us too.** Before Lucy (74) signs anything, Night Guard Wallet **simulates the transaction on Solana**, shows in big plain words what would really change, **checks where every part comes from** (sender, link, wallet, program, token), **flags the scam** (with Gemma reading the message that came with it), and keeps her savings in an **on-chain vault** whose rules nobody can switch off: trusted contacts, a daily limit, a family guardian who approves with her own signature, and a cooling-off period for big amounts.
 
-And when one family's guardian refuses a scam, she can **report the wallet on a community scam list on Solana**: every Night Guard wallet reads it before signing, so **one family's "no" protects every family**.
+And when one family's guardian refuses a scam, she can **report the wallet on a community scam list on Solana**: every Night Guard wallet reads it before signing, so **one family's "no" protects every family**. It is built to be fair: a family can only report a wallet that asked it for money and was refused by its guardian (the program checks that proof), each family counts once, one report is only a warning, it takes three families to block, a trusted contact is never blocked by reports, and a family can withdraw its report.
 
 MLH Solana Hackathon · AI Track ("security tools that explain what a transaction will do or flag risky programs, tokens and wallets before a user signs").
 
-| **5/5** | **2/2** | **0.2 s** | **32/32 · 0** | **6** | **2 families** |
+| **5/5** | **2/2** | **0.2 s** | **32/32 · 0** | **6** | **1 → 3 families** |
 |:-:|:-:|:-:|:-:|:-:|:-:|
-| scam scenarios stopped, on every run (English, plus Portuguese) | real family payments let through | from "check" to verdict on screen (median, devnet simulation included) | scam messages Gemma recognised · false alarms on 28 ordinary family messages | scams refused **by the program itself** on devnet, even when forced past the app | reported the same scam wallet on the on-chain community list; the next check warned before signing |
+| scam scenarios stopped, on every run (English, plus Portuguese) | real family payments let through | from "check" to verdict on screen (median, devnet simulation included) | scam messages Gemma recognised · false alarms on 28 ordinary family messages | scams refused **by the program itself** on devnet, even when forced past the app | reported the same scam wallet on the on-chain community list, each with proof: 1 family = warning, 3 = block |
 
 <sub>[docs/RESULTS.md](docs/RESULTS.md): 42 checks on Solana devnet (7 scenarios × 2 languages × 3 runs) and the on-chain proofs with explorer links. [docs/EVAL.md](docs/EVAL.md): 60 fictional messages, Gemma 4 E2B on a CPU. Every person and message in this repository is fictional.</sub>
 
@@ -39,13 +39,13 @@ The `guardian_vault` Anchor program ([programs/guardian_vault/src/lib.rs](progra
 | Anything else is a **request**; the program itself decides if the guardian must approve (new wallet or over the limit) and how long it waits (big amount) | `request` → `guardian_decide` → `execute` |
 | A refused request can never be sent; a big one can't leave before the **cooling-off** ends | `Rejected`, `StillCoolingOff` |
 | Every step emits an **event**; the family page listens to the program's logs, so the alert comes from the chain | `RequestOpened`, `GuardianDecided`, `Executed`… |
-| **Community scam list**: a guardian reports a wallet; one public record per wallet counts how many different families reported it, each family only once; every wallet reads it before signing | `report_scam` (PDA `["scam", wallet]` + one `["reported", vault, wallet]` mark per family) |
+| **Community scam list**: a guardian reports a wallet **only with proof**, a request of her vault to that wallet that she refused; one public record per wallet counts how many different families reported it, each family once; the weight grows with the count (1 warning, 2 strong, 3+ block) | `report_scam` (needs the refused `TransferRequest`; PDA `["scam", wallet]` + one `["reported", vault, wallet]` mark per family), `withdraw_report` |
 
-Proven on devnet: transfers to the scammer and to the look-alike address, **forced through without preflight**, failed on-chain with `NotTrusted`; a fake "guardian" could not add the scammer; a rejected request could not be sent; a big payment could not leave before its cooling-off; the same family could not report a wallet twice ([links](docs/RESULTS.md#on-chain-proofs-devnet)).
+Proven on devnet: transfers to the scammer and to the look-alike address, **forced through without preflight**, failed on-chain with `NotTrusted`; a fake "guardian" could not add the scammer; a rejected request could not be sent; a big payment could not leave before its cooling-off; the same family could not report a wallet twice; a family could not report a wallet that never asked it for money (`NoProof`) ([links](docs/RESULTS.md#on-chain-proofs-devnet)).
 
 | | Devnet address |
 |---|---|
-| Program `guardian_vault` | [`8vE76ymUvgkQdwBmtQ68kVuaxPvUVN7YymSpSkf3hwtn`](https://explorer.solana.com/address/8vE76ymUvgkQdwBmtQ68kVuaxPvUVN7YymSpSkf3hwtn?cluster=devnet) |
+| Program `guardian_vault` | [`8BtGEAMv12hh24JQYmWUJZ8Y547y72n4LDfppv3CTDJ5`](https://explorer.solana.com/address/8BtGEAMv12hh24JQYmWUJZ8Y547y72n4LDfppv3CTDJ5?cluster=devnet) |
 
 ## The seven situations in the demo
 

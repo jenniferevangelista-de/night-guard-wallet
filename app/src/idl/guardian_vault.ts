@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/guardian_vault.json`.
  */
 export type GuardianVault = {
-  "address": "8vE76ymUvgkQdwBmtQ68kVuaxPvUVN7YymSpSkf3hwtn",
+  "address": "8BtGEAMv12hh24JQYmWUJZ8Y547y72n4LDfppv3CTDJ5",
   "metadata": {
     "name": "guardianVault",
     "version": "0.1.0",
@@ -391,7 +391,9 @@ export type GuardianVault = {
       "docs": [
         "Community scam list: a family guardian reports a wallet that tried to scam their family.",
         "One public record per wallet, counting how many different families reported it; every",
-        "Night Guard wallet reads it before signing. Each family can report a wallet only once."
+        "Night Guard wallet reads it before signing. Each family can report a wallet only once,",
+        "and only with proof: a request from this family's vault to that wallet that the guardian refused.",
+        "Nobody can report a wallet that never asked their family for money."
       ],
       "discriminator": [
         217,
@@ -413,7 +415,16 @@ export type GuardianVault = {
           ]
         },
         {
-          "name": "vault"
+          "name": "vault",
+          "relations": [
+            "proof"
+          ]
+        },
+        {
+          "name": "proof",
+          "docs": [
+            "The proof: a request of THIS vault, to this wallet, refused by the guardian."
+          ]
         },
         {
           "name": "report",
@@ -702,6 +713,91 @@ export type GuardianVault = {
           "type": "i64"
         }
       ]
+    },
+    {
+      "name": "withdrawReport",
+      "docs": [
+        "A family takes its own report back (a mistake). Its mark is closed, so it could report again later."
+      ],
+      "discriminator": [
+        233,
+        44,
+        172,
+        178,
+        255,
+        113,
+        14,
+        71
+      ],
+      "accounts": [
+        {
+          "name": "guardian",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "vault"
+          ]
+        },
+        {
+          "name": "vault"
+        },
+        {
+          "name": "report",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  99,
+                  97,
+                  109
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "address"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mark",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  112,
+                  111,
+                  114,
+                  116,
+                  101,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "arg",
+                "path": "address"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "address",
+          "type": "pubkey"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -822,6 +918,19 @@ export type GuardianVault = {
         83,
         195,
         82
+      ]
+    },
+    {
+      "name": "scamReportWithdrawn",
+      "discriminator": [
+        240,
+        23,
+        6,
+        82,
+        205,
+        176,
+        203,
+        84
       ]
     },
     {
@@ -952,6 +1061,11 @@ export type GuardianVault = {
       "code": 6014,
       "name": "zeroAmount",
       "msg": "Amount must be more than zero"
+    },
+    {
+      "code": 6015,
+      "name": "noProof",
+      "msg": "No proof: only a wallet that asked this family for money, and was refused by the guardian, can be reported"
     }
   ],
   "types": [
@@ -1122,6 +1236,26 @@ export type GuardianVault = {
           {
             "name": "bump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "scamReportWithdrawn",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "reports",
+            "type": "u32"
           }
         ]
       }

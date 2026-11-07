@@ -19,7 +19,7 @@
     <text x="62" y="342">✍️ a transaction to sign</text>
     <text x="62" y="374">📞 "I'm on the phone" mode</text>
   </g>
-  <text x="62" y="416" font-size="15" fill="#4a5568">PT + EN · big letters · read aloud</text>
+  <text x="62" y="416" font-size="15" fill="#4a5568">English + Portuguese · big letters · read aloud</text>
 
   <!-- Guardian -->
   <rect x="400" y="130" width="560" height="470" rx="24" fill="#fff" stroke="#0f1b3d" stroke-width="3"/>
@@ -53,11 +53,11 @@
     <text x="1044" y="346">🆕 Anything else → on-chain request</text>
     <text x="1044" y="380">👩 Guardian approves or refuses (signature)</text>
     <text x="1044" y="414">⏳ Cooling-off for big amounts</text>
-    <text x="1044" y="448">🚩 Community scam list: one vote per family</text>
+    <text x="1044" y="448">🚩 Scam list: report only with proof, 3 families block</text>
   </g>
   <rect x="1044" y="474" width="492" height="102" rx="14" fill="#1d2b55"/>
   <text x="1064" y="504" font-size="16" fill="#f4c95d" font-weight="700">send · request · guardian_decide · execute</text>
-  <text x="1064" y="530" font-size="16" fill="#c9d3ee">report_scam · add_trusted · set_limits · cancel · events</text>
+  <text x="1064" y="530" font-size="16" fill="#c9d3ee">report_scam · withdraw_report · add_trusted · set_limits</text>
   <text x="1064" y="556" font-size="15" fill="#c9d3ee">Even if the app is bypassed, the chain refuses.</text>
 
   <!-- Family -->

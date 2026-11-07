@@ -9,7 +9,7 @@
 **Links**
 - Code: https://github.com/jenniferevangelista-de/night-guard-wallet
 - Video: VIDEO_LINK
-- Program on devnet: https://explorer.solana.com/address/8vE76ymUvgkQdwBmtQ68kVuaxPvUVN7YymSpSkf3hwtn?cluster=devnet
+- Program on devnet: https://explorer.solana.com/address/8BtGEAMv12hh24JQYmWUJZ8Y547y72n4LDfppv3CTDJ5?cluster=devnet
 
 ## Inspiration
 
@@ -24,7 +24,7 @@ Before Lucy (74) signs anything:
 4. **Checks the sources:** the sender, the link, every wallet that would get money or power, every program (age, upgradeable, verified source) and every token.
 5. **Locks and asks the family.** Her savings live in the `guardian_vault` Anchor program: money only goes out at once to trusted contacts under a daily limit; adding a contact needs her signature AND her guardian's; anything else becomes an on-chain request that Ana, her daughter, approves or refuses with her own signature, live from the program's events; big amounts wait a cooling-off period on-chain.
 
-6. **Families protect families.** When Ana refuses a scam, she reports the wallet on a community scam list stored on Solana (`report_scam`): one public record per wallet, one vote per family. Every Night Guard wallet reads it before signing.
+6. **Families protect families, fairly.** When Ana refuses a scam, she reports the wallet on a community scam list stored on Solana (`report_scam`). The program only accepts a report with proof: a request of her family's vault to that wallet that she refused, so nobody can report a wallet that never asked them for money. One vote per family; one report is a warning, two are strong, three families block; a trusted contact is never blocked by reports; and a family can withdraw its report (`withdraw_report`).
 
 ## How we built it
 

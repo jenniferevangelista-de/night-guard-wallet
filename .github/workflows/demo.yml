@@ -94,6 +94,10 @@ jobs:
           cp /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf segoeuib.ttf
           cd "$GITHUB_WORKSPACE/video" && npm init -y > /dev/null && npm i -s playwright@1.49.1 && npx playwright install --with-deps chromium > /dev/null
 
+      - name: Architecture drawing (SVG to PNG)
+        if: ${{ inputs.video }}
+        run: node video/render_png.mjs docs/architecture.svg docs/architecture.png 1600 900
+
       - name: Record the real app
         if: ${{ inputs.video }}
         env:
@@ -125,6 +129,7 @@ jobs:
           retention-days: 7
           path: |
             docs/RESULTS.md
+            docs/architecture.png
             app/out/results.json
             video/out/*.mp4
             video/review/frame_*.jpg

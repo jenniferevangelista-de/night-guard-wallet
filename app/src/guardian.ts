@@ -175,12 +175,21 @@ export async function check(conn: Connection, book: Book, input: CheckInput): Pr
   const name = (a: string) => book.names[a] ?? null;
   const trustedDest = dest ? book.trusted.includes(dest) : false;
 
+  // Community scam list. Each report carries on-chain proof (a refused request), one per family. The weight grows
+  // with the number of families: 1 = a warning, 2 = strong, 3+ = block. A trusted contact is never blocked by reports.
   for (const [addr, r] of Object.entries(reports)) {
+    if (r.reports <= 0) continue;
     const days = Math.max(0, Math.round((Date.now() / 1000 - r.firstAt) / 86400));
     const fam = (n: number, pt: boolean) => (n === 1 ? (pt ? "1 família" : "1 family") : (pt ? `${n} famílias` : `${n} families`));
-    add("community_reported", "critical",
-      `A carteira ${short(addr)} já foi DENUNCIADA como golpe por ${fam(r.reports, true)} na lista comunitária da Solana${days ? ` (primeira denúncia há ${days} dias)` : ""}.`,
-      `The wallet ${short(addr)} was already REPORTED as a scam by ${fam(r.reports, false)} on the community list on Solana${days ? ` (first report ${days} days ago)` : ""}.`);
+    const trustedOne = book.trusted.includes(addr);
+    const level: Level = trustedOne ? "info" : r.reports >= 3 ? "critical" : r.reports === 2 ? "high" : "medium";
+    const tailPt = trustedOne ? " Ela está na sua lista de confiança, então isso não bloqueia nada: só confira com a família."
+      : r.reports === 1 ? " Uma denúncia é um aviso, não uma prova: confira com a sua família." : "";
+    const tailEn = trustedOne ? " It is on your trusted list, so this blocks nothing: just check with your family."
+      : r.reports === 1 ? " One report is a warning, not proof: check with your family." : "";
+    add("community_reported", level,
+      `A carteira ${short(addr)} foi DENUNCIADA como golpe por ${fam(r.reports, true)} na lista comunitária da Solana${days ? ` (primeira denúncia há ${days} dias)` : ""}.${tailPt}`,
+      `The wallet ${short(addr)} was REPORTED as a scam by ${fam(r.reports, false)} on the community list on Solana${days ? ` (first report ${days} days ago)` : ""}.${tailEn}`);
   }
   for (const pinfo of programs) {
     if (pinfo.name) continue;

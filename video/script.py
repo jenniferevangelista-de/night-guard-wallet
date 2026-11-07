@@ -35,7 +35,7 @@ LINES = [
     ("ana", "rec", "olive", "Ana decides",
      "Ana sees why it was blocked, read straight from Solana. She says no with her own signature, and reports that wallet to every family."),
     ("community", "rec", "olive", "Families protect families",
-     "Now that wallet is on a public scam list on Solana. Any family using Night Guard gets the warning before signing. One family's no protects every family."),
+     "Now that wallet is on a public scam list on Solana, and every family using Night Guard sees the warning. It's fair, too: you can only report a wallet that asked your family for money, one report is just a warning, and it takes three families to block it. One family's no protects every family."),
     ("others", "rec", "olive", "Four more scams",
      "Fake wallet support that wants her token account. A free airdrop that is really an unlimited approval. A look-alike of Ana's address. A fake USDC with a fee to unlock it. All stopped, each with its reason."),
     ("groceries", "rec", "olive", "The real Ana",

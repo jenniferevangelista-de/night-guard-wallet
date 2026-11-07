@@ -117,9 +117,14 @@ export function ix(conn: Connection) {
       p.methods.guardianDecide(approve).accountsPartial({ guardian, vault: vaultPda(owner), req }).instruction(),
     execute: (owner: PublicKey, req: PublicKey, to: PublicKey) =>
       p.methods.execute().accountsPartial({ owner, vault: vaultPda(owner), req, to }).instruction(),
-    reportScam: (guardian: PublicKey, owner: PublicKey, address: PublicKey, reason: number) =>
+    /** proof: a request of this vault to `address` that the guardian refused (the program checks it). */
+    reportScam: (guardian: PublicKey, owner: PublicKey, address: PublicKey, reason: number, proof: PublicKey) =>
       p.methods.reportScam(address, reason).accountsPartial({
-        guardian, vault: vaultPda(owner), report: scamPda(address), mark: markPda(vaultPda(owner), address), systemProgram: SystemProgram.programId,
+        guardian, vault: vaultPda(owner), proof, report: scamPda(address), mark: markPda(vaultPda(owner), address), systemProgram: SystemProgram.programId,
+      }).instruction(),
+    withdrawReport: (guardian: PublicKey, owner: PublicKey, address: PublicKey) =>
+      p.methods.withdrawReport(address).accountsPartial({
+        guardian, vault: vaultPda(owner), report: scamPda(address), mark: markPda(vaultPda(owner), address),
       }).instruction(),
     cancel: (signer: PublicKey, owner: PublicKey, req: PublicKey) =>
       p.methods.cancel().accountsPartial({ signer, rentTo: owner, vault: vaultPda(owner), req }).instruction(),

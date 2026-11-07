@@ -156,10 +156,12 @@ const routes: Record<string, (req: IncomingMessage, res: ServerResponse, q: URLS
     dropState();
     const b = await body(req);
     try {
-      const r = await sendTx(w.conn, [await ix(w.conn).reportScam(kp("ana").publicKey, w.elder, new PublicKey(b.address), Number(b.reason ?? 1))], [kp("ana")]);
+      // the proof: the refused request of this vault to that wallet
+      const r = await sendTx(w.conn, [await ix(w.conn).reportScam(kp("ana").publicKey, w.elder, new PublicKey(b.address), Number(b.reason ?? 1), new PublicKey(b.request))], [kp("ana")]);
       json(res, 200, { sig: r.sig, link: explorer(r.sig), ms: r.ms });
     } catch (e: any) {
-      json(res, 409, { error: /already in use|0x0/.test(String(e?.message)) ? "already reported by this family" : String(e?.message ?? e).slice(0, 200) });
+      const m = String(e?.message ?? e);
+      json(res, 409, { error: /already in use|0x0"|Custom":0\}/.test(m) ? "already reported by this family" : /6015|NoProof/.test(m) ? "no proof: this wallet never asked your family for money" : m.slice(0, 200) });
     }
   },
   "POST /api/execute": async (req, res) => {
