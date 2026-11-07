@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Night Guard Wallet · interactive demo</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .replay { max-width:1180px; margin:16px auto 0; padding:12px 18px; background:#fff3d6; border:2px solid #9a5b00; border-radius:14px; font-size:.8em; }
+  .try textarea { width:100%; font:inherit; font-size:.85em; padding:10px; border-radius:10px; border:1px solid #cfc8bb; margin:8px 0; }
+  .ana { display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:center; background:#efe9fd; border-radius:14px; padding:10px; margin-top:8px; }
+  .ana img { width:100%; border-radius:10px; border:1px solid #cfc8bb; }
+  .ana p { margin:0; font-size:.85em; }
+  @media (max-width:900px) { .ana { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>🌙 Night Guard Wallet <small data-t="sub"></small></h1>
+  <button id="phone" title="phone"></button>
+  <button id="bigger">A+</button>
+  <button id="lang">EN</button>
+  <a class="pill" href="../screens/3_ana_guardian.png" target="_blank" data-t="familyPage"></a>
+</header>
+<div class="replay">
+  <b>🎬 Interactive replay of a real run on Solana devnet.</b> Every verdict, explanation, flag and source below is the
+  app's real answer (devnet simulation + Gemma 4), recorded <span id="when"></span>. Buttons that sign open the real
+  transactions on Solana Explorer. To run it live: <a href="https://github.com/jenniferevangelista-de/night-guard-wallet#run-it" target="_blank">README</a> ·
+  <a href="https://youtu.be/rZ3oyl6PMTw" target="_blank">video</a> · <a href="../" target="_blank">project page</a>
+</div>
+<main>
+  <div class="balances" id="balances"></div>
+  <section class="card">
+    <h2 data-t="incoming"></h2>
+    <div id="scenarios"></div>
+    <div class="req try">
+      <b data-t="tryTitle"></b>
+      <div class="meta" data-t="tryHint"></div>
+      <textarea id="tryText" rows="4"></textarea>
+      <button class="big b-check" onclick="tryIt()" data-t="tryBtn"></button>
+      <div id="tryOut"></div>
+    </div>
+  </section>
+  <section class="card" id="resultCard">
+    <h2 data-t="check"></h2>
+    <div id="result"><p class="empty" data-t="pick"></p></div>
+    <h2 style="margin-top:22px" data-t="onchain"></h2>
+    <div id="requests"></div>
+  </section>
+</main>
+<script>
+const T = {
+  pt: { sub: "Carteira da Dona Lúcia, 74 anos · Solana devnet", familyPage: "Tela da Ana (guardiã) ↗", incoming: "Pedidos que chegaram",
+    check: "Antes de assinar", pick: "Escolha um pedido e toque em “Verificar antes de assinar”.", onchain: "Pedidos no cofre (na Solana)",
+    verify: "Verificar antes de assinar", checking: "Simulando na Solana e lendo a mensagem…", listen: "🔊 Ouvir", sign: "Assinar e enviar",
+    askAna: "Pedir para a Ana decidir", alertAna: "Avisar a Ana", dont: "Não enviar", what: "O que muda na sua carteira", why: "Por quê",
+    tricks: "Truques de golpe na mensagem", sources: "De onde vem cada parte", vault: "Seu cofre (protegido na Solana)", wallet: "Carteira do dia a dia", today: "Gasto hoje",
+    of: "de", tokens: "Seus tokens", fake: "FALSO", phoneOff: "📞 Estou no telefone com alguém", phoneOn: "📞 Modo golpe de telefone LIGADO",
+    none: "Nenhum pedido no cofre.", pending: "aguardando a Ana", approved: "Ana aprovou", rejected: "Ana recusou", waiting: "Espera de segurança:",
+    sendNow: "Enviar agora", cancel: "Cancelar", needsAna: "precisa da Ana", sent: "Enviado! Veja na Solana:", asked: "Pedido criado no cofre. A Ana foi avisada.",
+    alerted: "A Ana foi avisada.", speed: "Simulado na Solana devnet e analisado em", ai: "IA", gone: "Pronto, nada foi enviado. Seu dinheiro está seguro.",
+    trusted: "Contatos de confiança", tryTitle: "🧪 Teste ao vivo: cole uma mensagem que você recebeu", tryHint: "Roda aqui no seu navegador, com as regras fixas do app (o Gemma roda na nossa máquina).", tryBtn: "Procurar truques de golpe", tryNone: "Nenhum truque das regras fixas encontrado. Isso não prova que é seguro: no app, o Gemma também lê a mensagem.", tryFound: "Truques encontrados:", thinking: "está lendo a mensagem…", seconds: "s", wrote: "explicação escrita por", tpl: "texto fixo", from: "De", via: "Por" },
+  en: { sub: "Lucy's wallet, 74 · Solana devnet", familyPage: "Ana's page (guardian) ↗", incoming: "Requests that arrived",
+    check: "Before you sign", pick: "Pick a request and tap “Check before signing”.", onchain: "Requests in the vault (on Solana)",
+    verify: "Check before signing", checking: "Simulating on Solana and reading the message…", listen: "🔊 Listen", sign: "Sign and send",
+    askAna: "Ask Ana to decide", alertAna: "Tell Ana", dont: "Don't send", what: "What changes in your wallet", why: "Why",
+    tricks: "Scam tricks in the message", sources: "Where each part comes from", vault: "Your vault (protected on Solana)", wallet: "Everyday wallet", today: "Spent today",
+    of: "of", tokens: "Your tokens", fake: "FAKE", phoneOff: "📞 I'm on the phone with someone", phoneOn: "📞 Phone-scam mode ON",
+    none: "No requests in the vault.", pending: "waiting for Ana", approved: "Ana approved", rejected: "Ana said no", waiting: "Safety wait:",
+    sendNow: "Send now", cancel: "Cancel", needsAna: "needs Ana", sent: "Sent! See it on Solana:", asked: "Request created in the vault. Ana was told.",
+    alerted: "Ana was told.", speed: "Simulated on Solana devnet and checked in", ai: "AI", gone: "Done, nothing was sent. Your money is safe.",
+    trusted: "Trusted contacts", tryTitle: "🧪 Live test: paste a message you got", tryHint: "Runs right here in your browser with the app's fixed rules (Gemma runs on our own machine).", tryBtn: "Find scam tricks", tryNone: "No fixed-rule trick found. That does not prove it is safe: in the app, Gemma reads the message too.", tryFound: "Tricks found:", thinking: "is reading the message…", seconds: "s", wrote: "explanation written by", tpl: "fixed text", from: "From", via: "Via" },
+};
+const TACTIC = {
+  pt: { new_number: "\"troquei de número\"", urgency: "pressa", secrecy: "segredo", fake_support: "falso suporte/banco", safe_wallet: "\"carteira segura\"",
+    prize: "prêmio/grátis", fee_to_unlock: "taxa para liberar", secret_words: "pede palavras secretas", emotional: "susto/emergência", too_good: "lucro garantido" },
+  en: { new_number: "\"new number\"", urgency: "rush", secrecy: "secrecy", fake_support: "fake support/bank", safe_wallet: "\"safe wallet\"",
+    prize: "prize/free", fee_to_unlock: "fee to unlock", secret_words: "asks for secret words", emotional: "scare/emergency", too_good: "guaranteed profit" },
+};
+let lang = "en", phone = false, fs = 22, scen = [], current = null, report = null, st = null;
+const $ = (s) => document.querySelector(s);
+const t = (k) => T[lang][k];
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const D = "data/";
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const getJ = async (p) => (await fetch(p)).json();
+let PROOFS = null;
+const proof = async (re) => { PROOFS ??= (await getJ("../results.json")).proofs; return PROOFS.find((p) => re.test(p.name)); };
+async function api(path, body) {
+  if (path.startsWith("/api/state")) return getJ(`${D}state_${lang}.json`);
+  if (path === "/api/scenarios") return getJ(`${D}scenarios.json`);
+  if (path === "/api/check") {
+    const kind = body.phoneMode ? "phone" : body.ai ? "full" : "fast";
+    if (body.ai && !body.phoneMode) await sleep(1800);   // Gemma took several seconds on a CPU; shortened here
+    return getJ(`${D}check_${body.id}_${body.lang}_${kind}.json`);
+  }
+  if (path === "/api/sign") { const p = await proof(/^legit: groceries/); return { sig: p.link.split("/tx/")[1].split("?")[0], link: p.link, ms: p.ms }; }
+  if (path === "/api/ask-family") {
+    const s = scen.find((x) => x.id === body.id);
+    if (!s.vaultPath) return { alerted: true };
+    const p = await proof(body.id === "car-repair" ? /request opened: 1 SOL to Pedro/ : /request opened for the 'new number'/);
+    const d = await proof(body.id === "car-repair" ? /guardian Ana approves/ : /guardian Ana says NO/);
+    return { request: true, link: p.link, decided: d, car: body.id === "car-repair" };
+  }
+  return {};
+}
+function labels() {
+  document.documentElement.lang = lang === "pt" ? "pt-BR" : "en";
+  document.querySelectorAll("[data-t]").forEach((e) => (e.textContent = t(e.dataset.t)));
+  $("#lang").textContent = lang === "pt" ? "EN" : "PT";
+  $("#phone").textContent = phone ? t("phoneOn") : t("phoneOff");
+  $("#phone").classList.toggle("on", phone);
+}
+async function loadState() {
+  st = await api("/api/state?lang=" + lang);
+  const v = st.vault;
+  $("#balances").innerHTML = `
+    <div class="bal vault"><span>🔒 ${t("vault")}</span><b>${esc(v?.availableTxt)}</b><span><a href="${v?.link}" target="_blank">Solana Explorer ↗</a></span></div>
+    <div class="bal"><span>👛 ${t("wallet")}</span><b>${esc(st.walletTxt)}</b></div>
+    <div class="bal"><span>📅 ${t("today")}</span><b>${esc(v?.spentTodayTxt)}</b><span>${t("of")} ${esc(v?.dailyLimitTxt)}</span></div>
+    <div class="bal"><span>🪙 ${t("tokens")}</span><div>${st.tokens.map((x) => `<span class="tok ${x.verified ? "" : "fake"}">${esc(x.amount)} ${esc(x.symbol)}${x.verified ? "" : " · " + t("fake")}</span>`).join("")}</div>
+      <span>👪 ${t("trusted")}: ${st.trusted.map((c) => esc(c.name)).join(", ")}</span></div>`;
+  renderRequests();
+}
+function renderRequests() {
+  const rs = st?.requests ?? [];
+  if (!rs.length) { $("#requests").innerHTML = `<p class="empty">${t("none")}</p>`; return; }
+  const now = Date.now() / 1000;
+  $("#requests").innerHTML = rs.map((r) => {
+    const left = Math.max(0, Math.ceil(r.unlockAt - now));
+    const status = r.needsGuardian ? t(r.status) : "";
+    const canSend = r.status !== "rejected" && (!r.needsGuardian || r.status === "approved") && left === 0;
+    return `<div class="req"><b>${esc(r.amountTxt)} → ${esc(r.toName)}</b>
+      <div class="meta">#${r.id} · ${r.needsGuardian ? "👩 " + t("needsAna") + ": <b>" + esc(status) + "</b>" : ""} ${left ? ` · ⏳ ${t("waiting")} <span class="timer" data-unlock="${r.unlockAt}">${left}${t("seconds")}</span>` : ""}
+      · <a href="${r.link}" target="_blank">Explorer ↗</a></div>
+      <div class="actions">${canSend ? `<button class="big b-sign" onclick="execReq('${r.address}')">${t("sendNow")}</button>` : ""}
+      <button class="big b-no" onclick="cancelReq('${r.address}')">${t("cancel")}</button></div></div>`;
+  }).join("");
+}
+setInterval(() => {
+  document.querySelectorAll("[data-unlock]").forEach((e) => {
+    const left = Math.max(0, Math.ceil(+e.dataset.unlock - Date.now() / 1000));
+    e.textContent = left + t("seconds");
+    if (left === 0 && !e.dataset.done) { e.dataset.done = 1; loadState(); }
+  });
+}, 1000);
+async function loadScenarios() {
+  scen = await api("/api/scenarios");
+  $("#scenarios").innerHTML = scen.map((s) => `<div class="req" id="s-${s.id}">
+    <b>${esc(s.title[lang])}</b>
+    <div class="meta">${t("from")}: ${esc(s.from[lang])} · ${t("via")}: ${esc(s.channel[lang])}</div>
+    <div class="bubble">${esc(s.message[lang])}</div>
+    ${s.link ? `<div class="bubble link">🔗 ${esc(s.link)}</div>` : ""}${s.qr ? `<div class="bubble link">▦ ${esc(s.qr)}</div>` : ""}
+    <button class="big b-check" onclick="checkIt('${s.id}')">${t("verify")}</button></div>`).join("");
+}
+function hl(text, quotes) {
+  let h = esc(text);
+  for (const q of quotes) { const e = esc(q); if (e) h = h.split(e).join(`<span class="quote">${e}</span>`); }
+  return h;
+}
+async function checkIt(id) {
+  current = scen.find((s) => s.id === id);
+  $("#result").innerHTML = `<p>${t("checking")}</p>`;
+  document.getElementById("resultCard").scrollIntoView({ behavior: "smooth" });
+  report = await api("/api/check", { id, lang, phoneMode: phone });
+  render(id, false);
+  say();
+  if (st?.ai !== "templates") {
+    const full = await api("/api/check", { id, lang, phoneMode: phone, ai: true });
+    if (current?.id !== id) return;
+    if (report.verdict === "STOP") full.verdict = "STOP", full.headline = report.headline; // the model can only add warnings
+    full.timings.simulateMs = report.timings.simulateMs; full.fastMs = report.timings.totalMs;
+    report = full; render(id, true);
+  }
+}
+function render(id, done) {
+  const r = report;
+  const tm = r.timings;
+  const flags = r.flags.map((f) => `<li class="${f.level}">${esc(f[lang])}</li>`).join("");
+  const tactics = r.tactics.length ? `<h2>${t("tricks")}</h2><div class="bubble">${hl(current.message[lang], r.tactics.map((x) => x.quote))}</div>
+    <div class="small">${r.tactics.map((x) => `${TACTIC[lang][x.id] ?? x.id} (${x.by === "model" ? "Gemma" : lang === "pt" ? "regra" : "rule"})`).join(" · ")}</div>` : "";
+  const act = r.verdict === "OK"
+    ? `<button class="big b-sign" onclick="signIt()">${t("sign")}</button>`
+    : `<button class="big b-family" onclick="askFamily()">${current.vaultPath ? t("askAna") : t("alertAna")}</button><button class="big b-no" onclick="dont()">${t("dont")}</button>`;
+  $("#result").innerHTML = `
+    <div class="verdict v-${r.verdict}"><h3>${r.verdict === "STOP" ? "⛔" : r.verdict === "CAUTION" ? "⚠️" : "✅"} ${esc(r.headline[lang])}</h3><p>${esc(r.explanation.text)}</p></div>
+    <div class="actions"><button class="big b-listen" onclick="say()">${t("listen")}</button>${act}</div>
+    <h2 style="margin-top:16px">${t("what")}</h2><ul class="changes">${r.changes.map((c) => `<li>${esc(c[lang])}</li>`).join("")}</ul>
+    ${flags ? `<h2>${t("why")}</h2><ul class="flags">${flags}</ul>` : ""}
+    ${(r.sources ?? []).length ? `<h2>${t("sources")}</h2><ul class="sources">${r.sources.map((x) => `<li class="s-${x.ok === true ? "ok" : x.ok === false ? "bad" : "unk"}">${x.ok === true ? "✅" : x.ok === false ? "❌" : "❔"} ${esc(x[lang])}</li>`).join("")}</ul>` : ""}
+    ${tactics}
+    <p class="small">${t("speed")} ${((r.fastMs ?? tm.totalMs) / 1000).toFixed(2)} s (simulation ${Math.round(tm.simulateMs)} ms) · ${done ? `${t("ai")} ${esc(st?.ai)}: ${(Math.round(tm.aiTacticsMs + tm.aiExplainMs) / 1000).toFixed(1)} s · ${t("wrote")} ${r.explanation.by === "model" ? esc(st?.ai) : t("tpl")}` : (st?.ai !== "templates" ? `⏳ ${esc(st?.ai)} ${t("thinking")}` : "")} · ${r.simulation.unitsConsumed} CU</p>
+    <div id="after"></div>`;
+}
+function say() {
+  if (!report || !window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(report.headline[lang] + " " + report.explanation.text);
+  u.lang = lang === "pt" ? "pt-BR" : "en-US"; u.rate = 0.9;
+  const v = speechSynthesis.getVoices().find((x) => x.lang.startsWith(u.lang.slice(0, 2)));
+  if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+async function signIt() {
+  $("#after").innerHTML = "…";
+  const r = await api("/api/sign", { id: current.id });
+  $("#after").innerHTML = r.sig ? `<p>✅ ${t("sent")} <a href="${r.link}" target="_blank">${r.sig.slice(0, 16)}…</a> (${(r.ms / 1000).toFixed(1)} s)</p>` : `<p>${esc(r.error)}</p>`;
+  loadState();
+}
+async function askFamily() {
+  $("#after").innerHTML = "…";
+  const r = await api("/api/ask-family", { id: current.id });
+  $("#after").innerHTML = r.request ? `<p>👩 ${t("asked")} <a href="${r.link}" target="_blank">Explorer ↗</a></p>
+    <div class="ana"><img src="../screens/3_ana_guardian.png" alt="Ana's guardian page"><p>${r.car
+      ? (lang === "pt" ? "Na tela dela, a Ana <b>aprovou</b> com a própria assinatura; o cofre ainda segurou o valor pelo período de espera." : "On her page, Ana <b>approved</b> with her own signature; the vault still held the money for the cooling-off.")
+      : (lang === "pt" ? "Na tela dela, a Ana disse <b>não</b> com a própria assinatura e denunciou a carteira para todas as famílias." : "On her page, Ana said <b>no</b> with her own signature and reported the wallet to every family.")}
+      <a href="${r.decided.link}" target="_blank">${lang === "pt" ? "Ver a decisão na Solana" : "See her decision on Solana"} ↗</a></p></div>` : `<p>👩 ${t("alerted")} ${t("gone")}</p>`;
+}
+function dont() { $("#after").innerHTML = `<p>✅ ${t("gone")}</p>`; }
+async function execReq(a) { const r = await api("/api/execute", { request: a }); if (r.error) alert(r.error); loadState(); }
+async function cancelReq(a) { await api("/api/cancel", { request: a }); loadState(); }
+$("#lang").onclick = () => { lang = lang === "pt" ? "en" : "pt"; localStorage.lang = lang; labels(); loadScenarios(); loadState(); $("#result").innerHTML = `<p class="empty">${t("pick")}</p>`; };
+$("#phone").onclick = () => { phone = !phone; labels(); };
+$("#bigger").onclick = () => { fs = fs >= 30 ? 20 : fs + 4; document.documentElement.style.setProperty("--fs", fs + "px"); };
+const RULES = {
+  new_number: /(troquei de (n[uú]mero|celular|chip)|meu n[uú]mero novo|(esse|este) [eé] (o )?meu (novo )?n[uú]mero|new (phone )?number|changed my (phone|number)|this is my new)/i,
+  urgency: /(urgente|urg[eê]ncia|agora mesmo|o quanto antes|r[aá]pido|ainda hoje|hoje ainda|em \d+ ?min|imediatamente|[uú]ltima chance|urgent|right now|immediately|asap|as soon as possible|within \d+ ?min|last chance|today only|hurry)/i,
+  secrecy: /(n[aã]o (conta|fala|comenta|diga)|segredo|s[oó] entre n[oó]s|don'?t tell|keep (it|this) (a )?secret|between us|no one (needs|has) to know)/i,
+  fake_support: /(suporte|central (de )?seguran[cç]a|atendente|equipe de seguran[cç]a|gerente do banco|do banco|sua conta (foi|est[aá]) (bloqueada|invadida|suspensa)|support (team|agent)|security (team|department)|your (account|wallet) (has been|was|is) (locked|blocked|compromised|suspended)|bank (officer|manager))/i,
+  safe_wallet: /(carteira segura|conta segura|migra[cç][aã]o|migrar (seus|os) fundos|proteger (seus|os) fundos|safe wallet|secure wallet|migrate (your )?funds|protect your funds)/i,
+  prize: /(voc[eê] ganhou|ganhe|gr[aá]tis|pr[eê]mio|sorteio|airdrop|resgat(ar|e)|you (have )?won|free (tokens?|usdc|sol|money)|claim (your|now)|reward)/i,
+  fee_to_unlock: /(taxa (de|para) (libera|desbloqu|resgat)|pague (a|uma) taxa|para liberar|para desbloquear|pay (a|the) (small )?fee|fee to (unlock|release|claim)|to unlock (your|the))/i,
+  secret_words: /(frase secreta|12 palavras|24 palavras|frase de recupera[cç][aã]o|chave privada|seed phrase|secret (recovery )?phrase|private key|recovery phrase)/i,
+  too_good: /(lucro garantido|retorno garantido|investimento garantido|receba o dobro|dobr(a|e) (o seu|seu) dinheiro|\d+x (seus|o seu)|guaranteed (return|profit|investment)|double (your|back)|receive double|\d+x your)/i,
+  emotional: /(hospital|acidente|pres[oa]\b|delegacia|advogado|fian[cç]a|socorro|accident|in jail|arrested|lawyer|bail|emergency|emerg[eê]ncia)/i,
+};
+function tryIt() {
+  const msg = $("#tryText").value.trim();
+  if (!msg) return;
+  const found = [];
+  for (const [id, re] of Object.entries(RULES)) { const m = msg.match(re); if (m) found.push({ id, quote: m[0] }); }
+  $("#tryOut").innerHTML = found.length
+    ? `<p><b>${t("tryFound")}</b> ${found.map((f) => TACTIC[lang][f.id] ?? f.id).join(" · ")}</p><div class="bubble">${hl(msg, found.map((f) => f.quote))}</div>`
+    : `<p class="small">${t("tryNone")}</p>`;
+}
+getJ(D + "captured.json").then((c) => ($("#when").textContent = new Date(c.when).toUTCString())).catch(() => {});
+labels(); loadScenarios(); loadState();
+</script>
+</body>
+</html>

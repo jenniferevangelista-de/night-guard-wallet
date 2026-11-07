@@ -11,9 +11,32 @@ Built for the [MLH Solana Hackathon](https://events.mlh.com/events/15200-solana-
 
 [![Watch the 3-minute Night Guard Wallet video on YouTube](docs/img/video_thumb.jpg)](https://youtu.be/rZ3oyl6PMTw)
 
-**Video (3:23):** [watch on YouTube](https://youtu.be/rZ3oyl6PMTw): the problem, how it works, and a real run on Solana devnet, narrated by Olive the owl · **Showcase page:** [jenniferevangelista-de.github.io/night-guard-wallet](https://jenniferevangelista-de.github.io/night-guard-wallet/) · **Every on-chain proof:** [docs/RESULTS.md](docs/RESULTS.md)
+**Video (3:23):** [watch on YouTube](https://youtu.be/rZ3oyl6PMTw): the problem, how it works, and a real run on Solana devnet, narrated by Olive the owl · **Interactive demo:** [try it](https://jenniferevangelista-de.github.io/night-guard-wallet/demo/) · **Showcase page:** [jenniferevangelista-de.github.io/night-guard-wallet](https://jenniferevangelista-de.github.io/night-guard-wallet/) · **Every on-chain proof:** [docs/RESULTS.md](docs/RESULTS.md)
 
 ![The "son with a new number" asks for 1.8 SOL: Night Guard says STOP in plain words, and Lucy asks Ana to decide](docs/img/demo.gif)
+
+### ▶ [Try the interactive demo](https://jenniferevangelista-de.github.io/night-guard-wallet/demo/) · click the 7 situations, hear the verdict, paste your own message
+
+## What makes it different
+
+1. **Solana enforces it, not the app.** The rules live in her vault on-chain. We forced 7 scam attempts past the app on purpose: **the program refused every one**.
+2. **The family signs, not a support line.** A risky payment becomes a request that Ana approves or refuses **with her own signature**; a scammer can't even add a "trusted" contact without her.
+3. **One family's "no" protects every family.** A refused scam goes on a **community scam list on Solana**, with on-chain proof, one vote per family: 1 report warns, 3 families block.
+4. **It speaks her language.** One sentence in plain words, big letters, read aloud, English or Portuguese, and **where every part comes from**: sender, link, wallet, program, token.
+5. **AI that can't be talked into "safe".** Gemma reads the scam story the rules miss (**32/32**), runs free on our own machine, and can only **add** warnings: the verdict comes from the simulation.
+
+## Before and after
+
+| | A wallet without a guard | **With Night Guard Wallet** |
+|---|---|---|
+| What Lucy sees before signing | the program, the accounts and an amount | **⛔ STOP** and one sentence in her words, read aloud, in **0.2 s** |
+| The 5 scam scenarios of the demo | each one signed with one tap | **5/5 stopped**, nothing signed |
+| The message that came with the request | never read | **32/32** scam messages recognised, **0** false alarms on 28 family messages |
+| Fake USDC, look-alike address, unlimited approval | look like any token, address or approval | flagged by the mint, by the copied first characters, by the amount |
+| After she taps "approve" | final: nobody can stop it | the vault refuses: **7 refusals** recorded on devnet |
+| Her family | finds out after the money is gone | Ana is alerted **live from the chain** and decides with her signature |
+| Other families | each one alone against the same scammer | **1 report = warning, 3 families = block**, for everyone |
+| Cost to run | | **free**: local Gemma, no API; 5,000 lamports per on-chain action |
 
 ## Measured results
 
