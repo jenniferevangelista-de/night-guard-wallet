@@ -37,7 +37,8 @@ Before Lucy (74) signs anything:
 
 - **5/5 scam scenarios stopped and 2/2 real payments let through**, in Portuguese and English, on every one of 42 checks on devnet.
 - **0.2 s** median from "check" to the verdict on screen, devnet simulation included (simulation alone: 18 ms median).
-- **5 scams refused by the program itself on devnet**, sent on purpose without preflight: transfers to the scammer and to the look-alike address (`NotTrusted`), a fake guardian adding the scammer (`ConstraintHasOne`), a rejected request (`Rejected`), a big payment before its cooling-off (`StillCoolingOff`).
+- **6 refusals by the program itself on devnet**, sent on purpose without preflight: transfers to the scammer and to the look-alike address (`NotTrusted`), a fake guardian adding the scammer (`ConstraintHasOne`), a rejected request (`Rejected`), a big payment before its cooling-off (`StillCoolingOff`), and the same family reporting a wallet twice.
+- **Community scam list:** Ana reported the scam wallet, a second family reported it too, and the next check on that wallet showed "reported as a scam by 2 families" before signing.
 - **Gemma recognised 32/32 scam messages with 0 false alarms** on 28 ordinary family messages (60 fictional messages, PT + EN); fixed rules alone caught 22/32 with 3 false alarms.
 
 ## Challenges we ran into

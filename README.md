@@ -6,9 +6,9 @@ And when one family's guardian refuses a scam, she can **report the wallet on a 
 
 MLH Solana Hackathon · AI Track ("security tools that explain what a transaction will do or flag risky programs, tokens and wallets before a user signs").
 
-| **5/5** | **2/2** | **0.2 s** | **32/32 · 0** | **5** |
-|:-:|:-:|:-:|:-:|:-:|
-| scam scenarios stopped, on every run (English, plus Portuguese) | real family payments let through | from "check" to verdict on screen (median, devnet simulation included) | scam messages Gemma recognised · false alarms on 28 ordinary family messages | scams refused **by the program itself** on devnet, even when forced past the app |
+| **5/5** | **2/2** | **0.2 s** | **32/32 · 0** | **6** | **2 families** |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| scam scenarios stopped, on every run (English, plus Portuguese) | real family payments let through | from "check" to verdict on screen (median, devnet simulation included) | scam messages Gemma recognised · false alarms on 28 ordinary family messages | scams refused **by the program itself** on devnet, even when forced past the app | reported the same scam wallet on the on-chain community list; the next check warned before signing |
 
 <sub>[docs/RESULTS.md](docs/RESULTS.md): 42 checks on Solana devnet (7 scenarios × 2 languages × 3 runs) and the on-chain proofs with explorer links. [docs/EVAL.md](docs/EVAL.md): 60 fictional messages, Gemma 4 E2B on a CPU. Every person and message in this repository is fictional.</sub>
 
@@ -41,13 +41,11 @@ The `guardian_vault` Anchor program ([programs/guardian_vault/src/lib.rs](progra
 | Every step emits an **event**; the family page listens to the program's logs, so the alert comes from the chain | `RequestOpened`, `GuardianDecided`, `Executed`… |
 | **Community scam list**: a guardian reports a wallet; one public record per wallet counts how many different families reported it, each family only once; every wallet reads it before signing | `report_scam` (PDA `["scam", wallet]` + one `["reported", vault, wallet]` mark per family) |
 
-Proven on devnet: transfers to the scammer and to the look-alike address, **forced through without preflight**, failed on-chain with `NotTrusted`; a fake "guardian" could not add the scammer; a rejected request could not be sent; a big payment could not leave before its cooling-off ([links](docs/RESULTS.md#on-chain-proofs-devnet)).
+Proven on devnet: transfers to the scammer and to the look-alike address, **forced through without preflight**, failed on-chain with `NotTrusted`; a fake "guardian" could not add the scammer; a rejected request could not be sent; a big payment could not leave before its cooling-off; the same family could not report a wallet twice ([links](docs/RESULTS.md#on-chain-proofs-devnet)).
 
 | | Devnet address |
 |---|---|
 | Program `guardian_vault` | [`8vE76ymUvgkQdwBmtQ68kVuaxPvUVN7YymSpSkf3hwtn`](https://explorer.solana.com/address/8vE76ymUvgkQdwBmtQ68kVuaxPvUVN7YymSpSkf3hwtn?cluster=devnet) |
-| Lucy's vault (PDA) | [`GvUQKFn2i6HveBLfxLbjLyrbdmQAqRqBdzCeisEGNnXY`](https://explorer.solana.com/address/GvUQKFn2i6HveBLfxLbjLyrbdmQAqRqBdzCeisEGNnXY?cluster=devnet) |
-| The fake "USDC" airdropped to Lucy (Token-2022) | [`CDRpHjTvwXL3B9Wk3mrCzDVtE5ZSjui3WJicrRwUHyqd`](https://explorer.solana.com/address/CDRpHjTvwXL3B9Wk3mrCzDVtE5ZSjui3WJicrRwUHyqd?cluster=devnet) |
 
 ## The seven situations in the demo
 
@@ -57,7 +55,7 @@ Proven on devnet: transfers to the scammer and to the look-alike address, **forc
 | The "son" with a new number: 1.8 SOL, urgent, "don't tell dad" | WhatsApp, unknown number | vault refuses (`NotTrusted`), brand-new wallet, 68% of her money, Gemma quotes *new number · rush · secret* | ⛔ |
 | Fake wallet support: "authorize the migration to the safe wallet" | SMS + `phantom-seguranca.com` | `SetAuthority` hands her token account to a stranger, phishing link | ⛔ |
 | "You won 500 free USDC", claim now | Blink link `so1ana-airdrop.com` | **unlimited `approve`** to a stranger, phishing link, fake USDC | ⛔ |
-| Paying "Ana" with an address copied from history | Solana Pay QR | address **looks like** Ana's (`BsfE…RE5w` × `BsfE…pruP`), vault refuses | ⛔ |
+| Paying "Ana" with an address copied from history | Solana Pay QR | address **looks like** Ana's (same first 4 characters, different wallet), vault refuses | ⛔ |
 | "You got 1,000 USDC, pay the 0.4 SOL fee to unlock" | in-app message | the USDC in her wallet is **fake** (Token-2022 metadata, not the verified mint), new wallet, fee-to-unlock trick | ⛔ |
 | Pedro: 1 SOL for the car repair, no rush | call, saved number | trusted, but a big amount: request → Ana approves → **60 s cooling-off on-chain** (24 h in real life) → sent | ⚠️ then ✅ |
 
