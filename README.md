@@ -25,6 +25,57 @@ Built for the [MLH Solana Hackathon](https://events.mlh.com/events/15200-solana-
 
 ![The verdict is on screen in a fraction of a second; Gemma's explanation arrives after and can only add warnings](docs/img/chart_speed.png)
 
+## Everything the event asked for, and where to check it
+
+**Top 3 Overall:** *"a working product that uses Solana for something it's good at (speed, low fees, composability, on-chain ownership), not a chain bolted onto a web2 app."*
+
+| They asked for | What we built | Proof |
+|---|---|---|
+| A **working product** | Lucy's wallet, Ana's guardian page, the guardian and the vault program, running end to end on devnet | 42 checks with the expected verdict ([RESULTS](docs/RESULTS.md)) · a real recording in the [video](https://youtu.be/rZ3oyl6PMTw) · tests and type check on every push ([CI](https://github.com/jenniferevangelista-de/night-guard-wallet/actions/workflows/ci.yml)) |
+| **Speed** | Every transaction is simulated before signing; the verdict never waits for the model | `simulateTransaction` median **15 ms**, verdict on screen median **0.2 s**, on-chain steps confirmed in **~0.9 s** |
+| **Low fees** | Every family action is one small transaction: a request, a guardian decision, a report | 5,000 lamports base fee per signature; request accounts are closed after use, so their rent goes back to Lucy |
+| **Composability** | Reads what other programs and standards say instead of re-inventing them | SPL Token + **Token-2022 metadata** (fake "USDC" caught), **Solana Pay** QR, **Blinks** links, Anchor **events** read live by the guardian page, one public scam list any wallet can read |
+| **On-chain ownership** | The rules that protect Lucy live in her vault, not in an app someone can switch off | savings in a PDA only the program moves · adding a trusted contact needs owner **and** guardian signatures · the guardian's "no" is her own signature · the scam list is public and nobody can erase it |
+| **Not a chain bolted on** | We forced scams past the app on purpose | **7 refusals by the program itself** on devnet: `NotTrusted` ×2, `ConstraintHasOne`, `Rejected`, `StillCoolingOff`, `NoProof`, and a second report by the same family |
+
+**AI Track:** *"Build something where AI and Solana each do real work"* · *"Security tools that explain what a transaction will do or flag risky programs, tokens and wallets before a user signs."*
+
+| They asked for | Proof |
+|---|---|
+| **Explain what a transaction will do** | simulation before/after of SOL, tokens, delegates and owners, then one or two sentences in plain English (Portuguese as an option), big letters, read aloud; Gemma wrote **14/14** explanations in the last measured run |
+| **Flag risky programs** | any program outside the known list is flagged with **how many days ago it was deployed, whether its owner can still change it, and whether its source is verified** (OtterSec verified-builds registry) |
+| **Flag risky tokens** | **unlimited `approve`**, `SetAuthority`, `CloseAccount` to a stranger; a Token-2022 token that calls itself **USDC** but is not the verified mint |
+| **Flag risky wallets** | a wallet she never paid and **how new it is**, a **look-alike** of a trusted contact (address poisoning), a wallet **reported by other families on-chain** |
+| **AI does real work** | Gemma recognised **32/32** scam messages with **0** false alarms on 28 ordinary ones; fixed rules alone: 22/32 and 3 false alarms ([EVAL](docs/EVAL.md)) |
+| **Solana does real work** | the vault enforces limits, trusted contacts, the guardian and the cooling-off; the community list keeps the reports; 7 refusals on-chain |
+| *Also on the track's idea list:* "clear confirmation before signing" and "wallets with spending limits" | nothing is signed on STOP; daily limit + large amount + cooling-off are enforced by the program |
+
+**DeFi Track** (*payments and stablecoins*): every payment from the vault goes through on-chain spending rules; Solana Pay requests and stablecoin approvals are checked before signing; a fake stablecoin is caught by its mint.
+
+**Best Beginner Hack:** this is the author's **first project on Solana**. Anchor, PDAs, events, `simulateTransaction` and Token-2022 were learned and shipped during the event; the MLH page counts every commit inside the hacking window.
+
+**MLH judging criteria**
+
+| Criterion | Why Night Guard Wallet |
+|---|---|
+| Originality | a guard for the people scammers target most; a community scam list where a report needs **on-chain proof**, one vote per family, warning before block |
+| Technical complexity | an Anchor program with **12 instructions** and events; transaction decoding and simulation diffs; Token-2022 metadata; program-age and verified-source checks; an LLM whose every quote is checked against the message; deploy, demo and video reproducible on GitHub Actions |
+| Adherence to the theme | it is literally the AI Track example: explain the transaction and flag risky programs, tokens and wallets before signing |
+| Practical implementation | the seven situations are the stories in the FBI's elder fraud figures; free to run (local Gemma, no API); big letters and read aloud; English and Portuguese |
+
+## The model: Gemma 4, on our own machine
+
+| | |
+|---|---|
+| Model | **Gemma 4 E2B** (Google's open-weight model) through **Ollama**, about 4.6 GB, on a CPU with **no GPU** |
+| Cost and privacy | **no API, no cost per check**; the message Lucy received never leaves the machine |
+| Job 1: read the message | lists the scam tricks (new number, rush, secrecy, fake support, "safe wallet", prize, fee to unlock, secret words, emergency, guaranteed profit) as **structured JSON**, each with a **verbatim quote**; a quote that is not really in the message is thrown away |
+| Job 2: explain the verdict | one or two plain sentences for a 74-year-old; rejected if it invents an amount, gets the direction of the money wrong, or calls a STOP "safe"; then a fixed text is used instead |
+| What it cannot do | **decide**: the verdict comes from the simulation and the rules, and the model can only **add** warnings |
+| Speed | median **5.5 s** per message in the evaluation; the verdict is on screen in **0.2 s** and does not wait for it |
+
+Built with Claude Code (Claude Opus 5.5) as the coding assistant, as declared on the MLH submission.
+
 ---
 
 ## The problem
