@@ -12,6 +12,10 @@ on:
         description: "Record and build the video"
         type: boolean
         default: true
+      demo:
+        description: "Run the measured demo (off: reuse docs/results.json)"
+        type: boolean
+        default: true
 
 jobs:
   demo:
@@ -72,6 +76,7 @@ jobs:
           npx tsx src/setup.ts
 
       - name: Measured demo + on-chain proofs
+        if: ${{ inputs.demo }}
         working-directory: app
         run: |
           RUNS=${{ inputs.runs }} npx tsx src/demo_run.ts 2>&1 | grep -v '^\[explain\]'
@@ -91,7 +96,11 @@ jobs:
 
       - name: Record the real app
         if: ${{ inputs.video }}
+        env:
+          NGW_FAKE_ROUND: ${{ github.run_id }}
         run: |
+          mkdir -p app/out && [ -f app/out/results.json ] || cp docs/results.json app/out/results.json
+          (cd app && npx tsx src/proof_card.ts)
           (cd app && npx tsx src/setup.ts | grep -E "topped|cancelled|elder wallet")
           (cd app && nohup npx tsx src/server.ts > /tmp/server.log 2>&1 &)
           for i in $(seq 1 60); do curl -sf localhost:8787/api/state > /dev/null && break; sleep 2; done

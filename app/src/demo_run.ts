@@ -179,7 +179,7 @@ function byScenario(rows: any[], ok: (r: any) => boolean) {
 
 function markdown(s: any, rows: any[], proofs: any[]) {
   const ms = (x: number) => `${Math.round(x)} ms`;
-  let md = `# Measured results\n\nRun: ${s.when} · Solana devnet · AI: ${s.model} on CPU (Codespace, 4 cores) · ${s.runsPerScenario} runs per scenario and language.\n\n`;
+  let md = `# Measured results\n\nRun: ${s.when} · Solana devnet · AI: ${s.model} on CPU, no GPU · ${s.runsPerScenario} runs per scenario and language.\n\n`;
   md += `| Scams stopped | Legit payments let through | Verdicts as expected | Verdict on screen (median) | Simulation on devnet (median) | Gemma reads + explains (median) | Refusals proven on-chain |\n|:-:|:-:|:-:|:-:|:-:|:-:|:-:|\n`;
   md += `| **${s.scamsStopped}** | **${s.legitLetThrough}** | ${s.verdictsAsExpected} | **${ms(s.medianVerdictMs)}** | ${ms(s.medianSimulateMs)} | ${(s.medianAiMs / 1000).toFixed(1)} s | **${s.onchainRefusals}** |\n\n`;
   md += `The verdict comes from the simulation and the rules, so it is on screen before the model answers. Gemma then adds the tricks it finds in the message (it can only add warnings) and writes the plain-language explanation.\n\n`;

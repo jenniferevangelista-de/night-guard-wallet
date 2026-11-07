@@ -84,7 +84,7 @@ for n in narr:
         s = scenes[n["id"]]
         v0, v1 = new_time(s["start"]), new_time(s["end"])
         rec_len = max(0.5, v1 - v0)
-        speed = min(2.2, max(1.0, rec_len / (d + 0.8)))
+        speed = min(2.6, max(1.0, rec_len / (d + 0.8)))
         item.update(v0=v0, v1=v1, speed=speed)
         seg_len = max(d + 0.8, rec_len / speed)
     else:

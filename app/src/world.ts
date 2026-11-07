@@ -22,7 +22,10 @@ export const PEOPLE = {
 export interface WorldFile { nusdMint?: string; fakeUsdcMint?: string; elderNusd?: string; history?: { to: string; lamports: number; sig: string }[] }
 
 export function kp(role: Role): Keypair {
-  if (seedHex() && role !== "lookalike") return derived(role);   // NGW_SEED: every key comes from the secret seed
+  // NGW_SEED: every key comes from the secret seed. NGW_FAKE_ROUND gives the "new number" scammer a fresh,
+  // never-reported wallet (the video shows the community report happening, so it must start clean).
+  if (seedHex() && role === "fakeRelative" && process.env.NGW_FAKE_ROUND) return derived(`${role}:${process.env.NGW_FAKE_ROUND}`);
+  if (seedHex() && role !== "lookalike") return derived(role);
   const p = join(DEMO_DIR, `${role}.json`);
   return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(p, "utf8"))));
 }

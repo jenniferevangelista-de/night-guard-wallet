@@ -1,20 +1,27 @@
 {
   "summary": {
-    "when": "2026-11-06T20:39:50.782Z",
+    "when": "2026-11-07T06:46:17.789Z",
     "model": "gemma4:e2b",
     "runsPerScenario": 3,
     "checks": 42,
     "scamsStopped": "5/5",
     "legitLetThrough": "2/2",
     "verdictsAsExpected": "14/14",
-    "medianVerdictMs": 204.52229399999487,
-    "maxVerdictMs": 400.1578380000137,
-    "medianTotalMs": 12330.76126900001,
-    "medianSimulateMs": 19.674337000004016,
-    "medianAiMs": 12330.122528999986,
+    "medianVerdictMs": 226.87731399998302,
+    "maxVerdictMs": 454.9666520000319,
+    "medianTotalMs": 17347.072948999994,
+    "medianSimulateMs": 19.22698599996511,
+    "medianAiMs": 17347.196102000074,
     "explanationsByModel": "14/14",
-    "onchainRefusals": 5,
-    "medianConfirmMs": 925.9404709999217
+    "onchainRefusals": 6,
+    "community": {
+      "reportsBefore": 0,
+      "reportsAfter": 2,
+      "flagAfter": "The wallet Uonp…ZU8U was already REPORTED as a scam by 2 families on the community list on Solana.",
+      "verdictAfter": "STOP",
+      "verdictMs": 3740.8297480000183
+    },
+    "medianConfirmMs": 947.874746000045
   },
   "rows": [
     {
@@ -32,20 +39,20 @@
         "OK",
         "OK"
       ],
-      "fastVerdictMs": 84.85345199999938,
+      "fastVerdictMs": 106.0673700000043,
       "correct": true,
       "flags": [],
       "tactics": [],
-      "explanation": "Está tudo certo, você recebeu 0,05 SOL. Continue com suas coisas normalmente.",
+      "explanation": "Você enviou 0,05 SOL para a Ana, sua filha. Isso foi um envio normal.",
       "explanationBy": "model",
       "vaultError": null,
       "median": {
-        "simulateMs": 21.095060999999987,
-        "lookupsMs": 44.993874000000005,
-        "aiTacticsMs": 1445.178258,
-        "aiExplainMs": 4363.201202,
-        "rulesMs": 1364.015191999999,
-        "totalMs": 5809.3333600000005
+        "simulateMs": 19.154381000000285,
+        "lookupsMs": 35.153668999999354,
+        "aiTacticsMs": 1576.4537469999996,
+        "aiExplainMs": 5971.139802000005,
+        "rulesMs": 1521.860305000002,
+        "totalMs": 7548.540928000002
       }
     },
     {
@@ -63,20 +70,20 @@
         "OK",
         "OK"
       ],
-      "fastVerdictMs": 82.00364699999773,
+      "fastVerdictMs": 86.49112999999488,
       "correct": true,
       "flags": [],
       "tactics": [],
-      "explanation": "This transaction is okay; you sent 0.05 SOL. Keep an eye on your wallet for any other activity.",
+      "explanation": "You sent 0.05 SOL to Ana. This is a transfer from your wallet to her.",
       "explanationBy": "model",
       "vaultError": null,
       "median": {
-        "simulateMs": 20.73847499999829,
-        "lookupsMs": 34.581962999996904,
-        "aiTacticsMs": 1599.8977840000007,
-        "aiExplainMs": 4908.166008,
-        "rulesMs": 1547.2382820000057,
-        "totalMs": 6508.785199000005
+        "simulateMs": 20.16750100000354,
+        "lookupsMs": 35.198184000000765,
+        "aiTacticsMs": 1989.5791959999915,
+        "aiExplainMs": 5162.609591999993,
+        "rulesMs": 1935.5144230000005,
+        "totalMs": 7147.853995999998
       }
     },
     {
@@ -94,13 +101,13 @@
         "STOP",
         "STOP"
       ],
-      "fastVerdictMs": 400.1578380000137,
+      "fastVerdictMs": 240.92727000000014,
       "correct": true,
       "flags": [
         "high:vault_refused",
+        "high:new_wallet",
         "high:drains_balance",
         "high:scam_script",
-        "medium:unknown_wallet",
         "medium:unusual_amount"
       ],
       "tactics": [
@@ -108,16 +115,16 @@
         "urgency(rule)",
         "secrecy(rule)"
       ],
-      "explanation": "Pare! Quem pede 1,8 SOL dizendo que trocou de número costuma ser golpista, e essa carteira você nunca usou. Ligue para o seu filho no número antigo antes de qualquer coisa.",
+      "explanation": "Pare! Alguém pediu 1,8 SOL dizendo que trocou de número, e essa carteira é nova. Não envie nada e ligue para sua família no número antigo.",
       "explanationBy": "model",
       "vaultError": "NotTrusted",
       "median": {
-        "simulateMs": 19.674337000004016,
-        "lookupsMs": 296.94543199999316,
-        "aiTacticsMs": 9635.374393999999,
-        "aiExplainMs": 4868.372090000004,
-        "rulesMs": 9305.647329,
-        "totalMs": 14289.399409999998
+        "simulateMs": 20.210552999997162,
+        "lookupsMs": 149.5638900000049,
+        "aiTacticsMs": 11755.869422000003,
+        "aiExplainMs": 6994.497551000008,
+        "rulesMs": 11580.864707,
+        "totalMs": 18750.998196999994
       }
     },
     {
@@ -135,13 +142,13 @@
         "STOP",
         "STOP"
       ],
-      "fastVerdictMs": 347.2929819999845,
+      "fastVerdictMs": 234.06546300000628,
       "correct": true,
       "flags": [
         "high:vault_refused",
+        "high:new_wallet",
         "high:drains_balance",
         "high:scam_script",
-        "medium:unknown_wallet",
         "medium:unusual_amount"
       ],
       "tactics": [
@@ -149,16 +156,16 @@
         "urgency(rule)",
         "secrecy(rule)"
       ],
-      "explanation": "Stop! This request for 1.8 SOL is a scam because this wallet is not in your trusted list. Do not send the money and call your family right away.",
+      "explanation": "Stop! Someone asked for 1.8 SOL and said they changed their number. You never sent money to this person, so do not send anything.",
       "explanationBy": "model",
       "vaultError": "NotTrusted",
       "median": {
-        "simulateMs": 20.156392000004416,
-        "lookupsMs": 296.54991100000916,
-        "aiTacticsMs": 8861.965568,
-        "aiExplainMs": 6069.012489999994,
-        "rulesMs": 8544.890899000005,
-        "totalMs": 14390.16296799999
+        "simulateMs": 17.506094000011217,
+        "lookupsMs": 149.2325079999864,
+        "aiTacticsMs": 10895.899277999997,
+        "aiExplainMs": 6548.062103000004,
+        "rulesMs": 10728.739531,
+        "totalMs": 17444.473165000003
       }
     },
     {
@@ -176,7 +183,7 @@
         "STOP",
         "STOP"
       ],
-      "fastVerdictMs": 204.52229399999487,
+      "fastVerdictMs": 263.78831099998206,
       "correct": true,
       "flags": [
         "critical:set_authority",
@@ -190,16 +197,16 @@
         "safe_wallet(rule)",
         "urgency(model)"
       ],
-      "explanation": "Pare! Alguém está pedindo 0,4 SOL para mudar o controle da sua conta. Não clique no link falso e não envie nada.",
+      "explanation": "Pare! Alguém está dizendo que você precisa mudar seu dinheiro para outra conta, mas você nunca enviou para ela. Não faça nada e ligue para alguém de confiança.",
       "explanationBy": "model",
       "vaultError": null,
       "median": {
-        "simulateMs": 19.142752000014298,
-        "lookupsMs": 156.26270300001488,
-        "aiTacticsMs": 11185.304304999998,
-        "aiExplainMs": 5612.325784999994,
-        "rulesMs": 11010.406652000005,
-        "totalMs": 16566.264824000013
+        "simulateMs": 18.95867900000303,
+        "lookupsMs": 148.03330799998366,
+        "aiTacticsMs": 14537.254919999978,
+        "aiExplainMs": 9431.876889999956,
+        "rulesMs": 14364.937853999989,
+        "totalMs": 23948.920186000003
       }
     },
     {
@@ -217,7 +224,7 @@
         "STOP",
         "STOP"
       ],
-      "fastVerdictMs": 203.9195840000175,
+      "fastVerdictMs": 226.87731399998302,
       "correct": true,
       "flags": [
         "critical:set_authority",
@@ -231,16 +238,16 @@
         "safe_wallet(rule)",
         "fake_support(model)"
       ],
-      "explanation": "Stop! Someone is trying to take control of your money by moving it to a new place. Do not follow that link; protect your funds by not doing anything.",
+      "explanation": "Stop! Someone tried to move 0.4 SOL out of your wallet to a new person. This is a scam, so do not trust that message.",
       "explanationBy": "model",
       "vaultError": null,
       "median": {
-        "simulateMs": 20.749038999987533,
-        "lookupsMs": 156.79524500004482,
-        "aiTacticsMs": 11519.040065000008,
-        "aiExplainMs": 8650.41288399999,
-        "rulesMs": 11340.377792000014,
-        "totalMs": 22428.351664999995
+        "simulateMs": 19.72038400004385,
+        "lookupsMs": 148.8682690000278,
+        "aiTacticsMs": 12747.364778000046,
+        "aiExplainMs": 13612.451992999995,
+        "rulesMs": 12577.084764999978,
+        "totalMs": 27184.813488999964
       }
     },
     {
@@ -258,7 +265,7 @@
         "STOP",
         "STOP"
       ],
-      "fastVerdictMs": 80.89714200003073,
+      "fastVerdictMs": 108.80838299996685,
       "correct": true,
       "flags": [
         "critical:approve",
@@ -270,16 +277,16 @@
         "urgency(rule)",
         "prize(rule)"
       ],
-      "explanation": "Pare! Essa mensagem é um golpe, pois permite que alguém tire todos os seus bens. Não clique no link e não responda a ninguém.",
+      "explanation": "Pare! Essa mensagem é um golpe, pois ela diz que você ganhou algo. Não clique no link e não envie nada.",
       "explanationBy": "model",
       "vaultError": null,
       "median": {
-        "simulateMs": 18.704228000016883,
-        "lookupsMs": 36.5677479999722,
-        "aiTacticsMs": 7189.3558820000035,
-        "aiExplainMs": 6217.508736000047,
-        "rulesMs": 7130.277996999968,
-        "totalMs": 13407.202017000003
+        "simulateMs": 19.67387300002156,
+        "lookupsMs": 41.20358999999007,
+        "aiTacticsMs": 9556.937972000043,
+        "aiExplainMs": 7790.258130000031,
+        "rulesMs": 9495.888452999992,
+        "totalMs": 17347.072948999994
       }
     },
     {
@@ -297,7 +304,7 @@
         "STOP",
         "STOP"
       ],
-      "fastVerdictMs": 81.63434799999231,
+      "fastVerdictMs": 101.13317899999674,
       "correct": true,
       "flags": [
         "critical:approve",
@@ -309,16 +316,16 @@
         "urgency(rule)",
         "prize(rule)"
       ],
-      "explanation": "Stop! A stranger can take all your money from this wallet. The link is fake and the money you have is worthless. Do not click anything and do not send anything.",
+      "explanation": "Stop! Someone is asking to give away all your money to a fake site, and the money they offer is fake. Don't click that link and don't send anything.",
       "explanationBy": "model",
       "vaultError": null,
       "median": {
-        "simulateMs": 18.26664400001755,
-        "lookupsMs": 32.85034399997676,
-        "aiTacticsMs": 7349.9195399999735,
-        "aiExplainMs": 6640.09538699995,
-        "rulesMs": 7298.965527000022,
-        "totalMs": 13990.332849999948
+        "simulateMs": 18.735068000038154,
+        "lookupsMs": 35.15418700000737,
+        "aiTacticsMs": 8751.743883999996,
+        "aiExplainMs": 9383.971726000018,
+        "rulesMs": 8690.083738999965,
+        "totalMs": 18136.035083000024
       }
     },
     {
@@ -336,7 +343,7 @@
         "STOP",
         "STOP"
       ],
-      "fastVerdictMs": 374.16948599996977,
+      "fastVerdictMs": 454.9666520000319,
       "correct": true,
       "flags": [
         "critical:lookalike_address",
@@ -345,16 +352,16 @@
         "medium:unusual_amount"
       ],
       "tactics": [],
-      "explanation": "Pare! Essa carteira é parecida com a da sua filha, mas não é a dela. Não envie esse dinheiro e ligue para a sua família no número antigo.",
+      "explanation": "Pare! Essa movimentação é suspeita porque você nunca enviou para essa carteira. Não faça nada e ligue para sua família no número antigo.",
       "explanationBy": "model",
       "vaultError": "NotTrusted",
       "median": {
-        "simulateMs": 19.94593100005295,
-        "lookupsMs": 306.22765499999514,
-        "aiTacticsMs": 1194.9729429999716,
-        "aiExplainMs": 6708.1151069999905,
-        "rulesMs": 867.1404699999839,
-        "totalMs": 7843.7607529999805
+        "simulateMs": 19.22698599996511,
+        "lookupsMs": 278.93321200000355,
+        "aiTacticsMs": 1940.9642979999771,
+        "aiExplainMs": 11163.37522700004,
+        "rulesMs": 1640.910652999999,
+        "totalMs": 13129.593483000004
       }
     },
     {
@@ -372,7 +379,7 @@
         "STOP",
         "STOP"
       ],
-      "fastVerdictMs": 355.5229110000073,
+      "fastVerdictMs": 329.03828199999407,
       "correct": true,
       "flags": [
         "critical:lookalike_address",
@@ -381,16 +388,16 @@
         "medium:unusual_amount"
       ],
       "tactics": [],
-      "explanation": "Stop! This address looks like someone else's, and you never sent money there. Don't send that 0.25 SOL; call your daughter to check.",
+      "explanation": "Stop! This transaction is suspicious because the address looks like someone else's, and your vault blocked it. Do not send the 0.25 SOL; call your family to check.",
       "explanationBy": "model",
       "vaultError": "NotTrusted",
       "median": {
-        "simulateMs": 19.652895000006538,
-        "lookupsMs": 310.2582779999939,
-        "aiTacticsMs": 1515.5822439999902,
-        "aiExplainMs": 6085.8579729999765,
-        "rulesMs": 1186.0884160000132,
-        "totalMs": 7601.944175999961
+        "simulateMs": 18.997097000014037,
+        "lookupsMs": 279.3964599999599,
+        "aiTacticsMs": 1926.582950000069,
+        "aiExplainMs": 8073.382582999999,
+        "rulesMs": 1629.5734370000428,
+        "totalMs": 9999.842738000094
       }
     },
     {
@@ -408,7 +415,7 @@
         "STOP",
         "STOP"
       ],
-      "fastVerdictMs": 213.57575000001816,
+      "fastVerdictMs": 211.80087499995716,
       "correct": true,
       "flags": [
         "high:new_wallet",
@@ -419,16 +426,16 @@
       "tactics": [
         "fee_to_unlock(rule)"
       ],
-      "explanation": "Pare! Essa mensagem parece um golpe, e o valor é muito maior que o normal. Não faça nada e ligue para alguém de confiança antes.",
+      "explanation": "Pare! Alguém pediu 0,4 SOL e disse que é para liberar algo, mas essa carteira é nova e o dinheiro que você tem não é o verdadeiro. Não envie nada e ligue para alguém de confiança.",
       "explanationBy": "model",
       "vaultError": null,
       "median": {
-        "simulateMs": 20.621953999972902,
-        "lookupsMs": 168.53046900004847,
-        "aiTacticsMs": 5050.389304999961,
-        "aiExplainMs": 7279.733224000025,
-        "rulesMs": 4849.084472000017,
-        "totalMs": 12330.76126900001
+        "simulateMs": 20.761915000039153,
+        "lookupsMs": 147.38030199997593,
+        "aiTacticsMs": 5941.638956999988,
+        "aiExplainMs": 11796.012627999997,
+        "rulesMs": 5772.206649999949,
+        "totalMs": 17701.550661000074
       }
     },
     {
@@ -446,7 +453,7 @@
         "STOP",
         "STOP"
       ],
-      "fastVerdictMs": 213.0929790000082,
+      "fastVerdictMs": 231.65186700003687,
       "correct": true,
       "flags": [
         "high:new_wallet",
@@ -457,16 +464,16 @@
       "tactics": [
         "fee_to_unlock(rule)"
       ],
-      "explanation": "Stop! This transaction is dangerous because the money is fake and the message is a scam. Do not send anything and call your family right away.",
+      "explanation": "Stop! Someone tried to take away 0.4 SOL, but you never sent anything to that address. This looks like a trick, so don't do anything and call your family.",
       "explanationBy": "model",
       "vaultError": null,
       "median": {
-        "simulateMs": 17.194342000002507,
-        "lookupsMs": 165.29274000000441,
-        "aiTacticsMs": 5817.735398999997,
-        "aiExplainMs": 5136.279410999967,
-        "rulesMs": 5626.5893429999705,
-        "totalMs": 10954.677014999965
+        "simulateMs": 19.471890000044368,
+        "lookupsMs": 147.54718999995384,
+        "aiTacticsMs": 6311.164113000035,
+        "aiExplainMs": 10058.742038000026,
+        "rulesMs": 6144.873083000071,
+        "totalMs": 16370.433163000038
       }
     },
     {
@@ -484,22 +491,22 @@
         "CAUTION",
         "CAUTION"
       ],
-      "fastVerdictMs": 80.4683120000409,
+      "fastVerdictMs": 93.38337199995294,
       "correct": true,
       "flags": [
         "medium:vault_refused"
       ],
       "tactics": [],
-      "explanation": "Atenção, você precisa esperar um pouco antes de enviar esse 1 SOL. Espere um tempo para não ter problemas.",
+      "explanation": "Você tem um valor pequeno, mas o sistema pode demorar um pouco para liberar. Espere um pouco antes de enviar o 1 SOL.",
       "explanationBy": "model",
       "vaultError": "NeedsCoolingOff",
       "median": {
-        "simulateMs": 17.79709400003776,
-        "lookupsMs": 38.6103759999387,
-        "aiTacticsMs": 1192.4904180000303,
-        "aiExplainMs": 5501.841209999984,
-        "rulesMs": 1108.864457000047,
-        "totalMs": 6697.023007999989
+        "simulateMs": 18.107289999956265,
+        "lookupsMs": 34.628602000069804,
+        "aiTacticsMs": 1568.3977919999743,
+        "aiExplainMs": 8408.99719299993,
+        "rulesMs": 1515.5375560000539,
+        "totalMs": 9977.923178000026
       }
     },
     {
@@ -517,95 +524,114 @@
         "CAUTION",
         "CAUTION"
       ],
-      "fastVerdictMs": 84.79585499991663,
+      "fastVerdictMs": 84.1620310000144,
       "correct": true,
       "flags": [
         "medium:vault_refused"
       ],
       "tactics": [],
-      "explanation": "Wait a little while because that amount is too big for your wallet right now. Give it some time before you try sending it again.",
+      "explanation": "You have 1 SOL ready to send to Pedro. However, the system is pausing this big amount for a cooling-off time before it can leave your vault.",
       "explanationBy": "model",
       "vaultError": "NeedsCoolingOff",
       "median": {
-        "simulateMs": 18.971366000012495,
-        "lookupsMs": 33.29869100009091,
-        "aiTacticsMs": 1195.5330969999777,
-        "aiExplainMs": 6528.270518000005,
-        "rulesMs": 1143.2405289999442,
-        "totalMs": 7691.328968000016
+        "simulateMs": 17.64876499993261,
+        "lookupsMs": 35.16609400010202,
+        "aiTacticsMs": 1573.2094420000212,
+        "aiExplainMs": 8340.262266000034,
+        "rulesMs": 1520.3858330000658,
+        "totalMs": 9913.918377000024
       }
     }
   ],
   "proofs": [
     {
       "name": "legit: groceries to Ana, sent at once by the vault",
-      "link": "https://explorer.solana.com/tx/5VaF9M7mEv7mmQ2FCTCVNr3ugCv5nN25HaQnSs1gPJ3WwT42ZMzj7omZRGUBQYCU39ktnfkLEbimjbMPi9TrVK2W?cluster=devnet",
-      "ms": 876.9952540000668,
+      "link": "https://explorer.solana.com/tx/4tmnTcyT5wamkg6b53QdALmn8tp9kQRVDKoj1t62S3V712z2y5gubgva7W1PAJoSodd8vqzALLNzfJe4UqSLBkqx?cluster=devnet",
+      "ms": 889.6623109999346,
       "failed": false
     },
     {
       "name": "scam: 1.8 SOL to the 'new number' wallet, forced through",
-      "sig": "4TTBvbsErvCacsDw7HoFUUMBBgTwaiAHyJsZAUXFLwHSLAfM7ry5mTosyLYZLaSDsPXVC1PbCR3aVLzBkScQUYwc",
-      "link": "https://explorer.solana.com/tx/4TTBvbsErvCacsDw7HoFUUMBBgTwaiAHyJsZAUXFLwHSLAfM7ry5mTosyLYZLaSDsPXVC1PbCR3aVLzBkScQUYwc?cluster=devnet",
+      "sig": "2qNiMzRNMbZAhjRQCEwLpxNCMqbqmT2bub6DUNDY4ocH1GwKy4NEPYmDWDuRH8DavhUNjfMSDppJKTm74c7MMgUH",
+      "link": "https://explorer.solana.com/tx/2qNiMzRNMbZAhjRQCEwLpxNCMqbqmT2bub6DUNDY4ocH1GwKy4NEPYmDWDuRH8DavhUNjfMSDppJKTm74c7MMgUH?cluster=devnet",
       "failed": true,
       "error": "6000 NotTrusted: This wallet is not on your trusted contacts list"
     },
     {
       "name": "scam: 0.25 SOL to the look-alike of Ana, forced through",
-      "sig": "bSQGs6e5wB7CQgqBjf2cbQmhuPLVYCGnje48jLxNZaV3aTZ2LLP8VWdwcdbGTpt95xkdK4QVXr1k37L6osA8AXC",
-      "link": "https://explorer.solana.com/tx/bSQGs6e5wB7CQgqBjf2cbQmhuPLVYCGnje48jLxNZaV3aTZ2LLP8VWdwcdbGTpt95xkdK4QVXr1k37L6osA8AXC?cluster=devnet",
+      "sig": "5g8FSsbd9Se8xvvMooc5Jj5hqFSWwZSenkVHqZkdYSsbJ8JMAJVMMz9oyqVhS8xRafS2kpxHZgyYn1GyVSMCu6fn",
+      "link": "https://explorer.solana.com/tx/5g8FSsbd9Se8xvvMooc5Jj5hqFSWwZSenkVHqZkdYSsbJ8JMAJVMMz9oyqVhS8xRafS2kpxHZgyYn1GyVSMCu6fn?cluster=devnet",
       "failed": true,
       "error": "6000 NotTrusted: This wallet is not on your trusted contacts list"
     },
     {
       "name": "scam: owner + a fake 'guardian' try to trust the scammer",
-      "sig": "3HZyQAoiEydnNscHJLimjNSReM5Rgt29XnUwSYbEu7dUNDF1zEsQyBouu5RyKARgLZctm4h2AKHkjgVjYoyhHeSp",
-      "link": "https://explorer.solana.com/tx/3HZyQAoiEydnNscHJLimjNSReM5Rgt29XnUwSYbEu7dUNDF1zEsQyBouu5RyKARgLZctm4h2AKHkjgVjYoyhHeSp?cluster=devnet",
+      "sig": "2mgqbMP6rPq6aAD6PxFJdL7AqqyUvL7kZyKoDMahun4Wu19RsKMLZdFhGMLEvgcpRFdkWG9ptKsGJPEUXoqr8gq1",
+      "link": "https://explorer.solana.com/tx/2mgqbMP6rPq6aAD6PxFJdL7AqqyUvL7kZyKoDMahun4Wu19RsKMLZdFhGMLEvgcpRFdkWG9ptKsGJPEUXoqr8gq1?cluster=devnet",
       "failed": true,
       "error": "2001 ConstraintHasOne: the guardian must be the one saved in the vault"
     },
     {
       "name": "request opened for the 'new number' (needs the guardian)",
-      "link": "https://explorer.solana.com/tx/4oeDJs7V3V9gW8FJjKtcVMB48jrxv5ccdk1XMJVwUAP8psfUjAsukcQwvx98R6f1yKbaXwYfrbnENbzw7gcdFb67?cluster=devnet",
-      "ms": 988.8882890000241,
+      "link": "https://explorer.solana.com/tx/zxxKoqQ56WZbqu4cSC6j8gChbUpnuA8eEEppM7vva3XoXCHjAJGNzDyAcTjNqfKsyu74vPnSJR2dLCmE8xKcyXd?cluster=devnet",
+      "ms": 953.9072509999387,
       "failed": false
     },
     {
       "name": "guardian Ana says NO, signed on-chain",
-      "link": "https://explorer.solana.com/tx/5yiChvhP564REqzEVZneFHUcQbKx25VSpfEWRVypPYUmCiXaPVFR3FfRVjituWevEosZJqBx2Z45R2MADpZqWPf8?cluster=devnet",
-      "ms": 925.9404709999217,
+      "link": "https://explorer.solana.com/tx/ce92xY3594sK71Waj28xWfHPXvGb7c7PYQSnbNGgvLqX915ZnHaMMknm8uBvzQBVpscexknBUtcR7p2SV6idYXC?cluster=devnet",
+      "ms": 947.874746000045,
       "failed": false
     },
     {
       "name": "sending the rejected request anyway",
-      "sig": "5FmUarppcqnr9qKViRTeiKNSxkd37ZcenwBNepJYadtNnr28z67ieoxT7Bg1eyTDTFCiduTKcqGWKBJmqJPKpCqd",
-      "link": "https://explorer.solana.com/tx/5FmUarppcqnr9qKViRTeiKNSxkd37ZcenwBNepJYadtNnr28z67ieoxT7Bg1eyTDTFCiduTKcqGWKBJmqJPKpCqd?cluster=devnet",
+      "sig": "4LLFYYpDpLCcrFJpkSqgU9Ug85JMhsNSGGvtVfX4dPArFsvZ3Ynyz9xB1ANCpLy6jA9d1Xe5uron1ybNbmpsnRU6",
+      "link": "https://explorer.solana.com/tx/4LLFYYpDpLCcrFJpkSqgU9Ug85JMhsNSGGvtVfX4dPArFsvZ3Ynyz9xB1ANCpLy6jA9d1Xe5uron1ybNbmpsnRU6?cluster=devnet",
       "failed": true,
       "error": "6005 Rejected: The family guardian said no"
     },
     {
+      "name": "Ana reports the 'new number' wallet on the community scam list",
+      "link": "https://explorer.solana.com/tx/4W2idEsLPXpzJjrXkH7tGQqEdJ9dTNzPdSMJpGBzzXSdXN3JGBmRXaHASEkzbY5vJ4c6FtXcd86WPFw3aUgf3rpq?cluster=devnet",
+      "ms": 824.7738259999314,
+      "failed": false
+    },
+    {
+      "name": "the same family reports it again (counts once)",
+      "sig": "5aoiyQPHTScDYqXNAoRXVngZiJCt4bZjF7cCgtaxv9DM66MckW8ufwW2qNVK4LkehDZyA9WWD1ecd9D2spQYH4zh",
+      "link": "https://explorer.solana.com/tx/5aoiyQPHTScDYqXNAoRXVngZiJCt4bZjF7cCgtaxv9DM66MckW8ufwW2qNVK4LkehDZyA9WWD1ecd9D2spQYH4zh?cluster=devnet",
+      "failed": true,
+      "error": "account already in use: this family already reported this wallet"
+    },
+    {
+      "name": "a second family (another vault's guardian) reports the same wallet",
+      "link": "https://explorer.solana.com/tx/5UUNeDvyPnZnHnLM98w1ntf2Le6i3RpTvE8aTM948NBZsYC5TJSbVYLhwuuGRzyB1Vm2BLrKLzGgF4X4isc7z7mC?cluster=devnet",
+      "ms": 687.0148630000185,
+      "failed": false
+    },
+    {
       "name": "request opened: 1 SOL to Pedro (big amount)",
-      "link": "https://explorer.solana.com/tx/gm8N9D7g4ivKJqErmKtLnpoZqLgPsJY25Jrs9PwBEFBL4t2wegfdC99nD9qYqJNLvm7gd7j2UMv1shkaV8tHzeL?cluster=devnet",
-      "ms": 956.6593690000009,
+      "link": "https://explorer.solana.com/tx/3dDE4QHYhP5bgQLhrdLfZhBpXfjrDjgwmBdPd7HaepYcB2zSPpYqzrxwtTWkuwG7oRQwQYy8E492RfUUuTJdsNJC?cluster=devnet",
+      "ms": 1295.7028260000516,
       "failed": false
     },
     {
       "name": "guardian Ana approves, signed on-chain",
-      "link": "https://explorer.solana.com/tx/5ztd7Qc1oEGH5vXCzFL9kJt28Vzb1n3p5PTi4srzz41PCjwhUeMhRV2rekzz4U3QnMXpcumTomB4JGAjNgtFB7tP?cluster=devnet",
-      "ms": 884.7619819999672,
+      "link": "https://explorer.solana.com/tx/3LbMuUL9WHiD3dVy5J3876oQuGhJYAhNufzAaDiEpSro4bECBD2PZ6rLzjsQsepwQRkE9yTwCajoPFpjKJZA46mD?cluster=devnet",
+      "ms": 1262.4701479999349,
       "failed": false
     },
     {
       "name": "sending before the cooling-off ends",
-      "sig": "4gSGc4pVeWjGomeZrm5pyh2vm6TvLfBBWNsUnaidq4rTC65Ers3Ptr4wQWsY7JiCx77RG2cRXe4viqnrSLuBPFnN",
-      "link": "https://explorer.solana.com/tx/4gSGc4pVeWjGomeZrm5pyh2vm6TvLfBBWNsUnaidq4rTC65Ers3Ptr4wQWsY7JiCx77RG2cRXe4viqnrSLuBPFnN?cluster=devnet",
+      "sig": "2wPvTVeWZehPEm8noFdJpELweTw4A6SwEQULXii3v15d7mERZ9vSmNHsY3BhPiEPAJaRV41JDJiehrYWKnVhm3Cf",
+      "link": "https://explorer.solana.com/tx/2wPvTVeWZehPEm8noFdJpELweTw4A6SwEQULXii3v15d7mERZ9vSmNHsY3BhPiEPAJaRV41JDJiehrYWKnVhm3Cf?cluster=devnet",
       "failed": true,
       "error": "6004 StillCoolingOff: Still in the cooling-off period"
     },
     {
       "name": "after the cooling-off: 1 SOL goes to Pedro",
-      "link": "https://explorer.solana.com/tx/621ckMCemvzWXXkRX2jTPgZncWmVbGAEvzRnvh6pEjHa2tx92wubCHa3geMpxXY1ZiVYJw1GSAQuc9tKAbYnvRrJ?cluster=devnet",
-      "ms": 779.8470019999659,
+      "link": "https://explorer.solana.com/tx/4i8sHi6dDjB9vVamiDGi8rmcRBu8jfsKbAxi2KESQQfZqfSLRhT2u99VYem51xyR7YafKyrTrxf7XpU8z2VLsfBm?cluster=devnet",
+      "ms": 785.2654169999296,
       "failed": false
     }
   ]
